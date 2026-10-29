@@ -1,0 +1,8 @@
+# tensorQTL stack validated on seadragon in Phase 0 (numpy/pandas/scipy/pyarrow come from env/xqtl.yml
+# at the same pins). CPU torch: --extra-index-url https://download.pytorch.org/whl/cpu
+# CUDA image: --extra-index-url https://download.pytorch.org/whl/cu124
+torch==2.15.0
+pandas-plink==2.3.2
+pgenlib==0.95.1
+qtl==0.1.10
+tensorqtl==1.0.10

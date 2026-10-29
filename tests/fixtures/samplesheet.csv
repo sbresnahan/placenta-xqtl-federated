@@ -1,0 +1,7 @@
+sample_id,fastq_1,fastq_2
+S01,fastq/S01_R1.fastq.gz,fastq/S01_R2.fastq.gz
+S02,fastq/S02_R1.fastq.gz,fastq/S02_R2.fastq.gz
+S03,fastq/S03_R1.fastq.gz,fastq/S03_R2.fastq.gz
+S04,fastq/S04_R1.fastq.gz,fastq/S04_R2.fastq.gz
+S05,fastq/S05_R1.fastq.gz,fastq/S05_R2.fastq.gz
+S06,fastq/S06_R1.fastq.gz,fastq/S06_R2.fastq.gz

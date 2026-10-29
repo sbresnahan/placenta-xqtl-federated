@@ -1,0 +1,57 @@
+# Render the documentation site (book/) from docs/*.md and publish it to the orphan
+# `bookdown` branch, which GitHub Pages serves (Settings -> Pages -> Deploy from a
+# branch -> bookdown / (root)). The build fails on any broken internal link.
+name: docs
+
+on:
+  push:
+    branches: [main]
+    paths: ["docs/**", "book/**", "CHANGELOG.md", "nextflow.config", ".github/workflows/docs.yml"]
+    tags: ["v*"]
+  pull_request:
+    paths: ["docs/**", "book/**", "CHANGELOG.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  book:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+        with:
+          pandoc-version: "3.2"
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.4"
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::bookdown
+            any::rmarkdown
+            any::knitr
+      - name: Render book and check links
+        run: Rscript book/render_book.R
+      - name: Upload preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-html
+          path: book/_book
+          retention-days: 14
+      - name: Publish to the bookdown branch
+        if: github.event_name != 'pull_request'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: bookdown
+          publish_dir: book/_book
+          force_orphan: true
+          enable_jekyll: false
+          commit_message: "docs: ${{ github.sha }}"

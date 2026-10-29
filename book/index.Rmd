@@ -1,0 +1,43 @@
+---
+title: "placenta-xqtl-federated"
+subtitle: "Federated multi-ancestry placental xQTL pipeline: documentation"
+author: "Sean T. Bresnahan, MD Anderson Cancer Center (Bhattacharya Lab)"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+site: bookdown::bookdown_site
+description: "Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis."
+---
+
+# Home {#home .unnumbered}
+
+**placenta-xqtl-federated** lets cohorts with placental RNA-seq and genotype data take part in a multi-ancestry placental xQTL study without sharing individual-level data. Each cohort runs the pipeline on its own computers and sends only summary-level files (A–J) to MD Anderson Cancer Center (MDACC), which combines them across cohorts and ancestry groups.
+
+Pipeline version: **`r PIPELINE_VERSION`**. These pages are built from the [`docs/` folder of the repository](https://github.com/sbresnahan/placenta-xqtl-federated/tree/main/docs); the same pages are included inside the pipeline image for offline reading.
+
+## Where to start
+
+- **Cohort investigators:** read the [Collaboration brief](#collaboration-brief) for the aims, the analyses each site runs and the files requested.
+- **Analysts running the pipeline:** start with the quick start below, then the [HPC configuration guide](#hpc).
+- **Results:** the appendix [Seadragon validation](#seadragon-validation) shows what the site smoke test checks on a real cluster.
+
+## Quick start
+
+The pipeline is distributed as one self-contained image (software, public reference data, Java and Nextflow). It needs no internet access at the site.
+
+```bash
+apptainer pull xqtl-federated_<version>.sif oras://ghcr.io/sbresnahan/xqtl-federated-sif:<version>
+sha256sum -c xqtl-federated_<version>.sif.sha256
+apptainer run xqtl-federated_<version>.sif bootstrap ./xqtl
+./xqtl/run_xqtl.sh -profile seadragon,smoke
+./xqtl/run_xqtl.sh -profile seadragon -params-file cohort.yml --mode prepare_references
+./xqtl/run_xqtl.sh -profile seadragon -params-file cohort.yml --mode site
+```
+
+Replace `seadragon` with your scheduler and engine, for example `-profile slurm,apptainer -c mysite.config` (see [Executors](#hpc--executors)).
+
+## The restricted file
+
+> Site runs need `xqtl-restricted-<version>.tar.gz`, a small file that holds the shared splicing clusters and the MDACC signal list. MDACC sends it **by email** after the data-sharing agreement is approved. If your site has not received it, request it from the scientific contact, **Sean T. Bresnahan (stbresnahan@mdanderson.org)**, stating your cohort, the pipeline version and the approved agreement. Do not redistribute it.
+
+## Licence
+
+The pipeline is GPL-3.0. Embedded third-party software and reference data keep their own licences.

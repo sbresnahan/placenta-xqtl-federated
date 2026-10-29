@@ -1,0 +1,9 @@
+# Static bookdown settings. rmd_files is filled in by prepare_book.R from the chapter
+# list in that script, so chapters are only added in one place.
+book_filename: "placenta-xqtl-federated"
+output_dir: "../_book"
+delete_merged_file: true
+new_session: false
+language:
+  ui:
+    chapter_name: ""

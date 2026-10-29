@@ -1,0 +1,14 @@
+# Alignment / quantification tools at the atlas pins (cannot co-solve with R 4.3.1,
+# so they are a separate environment; the image puts this env's bin first on PATH).
+name: xqtl-align
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - star=2.7.4a
+  - salmon=1.10.2
+  - samtools=1.16.1
+  - subread=2.0.6
+  - gffread=0.12.7
+  - regtools=1.0.0

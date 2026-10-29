@@ -1,0 +1,69 @@
+# placenta-xqtl-federated main software environment (Python 3.11 + R 4.3.1 / Bioconductor 3.18).
+#
+# Single source of truth for the image (containers/Dockerfile) AND for the local test
+# environment (scripts/dev_env.sh). Tools whose atlas pins cannot co-solve with R 4.3.1
+# live in env/align.yml (STAR 2.7.4a, Salmon 1.10.2, samtools 1.16.1, ...); the image
+# puts both environments on PATH (align first). Python packages not on conda
+# (torch, tensorQTL) are in requirements-pip.txt; R packages from GitHub/CRAN only
+# (MuSiC, Rhcpp, colocboost) are in install_r_extra.R. Resolved versions of everything
+# are written to /opt/xqtl/VERSIONS.tsv at build time.
+name: xqtl
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  # ---- base ----------------------------------------------------------------
+  - python=3.11
+  - procps-ng            # Nextflow task wrapper needs `ps`
+  - coreutils
+  - pigz
+  - gawk
+  - jq
+  - tzdata
+  - pip
+  # ---- variant and alignment utilities ------------------------------------
+  - bcftools=1.16
+  - samtools=1.21
+  - pysam=0.22.1
+  - bedtools=2.31.1
+  # ---- genotypes ----------------------------------------------------------
+  - plink2=2.0.0a.6.9
+  - crossmap=0.7.0
+  # ---- python libraries (torch/tensorQTL from requirements-pip.txt)
+  - numpy=1.26.4
+  - pandas=2.3.3
+  - scipy=1.17.1
+  - pyarrow=16.1.0
+  - pyyaml
+  - jsonschema=4.23.0
+  - pytest
+  # ---- R 4.3.1 / Bioconductor 3.18 ------------------------------------------
+  - r-base=4.3.1
+  - r-data.table
+  - r-optparse
+  - r-matrix
+  - r-dplyr
+  - r-jsonlite
+  - r-yaml
+  - r-rfast
+  - r-glmnet
+  - r-nnls
+  - r-mcmcpack
+  - r-susier
+  - r-coloc=5.2.3
+  - r-remotes
+  - bioconductor-edger
+  - bioconductor-deseq2
+  - bioconductor-tximport
+  - bioconductor-rtracklayer
+  - bioconductor-genomicranges
+  - bioconductor-qvalue
+  - bioconductor-sva
+  - bioconductor-genesis
+  - bioconductor-snprelate
+  - bioconductor-seqarray
+  - bioconductor-gdsfmt
+  - bioconductor-biobase
+  - bioconductor-singlecellexperiment
+  - bioconductor-toast

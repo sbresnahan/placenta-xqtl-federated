@@ -1,0 +1,21 @@
+bookdown::gitbook:
+  css: style.css
+  split_by: chapter
+  number_sections: false
+  self_contained: false
+  config:
+    toc:
+      collapse: section
+      scroll_highlight: true
+      before: |
+        <li><a href="./">placenta-xqtl-federated</a></li>
+      after: |
+        <li><a href="https://github.com/sbresnahan/placenta-xqtl-federated" target="_blank">Source on GitHub</a></li>
+    search: true
+    sharing: null
+    download: null
+    info: false
+    fontsettings:
+      theme: white
+      family: sans
+      size: 2

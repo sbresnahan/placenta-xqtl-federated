@@ -1,0 +1,484 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sbresnahan/placenta-xqtl-federated/assets/schema/cohort.schema.json",
+  "title": "placenta-xqtl-federated cohort parameters (cohort.yml)",
+  "description": "Passed to Nextflow with -params-file cohort.yml. Every key is documented in docs/CONFIGURATION.md.",
+  "type": "object",
+  "required": [
+    "cohort_id"
+  ],
+  "properties": {
+    "cohort_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{1,31}$",
+      "description": "Short cohort label used in file names and exports (letters, digits, _ or -)."
+    },
+    "mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "prepare_references",
+        "imputation_prep",
+        "site",
+        "phenotyping_only",
+        "export",
+        "central",
+        "smoke",
+        null
+      ]
+    },
+    "outdir": {
+      "type": "string",
+      "description": "Output directory on a filesystem visible to compute nodes."
+    },
+    "release": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Export release tag; default <cohort_id>_<yyyymmdd>."
+    },
+    "samplesheet": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "CSV with sample_id,fastq_1,fastq_2 (fastq_2 empty for single-end)."
+    },
+    "metadata": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "TSV with rnaseq_id, genotype_id, sex, GA and optional exposures."
+    },
+    "restricted": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Path to xqtl-restricted-<version>.tar.gz (request by email if missing)."
+    },
+    "site_refs": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Directory written by --mode prepare_references."
+    },
+    "genotypes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "raw": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Pre-imputation genotypes: VCF/BCF (bgzipped) or PLINK prefix (.bed/.bim/.fam or .pgen/.pvar/.psam)."
+        },
+        "raw_build": {
+          "type": "string",
+          "enum": [
+            "GRCh37",
+            "GRCh38"
+          ],
+          "default": "GRCh38"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "array",
+            "wes",
+            "wgs"
+          ],
+          "default": "array"
+        },
+        "imputed_dir": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Directory holding TOPMed output chr*.dose.vcf.gz (decrypted)."
+        },
+        "imputed_pattern": {
+          "type": "string",
+          "default": "chr{chr}.dose.vcf.gz"
+        }
+      }
+    },
+    "rnaseq": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "read_layout": {
+          "type": "string",
+          "enum": [
+            "paired",
+            "single"
+          ],
+          "default": "paired"
+        },
+        "strandedness": {
+          "type": "string",
+          "enum": [
+            "reverse",
+            "forward",
+            "unstranded"
+          ],
+          "default": "reverse"
+        },
+        "read_length": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 500,
+          "default": 150
+        },
+        "library_type": {
+          "type": "string",
+          "enum": [
+            "total",
+            "polyA",
+            "3prime"
+          ],
+          "default": "total",
+          "description": "3prime libraries disable isoform, splicing, transcript-end and editing modalities."
+        }
+      }
+    },
+    "qc": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rsq_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.4
+        },
+        "maf_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "default": 0.01
+        },
+        "mac_min": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5
+        },
+        "hwe_p_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1e-06
+        },
+        "geno_missing_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.05
+        },
+        "sample_missing_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.05
+        }
+      }
+    },
+    "ancestry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_n": {
+          "type": "integer",
+          "minimum": 50,
+          "default": 50,
+          "description": "Ancestry groups with fewer analysed samples are not mapped or exported (floor 50)."
+        },
+        "assign_prob_min": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1,
+          "default": 0.8
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "AFR",
+              "AMR",
+              "EAS",
+              "EUR",
+              "SAS"
+            ]
+          },
+          "default": [
+            "AFR",
+            "AMR",
+            "EAS",
+            "EUR",
+            "SAS"
+          ]
+        }
+      }
+    },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cis_window": {
+          "type": "integer",
+          "minimum": 100000,
+          "maximum": 5000000,
+          "default": 1000000
+        },
+        "fdr": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 0.2,
+          "default": 0.05
+        },
+        "hcp_grid": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "default": null,
+          "description": "null = automatic: 0..60 by 10 for n < 350, else 0..100 by 10."
+        },
+        "modalities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "expression",
+              "isoform_expression",
+              "isoform_usage",
+              "splicing",
+              "intron_retention",
+              "alt_tss",
+              "alt_polya",
+              "rna_editing",
+              "stability"
+            ]
+          },
+          "default": [
+            "expression",
+            "isoform_expression",
+            "isoform_usage",
+            "splicing",
+            "intron_retention",
+            "alt_tss",
+            "alt_polya",
+            "rna_editing",
+            "stability"
+          ]
+        },
+        "seed": {
+          "type": "integer",
+          "default": 20261029
+        }
+      }
+    },
+    "ld": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maf_min": {
+          "type": "number",
+          "default": 0.05
+        },
+        "rsq_min": {
+          "type": "number",
+          "default": 0.8
+        },
+        "window_mb": {
+          "type": "number",
+          "default": 3
+        },
+        "step_mb": {
+          "type": "number",
+          "default": 1
+        }
+      }
+    },
+    "gxc": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "exclude_cell_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "Maternal"
+          ]
+        }
+      }
+    },
+    "gxe": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "maf_interaction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "default": 0.05
+        },
+        "min_n": {
+          "type": "integer",
+          "minimum": 50,
+          "default": 50
+        },
+        "min_cases": {
+          "type": "integer",
+          "minimum": 10,
+          "default": 20,
+          "description": "Binary exposures need at least this many cases and controls in a group."
+        },
+        "exposures": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "default": false
+              },
+              "column": {
+                "type": "string",
+                "description": "Metadata column; defaults to the exposure name."
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "continuous",
+                  "binary"
+                ],
+                "default": "continuous"
+              },
+              "transform": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "log",
+                  "inverse_normal"
+                ],
+                "default": "none"
+              },
+              "min": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "default": null
+              },
+              "max": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "default": null
+              }
+            }
+          },
+          "default": {
+            "GA": {
+              "enabled": true,
+              "column": "GA",
+              "type": "continuous",
+              "transform": "none",
+              "min": 20,
+              "max": 45
+            },
+            "ppBMI": {
+              "enabled": false,
+              "column": "ppBMI",
+              "type": "continuous",
+              "transform": "none",
+              "min": 14,
+              "max": 70
+            },
+            "gdm": {
+              "enabled": false,
+              "column": "gdm",
+              "type": "binary",
+              "transform": "none",
+              "min": 0,
+              "max": 1
+            },
+            "ogtt": {
+              "enabled": false,
+              "column": "ogtt",
+              "type": "continuous",
+              "transform": "none",
+              "min": null,
+              "max": null
+            }
+          }
+        },
+        "sensitivity": {
+          "type": "boolean",
+          "default": true
+        },
+        "transmitted": {
+          "type": "boolean",
+          "default": false,
+          "description": "Transmitted/non-transmitted follow-up; needs maternal genotypes (not part of round 1 inputs)."
+        }
+      }
+    },
+    "export": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": [
+            "parquet",
+            "tsv.gz"
+          ],
+          "default": "parquet"
+        },
+        "leak_scan": {
+          "type": "boolean",
+          "const": true,
+          "default": true,
+          "description": "The sample-identifier scan cannot be disabled."
+        },
+        "min_mac_export": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "round_digits": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "default": null
+        }
+      }
+    }
+  }
+}

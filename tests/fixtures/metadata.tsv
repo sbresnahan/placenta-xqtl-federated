@@ -1,0 +1,7 @@
+rnaseq_id	genotype_id	sex	GA	ppBMI	gdm
+S01	G01	F	39.1	22.5	0
+S02	G02	M	38.0	31.0	1
+S03	G03	female	40.2	NA	0
+S04	G04	male	37.5	27.9	0
+S05	G05	F	39.9	24.1	0
+S06	G06	M	41.0	29.3	1

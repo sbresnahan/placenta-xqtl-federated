@@ -1,0 +1,17 @@
+#!/bin/sh
+# Minimal /proc-based `ps` shim for containers that ship without procps.
+# Nextflow's task wrapper (.command.run) only ever calls `command -v ps` and
+# `ps -e -o pid= -o ppid=` (process-tree walk for metrics and for killing tasks).
+# Nextflow appends the pipeline's bin/ to PATH inside the container, so this shim
+# is used ONLY when the image has no ps of its own. The real pipeline image installs procps.
+case "$*" in
+    *pid=*ppid=*) ;;
+    *) echo "ps shim: only 'ps -e -o pid= -o ppid=' is supported (install procps)" >&2; exit 1 ;;
+esac
+for d in /proc/[0-9]*; do
+    [ -r "$d/status" ] || continue
+    while read -r k v _; do
+        if [ "$k" = "PPid:" ]; then echo "${d#/proc/} $v"; break; fi
+    done 2>/dev/null < "$d/status"
+done
+exit 0

@@ -1,0 +1,10 @@
+/* placenta-xqtl-federated documentation site */
+.book .book-body .page-wrapper .page-inner { max-width: 960px; }
+.book .book-body .page-wrapper .page-inner section.normal table { display: table; width: 100%; font-size: 0.92em; }
+.book .book-body .page-wrapper .page-inner section.normal table th { background: #f3f3f3; }
+.book .book-body .page-wrapper .page-inner section.normal table td,
+.book .book-body .page-wrapper .page-inner section.normal table th { padding: 5px 9px; vertical-align: top; }
+.book .book-body .page-wrapper .page-inner section.normal blockquote {
+  border-left: 4px solid #0279EE; background: #f5f9ff; color: #222; padding: 0.6em 1em; }
+.book .book-body .page-wrapper .page-inner section.normal pre { font-size: 0.85em; }
+.book .book-summary ul.summary li.part { font-weight: 600; margin-top: 0.6em; }

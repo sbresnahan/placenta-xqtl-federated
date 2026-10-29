@@ -1,0 +1,19 @@
+# Nextflow
+work/
+.nextflow/
+.nextflow.log*
+results/
+results_test/
+xqtl_smoke/
+# documentation build
+book/_build/
+book/_book/
+# local environments
+.xqtl-env/
+__pycache__/
+.pytest_cache/
+*.pyc
+# never commit restricted or individual-level data
+xqtl-restricted-*.tar.gz
+!tests/fixtures/xqtl-restricted-test.tar.gz
+*.sif
