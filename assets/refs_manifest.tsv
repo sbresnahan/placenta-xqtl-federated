@@ -1,0 +1,4 @@
+# Expected refs/MANIFEST.tsv of the image for this release (checked by bin/xqtl_refs_check.py --expected).
+# Empty until the first image build with the pinned Zenodo record: copy the image's
+# /opt/xqtl/refs/MANIFEST.tsv here (docs/REFERENCES.md, Release procedure).
+path	sha256	bytes	description	source	license

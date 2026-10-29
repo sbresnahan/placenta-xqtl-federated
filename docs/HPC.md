@@ -7,7 +7,7 @@ The pipeline runs in two parts:
 - **The head** is a small Java process (Nextflow) that runs on a login node, a workflow node or inside a batch job. It submits every task to the scheduler and tracks it. It needs about 1 CPU and 2–4 GB of memory for the whole run, which can take several days.
 - **Tasks** are batch jobs. Each task runs inside the same pipeline image (a `.sif` file, run with Apptainer or Singularity) on a compute node.
 
-Neither part needs internet access. The image contains all software and public reference data, and `run_xqtl.sh` (written by the image's `bootstrap` command; see `SETUP.md`) starts Nextflow in offline mode.
+Neither part needs internet access. The image contains all software and public reference data, and `run_xqtl.sh` (written by the image's `bootstrap` command; see [Setup](SETUP.md#3-export-the-launcher-bootstrap)) starts Nextflow in offline mode.
 
 ## Configuration layers
 
@@ -284,7 +284,7 @@ Results are written to `xqtl_smoke/smoke/smoke_summary.tsv`, ending with `VERDIC
 | S01 container R | The image starts on compute nodes; R 4.3.1 runs | Engine not on `PATH` on compute nodes; wrong `--sif` path; image not readable from nodes |
 | S02 embedded tools | Every tool in the image reports a version (`tool_versions.tsv`) | Wrong or damaged image; re-verify the sha256 |
 | S03 embedded references | Reference files match the image manifest | Wrong image or `--refs_dir` |
-| S04 restricted file | The restricted file opens, has the expected version and checksums | WARN if not given; FAIL if damaged or the wrong version. Request it by email (see `SETUP.md`) |
+| S04 restricted file | The restricted file opens, has the expected version and checksums | WARN if not given; FAIL if damaged or the wrong version. Request it by email (see [Setup](SETUP.md)) |
 | S05 plink2 | Genotype tooling runs | Image problem |
 | S06 resources | 4 CPUs and 8 GB are granted; a 4 GB allocation succeeds; whether CPUs are confined (scheduler view in `sched_view.txt`) | Memory units or per-job/per-slot setting wrong (see [Memory](#memory)) |
 | S07 fan-out | 5 independent jobs run, usually on several nodes | Queue or account settings |

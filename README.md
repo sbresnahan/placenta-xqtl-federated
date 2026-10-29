@@ -46,11 +46,13 @@ apptainer run xqtl-federated_<version>.sif bootstrap ./xqtl
 | Page | For |
 |---|---|
 | [Collaboration brief](docs/COLLABORATION_BRIEF.md) | Cohort investigators: aims, analyses and the files requested |
+| [Setup](docs/SETUP.md) | Getting and verifying the image, `bootstrap`, the launcher, the smoke test |
 | [HPC configuration](docs/HPC.md) | Running on your cluster: profiles, queues, memory, GPUs, the smoke test |
+| [Reference data and software](docs/REFERENCES.md) | Provenance, checksums and licences of everything in the image; MDACC release procedure |
 | [Seadragon validation](docs/SEADRAGON_VALIDATION.md) | Phase 0 results on MDACC's cluster |
 | [Changelog](CHANGELOG.md) | Release history |
 
-Setup, configuration, walkthrough, export specification, central analysis, troubleshooting and reference-data pages are added with their milestones.
+Configuration, walkthrough, export specification, central analysis and troubleshooting pages are added with their milestones.
 
 ## Repository layout
 
@@ -64,7 +66,7 @@ containers/                  image recipe and software environment
 docs/                        documentation (single source for the book)
 book/                        bookdown builder for the documentation site
 tests/                       unit tests and fixtures (synthetic or public data only)
-scripts/                     developer and MDACC maintenance scripts
+scripts/                     reference download, MDACC packaging and release scripts
 ```
 
 ## Development
@@ -77,6 +79,8 @@ scripts/check_configs.sh               # every profile resolves
 nextflow run main.nf -profile local,dev,smoke --refs_dir tests/fixtures/refs_mini \
     --restricted tests/fixtures/xqtl-restricted-test.tar.gz
 Rscript book/render_book.R             # documentation site into book/_book
+tests/scripts/test_bootstrap.sh        # bootstrap + run_xqtl.sh against a mock image tree
+containers/build_image.sh              # the image (needs Docker with buildx); see docs/REFERENCES.md
 ```
 
 ## Licence and citation

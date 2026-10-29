@@ -17,3 +17,5 @@ __pycache__/
 xqtl-restricted-*.tar.gz
 !tests/fixtures/xqtl-restricted-test.tar.gz
 *.sif
+refs_cache/
+refs/

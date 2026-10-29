@@ -1,0 +1,20 @@
+# Build context for containers/Dockerfile: the pipeline code only.
+# References and the rendered book come in through named build contexts.
+.git
+.github
+refs_cache
+refs
+book/_book
+book/_build
+work
+.nextflow
+.nextflow.log*
+results
+results_test
+xqtl_smoke
+.xqtl-env
+**/__pycache__
+.pytest_cache
+*.sif
+xqtl-restricted-*.tar.gz
+!tests/fixtures/xqtl-restricted-test.tar.gz

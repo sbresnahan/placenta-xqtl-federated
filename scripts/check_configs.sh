@@ -3,7 +3,7 @@
 # Fails if any profile does not parse or resolves to an unexpected executor/engine.
 #   scripts/check_configs.sh            (run from anywhere; needs nextflow on PATH)
 set -uo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 export NXF_OFFLINE=true
 fail=0
 check() {  # profile, expected executor, expected engine (docker|singularity|apptainer|none)

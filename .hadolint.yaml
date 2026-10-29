@@ -1,0 +1,7 @@
+# hadolint configuration for containers/Dockerfile
+ignored:
+  # Debian packages are not version-pinned: the base image is pinned by digest, and the
+  # few packages installed (ca-certificates, procps, boost/zlib runtimes, a compiler for
+  # IRFinder-S) do not affect results. Analysis software is pinned in containers/env/.
+  - DL3008
+failure-threshold: warning

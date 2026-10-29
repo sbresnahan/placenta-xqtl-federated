@@ -7,6 +7,7 @@ printf "tool\tversion\n"
 v() {  # name, command producing the version (first line kept)
     local name=$1; shift
     local out
+    # shellcheck disable=SC2294  # commands are given as strings with pipes
     if out=$( (eval "$@") 2>&1 | grep -v '^\s*$' | head -1 ) && [ -n "$out" ] && ! echo "$out" | grep -qiE 'command not found|No such file|not installed|there is no package|ModuleNotFoundError|Error'; then
         printf "%s\t%s\n" "$name" "$(echo "$out" | tr '\t' ' ')"
     else

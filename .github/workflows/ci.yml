@@ -1,0 +1,125 @@
+# Continuous integration: unit tests, configuration and syntax checks, linters, and the
+# site validation checks inside the development image (when that image exists).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NXF_VER: "26.10.4"
+  NXF_OFFLINE: "false"
+  DEV_IMAGE: ghcr.io/sbresnahan/placenta-xqtl-federated:dev
+
+jobs:
+  unit:
+    name: unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        # samtools/tabix let the reference-build tests run; tests that need plink2 skip
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends samtools tabix
+          python -m pip install --quiet pytest jsonschema pyyaml pandas pyarrow
+      - name: pytest
+        run: python -m pytest -q -rs tests/unit
+
+  checks:
+    name: configs, lint, shell, Dockerfile
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: nf-core/setup-nextflow@v2
+        with:
+          version: ${{ env.NXF_VER }}
+      - name: Every profile resolves
+        run: scripts/check_configs.sh
+      - name: nextflow lint
+        run: nextflow lint .
+      - name: Scripts are executable
+        run: |
+          bad=$(git ls-files -s -- 'bin/*' 'scripts/*.sh' 'scripts/*.py' 'containers/*.sh' 'tests/scripts/*.sh' \
+                | awk '$1 != "100755" {print $4}' | grep -v '__pycache__' || true)
+          if [ -n "$bad" ]; then echo "not executable in git:"; echo "$bad"; exit 1; fi
+      - name: shellcheck
+        run: |
+          shellcheck --version
+          shellcheck -S warning containers/*.sh scripts/*.sh book/publish_pages.sh \
+            assets/head_job/*.sh bin/*.sh tests/scripts/*.sh
+      - name: hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: containers/Dockerfile
+          config: .hadolint.yaml
+      - name: actionlint
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.7/scripts/download-actionlint.bash) 1.7.7
+          ./actionlint -color
+
+  test-profile:
+    name: image checks (development image)
+    runs-on: ubuntu-24.04
+    needs: [unit, checks]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: nf-core/setup-nextflow@v2
+        with:
+          version: ${{ env.NXF_VER }}
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull the development image
+        id: pull
+        run: |
+          if docker pull "$DEV_IMAGE"; then echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=test profile skipped::$DEV_IMAGE is not published yet (built by .github/workflows/image.yml)"
+          fi
+      - name: Image self-checks
+        if: steps.pull.outputs.available == 'true'
+        run: |
+          docker run --rm "$DEV_IMAGE" versions
+          docker run --rm "$DEV_IMAGE" refs-check
+      - name: Site validation checks in the image (smoke profile)
+        if: steps.pull.outputs.available == 'true'
+        run: |
+          nextflow run . -profile local,docker,smoke --image "$DEV_IMAGE" \
+            --restricted tests/fixtures/xqtl-restricted-test.tar.gz
+          grep -P '^VERDICT\tGO\t' xqtl_smoke/smoke/smoke_summary.tsv
+      # the -profile test,docker end-to-end run (fixtures -> files A-J) is added with --mode site (M3-M5)
+      - name: Upload test outputs
+        if: always() && steps.pull.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-profile-results
+          path: |
+            xqtl_smoke/
+            .nextflow.log
+          retention-days: 7

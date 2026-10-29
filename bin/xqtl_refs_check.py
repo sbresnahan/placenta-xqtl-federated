@@ -20,11 +20,13 @@ import sys
 COLS = ["path", "sha256", "bytes", "description", "source", "license"]
 
 
-def read_manifest(path: str) -> list[dict]:
+def read_manifest(path: str, allow_empty: bool = False) -> list[dict]:
     with open(path, newline="") as fh:
-        rows = list(csv.DictReader((l for l in fh if not l.startswith("#")), delimiter="\t"))
-    if not rows or [c for c in COLS[:3] if c not in rows[0]]:
-        raise ValueError(f"{path}: needs columns {COLS[:3]}")
+        reader = csv.DictReader((l for l in fh if not l.startswith("#")), delimiter="\t")
+        rows = list(reader)
+        cols = reader.fieldnames or []
+    if [c for c in COLS[:3] if c not in cols] or (not rows and not allow_empty):
+        raise ValueError(f"{path}: needs columns {COLS[:3]} and at least one row")
     return rows
 
 
@@ -60,7 +62,9 @@ def main(argv=None) -> int:
         if not a.quick and sha256(p) != r["sha256"]:
             problems.append(f"sha256 {r['path']}")
     if a.expected:
-        exp = {r["path"]: r for r in read_manifest(a.expected)}
+        exp = {r["path"]: r for r in read_manifest(a.expected, allow_empty=True)}
+        if not exp:
+            print(f"NOTE\t{a.expected} has no entries (development build): release pins not checked")
         got = {r["path"]: r for r in rows}
         for k, r in exp.items():
             if k not in got:

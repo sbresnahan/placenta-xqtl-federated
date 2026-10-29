@@ -11,7 +11,9 @@ mm=$(command -v micromamba || command -v mamba || command -v conda)
 "$mm" create -y -p "$prefix/align" -f "$here/containers/env/align.yml"
 "$prefix/xqtl/bin/python" -m pip install --no-cache-dir -r "$here/containers/requirements-pip.txt" \
     --extra-index-url https://download.pytorch.org/whl/cpu
-"$prefix/xqtl/bin/Rscript" "$here/containers/install_r_extra.R"
+# (R_LIBS/R_LIBS_USER cleared so the packages land in the environment's own library,
+#  which is the only library the pipeline's clean task environment sees)
+env -u R_LIBS -u R_LIBS_USER -u R_LIBS_SITE "$prefix/xqtl/bin/Rscript" "$here/containers/install_r_extra.R"
 # IRFinder-S from source (needs a C++ compiler <= gcc 13 on the host, plus boost/zlib from conda)
 # (own environment: Salmon 1.10.2 pins an older boost, so boost must not go into align/)
 "$mm" create -y -p "$prefix/irfinder" -c conda-forge "libboost-devel=1.84" zlib make
