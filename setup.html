@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Setup | placenta-xqtl-federated</title>
+  <meta name="description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  <meta name="generator" content="bookdown 0.48 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Setup | placenta-xqtl-federated" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Setup | placenta-xqtl-federated" />
+  
+  <meta name="twitter:description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  
+
+<meta name="author" content="Sean T. Bresnahan, MD Anderson Cancer Center (Bhattacharya Lab)" />
+
+
+<meta name="date" content="2026-10-30" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="collaboration-brief.html"/>
+<link rel="next" href="hpc.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">placenta-xqtl-federated</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Home</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#where-to-start"><i class="fa fa-check"></i>Where to start</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#quick-start"><i class="fa fa-check"></i>Quick start</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#the-restricted-file"><i class="fa fa-check"></i>The restricted file</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#licence"><i class="fa fa-check"></i>Licence</a></li>
+</ul></li>
+<li class="part"><span><b>Part I: For cohort investigators</b></span></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html"><i class="fa fa-check"></i>Collaboration brief</a>
+<ul>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--1-purpose-of-the-collaboration"><i class="fa fa-check"></i>1. Purpose of the collaboration</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--2-research-questions-and-planned-analyses"><i class="fa fa-check"></i>2. Research questions and planned analyses</a>
+<ul>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--21-identify-genetic-effects-on-different-rna-measurements"><i class="fa fa-check"></i>2.1 Identify genetic effects on different RNA measurements</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--22-compare-placental-findings-with-birth-and-childhood-health-studies"><i class="fa fa-check"></i>2.2 Compare placental findings with birth and childhood health studies</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--23-test-whether-pregnancy-conditions-modify-genetic-effects"><i class="fa fa-check"></i>2.3 Test whether pregnancy conditions modify genetic effects</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--24-interpret-the-findings"><i class="fa fa-check"></i>2.4 Interpret the findings</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--3-analyses-performed-by-participating-sites"><i class="fa fa-check"></i>3. Analyses performed by participating sites</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--4-analyses-performed-by-md-anderson"><i class="fa fa-check"></i>4. Analyses performed by MD Anderson</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--5-data-and-computing-needed-at-each-cohort"><i class="fa fa-check"></i>5. Data and computing needed at each cohort</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--6-files-requested-from-each-cohort"><i class="fa fa-check"></i>6. Files requested from each cohort</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--7-data-sharing-and-safeguards"><i class="fa fa-check"></i>7. Data sharing and safeguards</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--8-planned-extensions-beyond-the-first-release"><i class="fa fa-check"></i>8. Planned extensions beyond the first release</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--references"><i class="fa fa-check"></i>References</a></li>
+</ul></li>
+<li class="part"><span><b>Part II: Running the pipeline</b></span></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html"><i class="fa fa-check"></i>Setup</a>
+<ul>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--what-you-need"><i class="fa fa-check"></i>What you need</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--1-get-the-image"><i class="fa fa-check"></i>1. Get the image</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--2-check-the-image"><i class="fa fa-check"></i>2. Check the image</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--3-export-the-launcher-bootstrap"><i class="fa fa-check"></i>3. Export the launcher (<code>bootstrap</code>)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--4-what-run_xqtlsh-does"><i class="fa fa-check"></i>4. What <code>run_xqtl.sh</code> does</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--5-check-that-your-cluster-works-smoke-test"><i class="fa fa-check"></i>5. Check that your cluster works (smoke test)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--6-build-the-alignment-indices-once-per-site"><i class="fa fa-check"></i>6. Build the alignment indices (once per site)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--upgrading-to-a-new-pipeline-version"><i class="fa fa-check"></i>Upgrading to a new pipeline version</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--offline-documentation"><i class="fa fa-check"></i>Offline documentation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html"><i class="fa fa-check"></i>HPC configuration guide</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--configuration-layers"><i class="fa fa-check"></i>Configuration layers</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--resource-classes"><i class="fa fa-check"></i>Resource classes</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--caps---max_cpus---max_memory---max_time"><i class="fa fa-check"></i>Caps (<code>--max_cpus</code>, <code>--max_memory</code>, <code>--max_time</code>)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--executors"><i class="fa fa-check"></i>Executors</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--single-node--profile-local"><i class="fa fa-check"></i>Single node (<code>-profile local</code>)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--queues-and-partitions"><i class="fa fa-check"></i>Queues and partitions</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--memory"><i class="fa fa-check"></i>Memory</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--lsf"><i class="fa fa-check"></i>LSF</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--slurm"><i class="fa fa-check"></i>SLURM</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--pbs-and-sge"><i class="fa fa-check"></i>PBS and SGE</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--retries-after-memory-or-time-kills"><i class="fa fa-check"></i>Retries after memory or time kills</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--cpus-and-threads"><i class="fa fa-check"></i>CPUs and threads</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--job-arrays-queue-size-and-submission-rate"><i class="fa fa-check"></i>Job arrays, queue size and submission rate</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--gpus"><i class="fa fa-check"></i>GPUs</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--container-runtime"><i class="fa fa-check"></i>Container runtime</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--apptainer-or-singularity"><i class="fa fa-check"></i>Apptainer or Singularity</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--bind-paths"><i class="fa fa-check"></i>Bind paths</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--work-directory-temporary-space-and-cleanup"><i class="fa fa-check"></i>Work directory, temporary space and cleanup</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--running-offline"><i class="fa fa-check"></i>Running offline</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--running-the-head-inside-a-batch-job"><i class="fa fa-check"></i>Running the head inside a batch job</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--site-specific-settings"><i class="fa fa-check"></i>Site-specific settings</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--account-project-and-qos-codes"><i class="fa fa-check"></i>Account, project and QOS codes</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--module-systems"><i class="fa fa-check"></i>Module systems</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--validating-a-new-site"><i class="fa fa-check"></i>Validating a new site</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--worked-example-seadragon-md-anderson"><i class="fa fa-check"></i>Worked example: seadragon (MD Anderson)</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--tuning-table"><i class="fa fa-check"></i>Tuning table</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--hpc-troubleshooting"><i class="fa fa-check"></i>HPC troubleshooting</a></li>
+</ul></li>
+<li class="part"><span><b>Part III: Outputs and analysis</b></span></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html"><i class="fa fa-check"></i>Export specification</a>
+<ul>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--layout"><i class="fa fa-check"></i>Layout</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--file-classes"><i class="fa fa-check"></i>File classes</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--what-is-never-exported"><i class="fa fa-check"></i>What is never exported</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--leak-scan"><i class="fa fa-check"></i>Leak scan</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--rebuilding-the-export"><i class="fa fa-check"></i>Rebuilding the export</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--phenotype-inputs-phenotypes_dir"><i class="fa fa-check"></i>Phenotype inputs (<code>phenotypes_dir</code>)</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--site-side-processing-behind-the-export"><i class="fa fa-check"></i>Site-side processing behind the export</a></li>
+</ul></li>
+<li class="appendix"><span><b>Appendices</b></span></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>Reference data and software provenance</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--embedded-reference-data"><i class="fa fa-check"></i>Embedded reference data</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--genome"><i class="fa fa-check"></i>Genome</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--ancestry-pca-panel-deviation-from-the-atlas"><i class="fa fa-check"></i>Ancestry PCA panel (deviation from the atlas)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--rna-editing-sites-rediportal"><i class="fa fa-check"></i>RNA-editing sites (REDIportal)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--built-at-each-site"><i class="fa fa-check"></i>Built at each site</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--not-public-the-restricted-file"><i class="fa fa-check"></i>Not public: the restricted file</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--software"><i class="fa fa-check"></i>Software</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--mdacc-maintainer-procedures"><i class="fa fa-check"></i>MDACC maintainer procedures</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-the-public-reference-record-once-per-reference-release"><i class="fa fa-check"></i>Building the public reference record (once per reference release)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-the-restricted-file"><i class="fa fa-check"></i>Building the restricted file</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-an-image"><i class="fa fa-check"></i>Building an image</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--releasing-a-version"><i class="fa fa-check"></i>Releasing a version</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html"><i class="fa fa-check"></i>Seadragon validation (Phase 0)</a>
+<ul>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html#seadragon-validation--environment"><i class="fa fa-check"></i>Environment</a></li>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html#seadragon-validation--results-run-2-head-inside-an-lsf-job"><i class="fa fa-check"></i>Results (run 2, head inside an LSF job)</a></li>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html#seadragon-validation--findings-carried-into-the-pipeline"><i class="fa fa-check"></i>Findings carried into the pipeline</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html"><i class="fa fa-check"></i>Changelog</a>
+<ul>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--100-dev-unreleased"><i class="fa fa-check"></i>1.0.0-dev (unreleased)</a>
+<ul>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--added"><i class="fa fa-check"></i>Added</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--fixed"><i class="fa fa-check"></i>Fixed</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--notes"><i class="fa fa-check"></i>Notes</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--changed"><i class="fa fa-check"></i>Changed</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--not-yet-available"><i class="fa fa-check"></i>Not yet available</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/sbresnahan/placenta-xqtl-federated" target="_blank">Source on GitHub</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">placenta-xqtl-federated</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="setup" class="section level1 hasAnchor">
+<h1>Setup<a href="setup.html#setup" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>This page takes a site from nothing to a working installation: get the image, check it, export the launcher, and confirm that the cluster can run the pipeline. It takes about 30 minutes plus the image download.</p>
+<blockquote>
+<p><strong>Restricted file: request it before you start.</strong> Site runs need <code>xqtl-restricted-&lt;version&gt;.tar.gz</code>, a small file holding the shared (frozen) splicing clusters and the MDACC signal list. It is not in the image or on any public server. MDACC sends it <strong>by email</strong> to sites with an approved data-sharing agreement. If you have not received it, request it from <strong>Sean T. Bresnahan (<a href="mailto:stbresnahan@mdanderson.org" class="email">stbresnahan@mdanderson.org</a>)</strong>, stating:</p>
+<ol style="list-style-type: decimal">
+<li>your cohort name,</li>
+<li>the pipeline version you will run (for example <code>1.0.0</code>), and</li>
+<li>the approved agreement (title or reference number).</li>
+</ol>
+<p>Keep the file inside your secure environment and set its path as <code>restricted:</code> in <code>cohort.yml</code>. The smoke test (step 5) reports whether it is present and intact.</p>
+</blockquote>
+<div id="setup--what-you-need" class="section level2 hasAnchor">
+<h2>What you need<a href="setup.html#setup--what-you-need" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Requirement</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Linux, x86-64</td>
+<td>Login/head node plus compute nodes (or a single large workstation)</td>
+</tr>
+<tr class="even">
+<td>Apptainer ≥ 1.0 or Singularity ≥ 3.8</td>
+<td>On every node that runs tasks. Check with <code>apptainer --version</code> or <code>singularity --version</code></td>
+</tr>
+<tr class="odd">
+<td>A batch scheduler (optional)</td>
+<td>LSF, SLURM, PBS Pro/Torque or SGE. See <a href="hpc.html#hpc">HPC configuration</a></td>
+</tr>
+<tr class="even">
+<td>Shared filesystem</td>
+<td>Visible from the head node and all compute nodes, for the work directory and results</td>
+</tr>
+<tr class="odd">
+<td>Disk</td>
+<td>The image file (its size is listed on the release page and the Zenodo record), plus work space for your cohort (see <a href="hpc.html#hpc--work-directory-temporary-space-and-cleanup">HPC configuration</a>)</td>
+</tr>
+<tr class="even">
+<td>Internet</td>
+<td>Only to download the image once. Nothing at run time</td>
+</tr>
+</tbody>
+</table>
+<p>Nothing else is installed on the host: no conda, Java, Nextflow, R or Python. All of them come from the image.</p>
+</div>
+<div id="setup--1-get-the-image" class="section level2 hasAnchor">
+<h2>1. Get the image<a href="setup.html#setup--1-get-the-image" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The image is one file, <code>xqtl-federated_&lt;version&gt;.sif</code>, available from two places that hold the same bytes.</p>
+<p><strong>From the GitHub container registry</strong> (needs outbound HTTPS to <code>ghcr.io</code> from the machine you download on):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="setup.html#cb2-1" tabindex="-1"></a><span class="ex">apptainer</span> pull xqtl-federated_1.0.0.sif oras://ghcr.io/sbresnahan/xqtl-federated-sif:1.0.0</span>
+<span id="cb2-2"><a href="setup.html#cb2-2" tabindex="-1"></a><span class="co"># Singularity: singularity pull xqtl-federated_1.0.0.sif oras://ghcr.io/sbresnahan/xqtl-federated-sif:1.0.0</span></span></code></pre></div>
+<p><strong>From Zenodo</strong> (a plain HTTPS download; works through most proxies and can be done on a laptop and copied over): download <code>xqtl-federated_&lt;version&gt;.sif</code> and <code>xqtl-federated_&lt;version&gt;.sif.sha256</code> from the Zenodo record linked on the GitHub release page.</p>
+<p><strong>Verify the download.</strong> The checksum file is attached to the GitHub release and to the Zenodo record:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="setup.html#cb3-1" tabindex="-1"></a><span class="fu">sha256sum</span> <span class="at">-c</span> xqtl-federated_1.0.0.sif.sha256        <span class="co"># must print: xqtl-federated_1.0.0.sif: OK</span></span></code></pre></div>
+<p>Put the <code>.sif</code> on the shared filesystem, for example next to where you will keep the launcher. One copy serves every run; compute nodes read it directly, so no image cache is needed.</p>
+<p>A Docker image of the same build (<code>ghcr.io/sbresnahan/placenta-xqtl-federated:&lt;version&gt;</code>) exists for workstations and continuous integration. Most clusters do not allow Docker; use the <code>.sif</code>.</p>
+</div>
+<div id="setup--2-check-the-image" class="section level2 hasAnchor">
+<h2>2. Check the image<a href="setup.html#setup--2-check-the-image" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="setup.html#cb4-1" tabindex="-1"></a><span class="ex">apptainer</span> run xqtl-federated_1.0.0.sif help          <span class="co"># commands available in the image</span></span>
+<span id="cb4-2"><a href="setup.html#cb4-2" tabindex="-1"></a><span class="ex">apptainer</span> run xqtl-federated_1.0.0.sif versions      <span class="co"># software versions (TSV)</span></span>
+<span id="cb4-3"><a href="setup.html#cb4-3" tabindex="-1"></a><span class="ex">apptainer</span> run xqtl-federated_1.0.0.sif refs-check    <span class="co"># verify the embedded reference data (sha256; ~1 min)</span></span></code></pre></div>
+<p><code>refs-check</code> compares every embedded reference file with the checksums recorded for this release and ends with <code>OK &lt;n&gt; reference files verified</code>. A failure means the image file is damaged; download it again.</p>
+</div>
+<div id="setup--3-export-the-launcher-bootstrap" class="section level2 hasAnchor">
+<h2>3. Export the launcher (<code>bootstrap</code>)<a href="setup.html#setup--3-export-the-launcher-bootstrap" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Nextflow’s head job runs on the host, outside the container, so it can submit jobs to your scheduler. <code>bootstrap</code> copies what the head job needs out of the image into a directory you choose:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="setup.html#cb5-1" tabindex="-1"></a><span class="ex">apptainer</span> run xqtl-federated_1.0.0.sif bootstrap ./xqtl</span></code></pre></div>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Written</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>xqtl/run_xqtl.sh</code></td>
+<td>The launcher you run from now on</td>
+</tr>
+<tr class="even">
+<td><code>xqtl/pipeline/</code></td>
+<td>Pipeline code (identical to the copy in the image)</td>
+</tr>
+<tr class="odd">
+<td><code>xqtl/jre/</code></td>
+<td>Java 17 runtime for the head job</td>
+</tr>
+<tr class="even">
+<td><code>xqtl/nextflow/</code></td>
+<td>Nextflow launcher (self-contained build) and its home directory</td>
+</tr>
+<tr class="odd">
+<td><code>xqtl/docs/</code></td>
+<td>This documentation for offline reading: open <code>xqtl/docs/index.html</code></td>
+</tr>
+<tr class="even">
+<td><code>xqtl/VERSIONS.tsv</code>, <code>xqtl/XQTL_VERSION</code>, <code>xqtl/refs_MANIFEST.tsv</code></td>
+<td>Software versions, pipeline version, reference checksums</td>
+</tr>
+</tbody>
+</table>
+<p>The reference data stay inside the image; tasks read them at <code>/opt/xqtl/refs</code>.</p>
+<p>Notes:</p>
+<ul>
+<li>The destination must be on a filesystem visible inside the container. Apptainer binds <code>$HOME</code> and the current directory by default; for other locations add <code>-B /path</code> (for example <code>apptainer run -B /scratch xqtl-federated_1.0.0.sif bootstrap /scratch/xqtl</code>).</li>
+<li><code>bootstrap</code> records the path of the <code>.sif</code> in <code>run_xqtl.sh</code>. If you move the image later, set <code>XQTL_SIF=/new/path/xqtl-federated_1.0.0.sif</code> before running, or bootstrap again.</li>
+<li>Use <strong>one directory per pipeline version</strong>. <code>bootstrap</code> refuses to write into a directory that already holds an installation; <code>--force</code> replaces the exported files and leaves your own files, work directories and results untouched.</li>
+<li>If <code>bootstrap</code> says it cannot tell where the <code>.sif</code> is (this happens with some older Singularity versions), add <code>--sif /full/path/xqtl-federated_1.0.0.sif</code>.</li>
+</ul>
+</div>
+<div id="setup--4-what-run_xqtlsh-does" class="section level2 hasAnchor">
+<h2>4. What <code>run_xqtl.sh</code> does<a href="setup.html#setup--4-what-run_xqtlsh-does" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>run_xqtl.sh</code> runs <code>nextflow run xqtl/pipeline/main.nf --sif &lt;image&gt; &lt;your arguments&gt;</code> with:</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Setting</th>
+<th>Value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>JAVA_HOME</code></td>
+<td><code>xqtl/jre</code></td>
+<td>No Java needed on the host</td>
+</tr>
+<tr class="even">
+<td><code>NXF_HOME</code></td>
+<td><code>xqtl/nextflow/home</code></td>
+<td>Nextflow keeps its files inside the installation, not in <code>$HOME/.nextflow</code></td>
+</tr>
+<tr class="odd">
+<td><code>NXF_OFFLINE</code></td>
+<td><code>true</code></td>
+<td>Nextflow never tries to reach the internet (on seadragon each attempt cost about 130 s)</td>
+</tr>
+<tr class="even">
+<td><code>NXF_OPTS</code></td>
+<td><code>-Xms1g -Xmx4g</code> unless you set it</td>
+<td>Head-job memory; see <a href="hpc.html#hpc">HPC configuration</a></td>
+</tr>
+<tr class="odd">
+<td><code>XQTL_SIF</code></td>
+<td>the <code>.sif</code> path</td>
+<td>Every task runs in this image</td>
+</tr>
+</tbody>
+</table>
+<p>Any <code>NXF_VER</code>, <code>NXF_JAVA_HOME</code> or <code>JAVA_CMD</code> in your environment is ignored, so a Nextflow or Java installation already on the host cannot interfere.</p>
+<p>Run it from the directory where you want the work directory and results, usually on scratch:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="setup.html#cb6-1" tabindex="-1"></a><span class="bu">cd</span> /scratch/<span class="va">$USER</span>/xqtl_run</span>
+<span id="cb6-2"><a href="setup.html#cb6-2" tabindex="-1"></a><span class="ex">/path/to/xqtl/run_xqtl.sh</span> <span class="at">-profile</span> <span class="op">&lt;</span>site profile<span class="op">&gt;</span> -params-file cohort.yml <span class="at">--mode</span> <span class="op">&lt;</span>mode<span class="op">&gt;</span></span></code></pre></div>
+<p>Long runs should be launched as a batch job or inside <code>tmux</code>/<code>screen</code>; see <a href="hpc.html#hpc--running-the-head-inside-a-batch-job">Running the head inside a batch job</a> and the templates in <code>pipeline/assets/head_job/</code>.</p>
+</div>
+<div id="setup--5-check-that-your-cluster-works-smoke-test" class="section level2 hasAnchor">
+<h2>5. Check that your cluster works (smoke test)<a href="setup.html#setup--5-check-that-your-cluster-works-smoke-test" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="setup.html#cb7-1" tabindex="-1"></a><span class="ex">/path/to/xqtl/run_xqtl.sh</span> <span class="at">-profile</span> seadragon,smoke <span class="at">--restricted</span> /secure/path/xqtl-restricted-1.tar.gz</span>
+<span id="cb7-2"><a href="setup.html#cb7-2" tabindex="-1"></a><span class="co"># other sites:  -profile slurm,apptainer,smoke -c conf/sites/&lt;yoursite&gt;.config ...</span></span></code></pre></div>
+<p>The smoke test takes about 10 minutes and runs 12 checks (container start-up, tools, references, restricted file, job fan-out and arrays, memory enforcement, filesystem binds, a small tensorQTL run). It writes <code>xqtl_smoke/smoke/smoke_summary.tsv</code> ending in <code>VERDICT GO</code> or <code>VERDICT NO-GO</code>. <a href="hpc.html#hpc--validating-a-new-site">HPC configuration</a> explains each check and what to do about a FAIL or WARN. Send MDACC the summary file if you would like a second opinion; it holds no data.</p>
+</div>
+<div id="setup--6-build-the-alignment-indices-once-per-site" class="section level2 hasAnchor">
+<h2>6. Build the alignment indices (once per site)<a href="setup.html#setup--6-build-the-alignment-indices-once-per-site" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>STAR, Salmon and IRFinder-S indices are too large to ship in the image, so each site builds them once from the references inside it:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="setup.html#cb8-1" tabindex="-1"></a><span class="ex">/path/to/xqtl/run_xqtl.sh</span> <span class="at">-profile</span> <span class="op">&lt;</span>site profile<span class="op">&gt;</span> -params-file cohort.yml <span class="at">--mode</span> prepare_references</span></code></pre></div>
+<p>The indices are written to <code>site_refs:</code> in <code>cohort.yml</code> and reused by every later run. This mode becomes available with the phenotyping release (see the <a href="changelog.html#changelog">changelog</a>).</p>
+</div>
+<div id="setup--upgrading-to-a-new-pipeline-version" class="section level2 hasAnchor">
+<h2>Upgrading to a new pipeline version<a href="setup.html#setup--upgrading-to-a-new-pipeline-version" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ol style="list-style-type: decimal">
+<li>Download and verify the new <code>.sif</code> (step 1).</li>
+<li>Bootstrap it into a new directory, for example <code>./xqtl-1.1.0</code>.</li>
+<li>Check the <a href="changelog.html#changelog">changelog</a>: a new major version changes the export format or the restricted-file version, and MDACC will send a new restricted file.</li>
+<li>Re-run the smoke test. Site indices from <code>prepare_references</code> are reused unless the changelog says otherwise.</li>
+</ol>
+<p>Keep the old directory until the new version has run; results record the version that produced them.</p>
+</div>
+<div id="setup--offline-documentation" class="section level2 hasAnchor">
+<h2>Offline documentation<a href="setup.html#setup--offline-documentation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Every image carries this documentation. After <code>bootstrap</code>, open <code>xqtl/docs/index.html</code> in a browser (copy the folder to a laptop if the cluster has no browser). <code>apptainer run &lt;sif&gt; docs</code> prints its location inside the image. The online copy is at <a href="https://sbresnahan.github.io/placenta-xqtl-federated/" class="uri">https://sbresnahan.github.io/placenta-xqtl-federated/</a>.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="collaboration-brief.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="hpc.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": null,
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "section",
+    "scroll_highlight": true
+  },
+  "info": false
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

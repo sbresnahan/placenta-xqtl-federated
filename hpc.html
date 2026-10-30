@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>HPC configuration guide | placenta-xqtl-federated</title>
+  <meta name="description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  <meta name="generator" content="bookdown 0.48 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="HPC configuration guide | placenta-xqtl-federated" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="HPC configuration guide | placenta-xqtl-federated" />
+  
+  <meta name="twitter:description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  
+
+<meta name="author" content="Sean T. Bresnahan, MD Anderson Cancer Center (Bhattacharya Lab)" />
+
+
+<meta name="date" content="2026-10-30" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="setup.html"/>
+<link rel="next" href="export-spec.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">placenta-xqtl-federated</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Home</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#where-to-start"><i class="fa fa-check"></i>Where to start</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#quick-start"><i class="fa fa-check"></i>Quick start</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#the-restricted-file"><i class="fa fa-check"></i>The restricted file</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#licence"><i class="fa fa-check"></i>Licence</a></li>
+</ul></li>
+<li class="part"><span><b>Part I: For cohort investigators</b></span></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html"><i class="fa fa-check"></i>Collaboration brief</a>
+<ul>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--1-purpose-of-the-collaboration"><i class="fa fa-check"></i>1. Purpose of the collaboration</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--2-research-questions-and-planned-analyses"><i class="fa fa-check"></i>2. Research questions and planned analyses</a>
+<ul>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--21-identify-genetic-effects-on-different-rna-measurements"><i class="fa fa-check"></i>2.1 Identify genetic effects on different RNA measurements</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--22-compare-placental-findings-with-birth-and-childhood-health-studies"><i class="fa fa-check"></i>2.2 Compare placental findings with birth and childhood health studies</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--23-test-whether-pregnancy-conditions-modify-genetic-effects"><i class="fa fa-check"></i>2.3 Test whether pregnancy conditions modify genetic effects</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--24-interpret-the-findings"><i class="fa fa-check"></i>2.4 Interpret the findings</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--3-analyses-performed-by-participating-sites"><i class="fa fa-check"></i>3. Analyses performed by participating sites</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--4-analyses-performed-by-md-anderson"><i class="fa fa-check"></i>4. Analyses performed by MD Anderson</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--5-data-and-computing-needed-at-each-cohort"><i class="fa fa-check"></i>5. Data and computing needed at each cohort</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--6-files-requested-from-each-cohort"><i class="fa fa-check"></i>6. Files requested from each cohort</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--7-data-sharing-and-safeguards"><i class="fa fa-check"></i>7. Data sharing and safeguards</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--8-planned-extensions-beyond-the-first-release"><i class="fa fa-check"></i>8. Planned extensions beyond the first release</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--references"><i class="fa fa-check"></i>References</a></li>
+</ul></li>
+<li class="part"><span><b>Part II: Running the pipeline</b></span></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html"><i class="fa fa-check"></i>Setup</a>
+<ul>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--what-you-need"><i class="fa fa-check"></i>What you need</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--1-get-the-image"><i class="fa fa-check"></i>1. Get the image</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--2-check-the-image"><i class="fa fa-check"></i>2. Check the image</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--3-export-the-launcher-bootstrap"><i class="fa fa-check"></i>3. Export the launcher (<code>bootstrap</code>)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--4-what-run_xqtlsh-does"><i class="fa fa-check"></i>4. What <code>run_xqtl.sh</code> does</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--5-check-that-your-cluster-works-smoke-test"><i class="fa fa-check"></i>5. Check that your cluster works (smoke test)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--6-build-the-alignment-indices-once-per-site"><i class="fa fa-check"></i>6. Build the alignment indices (once per site)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--upgrading-to-a-new-pipeline-version"><i class="fa fa-check"></i>Upgrading to a new pipeline version</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--offline-documentation"><i class="fa fa-check"></i>Offline documentation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html"><i class="fa fa-check"></i>HPC configuration guide</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--configuration-layers"><i class="fa fa-check"></i>Configuration layers</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--resource-classes"><i class="fa fa-check"></i>Resource classes</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--caps---max_cpus---max_memory---max_time"><i class="fa fa-check"></i>Caps (<code>--max_cpus</code>, <code>--max_memory</code>, <code>--max_time</code>)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--executors"><i class="fa fa-check"></i>Executors</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--single-node--profile-local"><i class="fa fa-check"></i>Single node (<code>-profile local</code>)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--queues-and-partitions"><i class="fa fa-check"></i>Queues and partitions</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--memory"><i class="fa fa-check"></i>Memory</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--lsf"><i class="fa fa-check"></i>LSF</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--slurm"><i class="fa fa-check"></i>SLURM</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--pbs-and-sge"><i class="fa fa-check"></i>PBS and SGE</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--retries-after-memory-or-time-kills"><i class="fa fa-check"></i>Retries after memory or time kills</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--cpus-and-threads"><i class="fa fa-check"></i>CPUs and threads</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--job-arrays-queue-size-and-submission-rate"><i class="fa fa-check"></i>Job arrays, queue size and submission rate</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--gpus"><i class="fa fa-check"></i>GPUs</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--container-runtime"><i class="fa fa-check"></i>Container runtime</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--apptainer-or-singularity"><i class="fa fa-check"></i>Apptainer or Singularity</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--bind-paths"><i class="fa fa-check"></i>Bind paths</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--work-directory-temporary-space-and-cleanup"><i class="fa fa-check"></i>Work directory, temporary space and cleanup</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--running-offline"><i class="fa fa-check"></i>Running offline</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--running-the-head-inside-a-batch-job"><i class="fa fa-check"></i>Running the head inside a batch job</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--site-specific-settings"><i class="fa fa-check"></i>Site-specific settings</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--account-project-and-qos-codes"><i class="fa fa-check"></i>Account, project and QOS codes</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--module-systems"><i class="fa fa-check"></i>Module systems</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--validating-a-new-site"><i class="fa fa-check"></i>Validating a new site</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--worked-example-seadragon-md-anderson"><i class="fa fa-check"></i>Worked example: seadragon (MD Anderson)</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--tuning-table"><i class="fa fa-check"></i>Tuning table</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--hpc-troubleshooting"><i class="fa fa-check"></i>HPC troubleshooting</a></li>
+</ul></li>
+<li class="part"><span><b>Part III: Outputs and analysis</b></span></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html"><i class="fa fa-check"></i>Export specification</a>
+<ul>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--layout"><i class="fa fa-check"></i>Layout</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--file-classes"><i class="fa fa-check"></i>File classes</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--what-is-never-exported"><i class="fa fa-check"></i>What is never exported</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--leak-scan"><i class="fa fa-check"></i>Leak scan</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--rebuilding-the-export"><i class="fa fa-check"></i>Rebuilding the export</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--phenotype-inputs-phenotypes_dir"><i class="fa fa-check"></i>Phenotype inputs (<code>phenotypes_dir</code>)</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--site-side-processing-behind-the-export"><i class="fa fa-check"></i>Site-side processing behind the export</a></li>
+</ul></li>
+<li class="appendix"><span><b>Appendices</b></span></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>Reference data and software provenance</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--embedded-reference-data"><i class="fa fa-check"></i>Embedded reference data</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--genome"><i class="fa fa-check"></i>Genome</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--ancestry-pca-panel-deviation-from-the-atlas"><i class="fa fa-check"></i>Ancestry PCA panel (deviation from the atlas)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--rna-editing-sites-rediportal"><i class="fa fa-check"></i>RNA-editing sites (REDIportal)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--built-at-each-site"><i class="fa fa-check"></i>Built at each site</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--not-public-the-restricted-file"><i class="fa fa-check"></i>Not public: the restricted file</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--software"><i class="fa fa-check"></i>Software</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--mdacc-maintainer-procedures"><i class="fa fa-check"></i>MDACC maintainer procedures</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-the-public-reference-record-once-per-reference-release"><i class="fa fa-check"></i>Building the public reference record (once per reference release)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-the-restricted-file"><i class="fa fa-check"></i>Building the restricted file</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-an-image"><i class="fa fa-check"></i>Building an image</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--releasing-a-version"><i class="fa fa-check"></i>Releasing a version</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html"><i class="fa fa-check"></i>Seadragon validation (Phase 0)</a>
+<ul>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html#seadragon-validation--environment"><i class="fa fa-check"></i>Environment</a></li>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html#seadragon-validation--results-run-2-head-inside-an-lsf-job"><i class="fa fa-check"></i>Results (run 2, head inside an LSF job)</a></li>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html#seadragon-validation--findings-carried-into-the-pipeline"><i class="fa fa-check"></i>Findings carried into the pipeline</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html"><i class="fa fa-check"></i>Changelog</a>
+<ul>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--100-dev-unreleased"><i class="fa fa-check"></i>1.0.0-dev (unreleased)</a>
+<ul>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--added"><i class="fa fa-check"></i>Added</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--fixed"><i class="fa fa-check"></i>Fixed</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--notes"><i class="fa fa-check"></i>Notes</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--changed"><i class="fa fa-check"></i>Changed</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--not-yet-available"><i class="fa fa-check"></i>Not yet available</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/sbresnahan/placenta-xqtl-federated" target="_blank">Source on GitHub</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">placenta-xqtl-federated</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="hpc" class="section level1 hasAnchor">
+<h1>HPC configuration guide<a href="hpc.html#hpc" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>This guide explains how the pipeline requests compute resources and how to adapt it to your cluster. Most sites only need to choose a profile, copy one site template and set five or six values. Validate every new configuration with the smoke test (see <a href="hpc.html#hpc--validating-a-new-site">Validating a new site</a>) before running real data.</p>
+<p>The pipeline runs in two parts:</p>
+<ul>
+<li><strong>The head</strong> is a small Java process (Nextflow) that runs on a login node, a workflow node or inside a batch job. It submits every task to the scheduler and tracks it. It needs about 1 CPU and 2–4 GB of memory for the whole run, which can take several days.</li>
+<li><strong>Tasks</strong> are batch jobs. Each task runs inside the same pipeline image (a <code>.sif</code> file, run with Apptainer or Singularity) on a compute node.</li>
+</ul>
+<p>Neither part needs internet access. The image contains all software and public reference data, and <code>run_xqtl.sh</code> (written by the image’s <code>bootstrap</code> command; see <a href="setup.html#setup--3-export-the-launcher-bootstrap">Setup</a>) starts Nextflow in offline mode.</p>
+<div id="hpc--configuration-layers" class="section level2 hasAnchor">
+<h2>Configuration layers<a href="hpc.html#hpc--configuration-layers" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Resource settings are layered so that the pipeline code never contains anything site-specific:</p>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Layer</th>
+<th>File</th>
+<th>What it sets</th>
+<th>Who edits it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1. Process labels</td>
+<td><code>modules/</code>, <code>workflows/</code></td>
+<td>Each process declares a resource class (<code>label 'process_medium'</code>), never a queue, account or path</td>
+<td>Pipeline developers</td>
+</tr>
+<tr class="even">
+<td>2. Resource classes</td>
+<td><code>conf/base.config</code></td>
+<td>CPUs, memory and walltime for each class; retry policy; queue selection rule; caps</td>
+<td>Rarely changed</td>
+</tr>
+<tr class="odd">
+<td>3. Executor profile</td>
+<td><code>conf/executors/&lt;scheduler&gt;.config</code></td>
+<td>Scheduler type, job submission rate, polling</td>
+<td>Rarely changed</td>
+</tr>
+<tr class="even">
+<td>4. Container profile</td>
+<td><code>conf/containers/&lt;engine&gt;.config</code></td>
+<td>Apptainer, Singularity or Docker; bind paths</td>
+<td>Rarely changed</td>
+</tr>
+<tr class="odd">
+<td>5. Site profile</td>
+<td><code>conf/sites/&lt;site&gt;.config</code></td>
+<td>Queues, account codes, GPU syntax, bind paths, node limits</td>
+<td><strong>Each site</strong></td>
+</tr>
+<tr class="even">
+<td>6. Command line</td>
+<td><code>--max_memory 64.GB</code> etc.</td>
+<td>Overrides any parameter for one run</td>
+<td>Each run</td>
+</tr>
+</tbody>
+</table>
+<p>Later layers override earlier ones. Profiles are combined with commas, for example <code>-profile slurm,apptainer</code>, and a site file is added with <code>-c conf/sites/&lt;site&gt;.config</code>. Seadragon has a built-in profile that bundles layers 3–5: <code>-profile seadragon</code>.</p>
+<p>To see the configuration that a combination resolves to, without running anything:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="hpc.html#cb9-1" tabindex="-1"></a><span class="ex">nextflow</span> config <span class="at">-profile</span> slurm,apptainer <span class="at">-c</span> conf/sites/mysite.config .</span></code></pre></div>
+<div id="hpc--resource-classes" class="section level3 hasAnchor">
+<h3>Resource classes<a href="hpc.html#hpc--resource-classes" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Defined in <code>conf/base.config</code>. Memory and time are multiplied by the attempt number, so a task that is killed for exceeding its memory or walltime is resubmitted with twice (then three times) as much.</p>
+<table>
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Label</th>
+<th>CPUs</th>
+<th>Memory (attempt 1)</th>
+<th>Walltime (attempt 1)</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>process_single</code></td>
+<td>1</td>
+<td>4 GB</td>
+<td>2 h</td>
+<td>Small bookkeeping, validation, plotting</td>
+</tr>
+<tr class="even">
+<td><code>process_low</code></td>
+<td>2</td>
+<td>8 GB</td>
+<td>4 h</td>
+<td>Per-sample light steps (featureCounts, RegTools)</td>
+</tr>
+<tr class="odd">
+<td><code>process_medium</code></td>
+<td>8</td>
+<td>32 GB</td>
+<td>8 h</td>
+<td>STAR/Salmon per sample, normalization, HCP fits</td>
+</tr>
+<tr class="even">
+<td><code>process_high</code></td>
+<td>16</td>
+<td>64 GB</td>
+<td>16 h</td>
+<td>Index builds, cohort-level aggregation</td>
+</tr>
+<tr class="odd">
+<td><code>process_long</code></td>
+<td>(class)</td>
+<td>(class)</td>
+<td>48 h</td>
+<td>Added to long tasks (permutation scans)</td>
+</tr>
+<tr class="even">
+<td><code>process_high_memory</code></td>
+<td>(class)</td>
+<td>128 GB</td>
+<td>(class)</td>
+<td>STAR genome index build</td>
+</tr>
+<tr class="odd">
+<td><code>process_gpu_capable</code></td>
+<td>8 (CPU) / 4 (GPU)</td>
+<td>32 GB</td>
+<td>12 h</td>
+<td>tensorQTL scans; GPU only with <code>--use_gpu</code></td>
+</tr>
+<tr class="even">
+<td><code>process_gpu</code></td>
+<td>4</td>
+<td>32 GB</td>
+<td>4 h</td>
+<td>Steps that require a GPU (none in round 1)</td>
+</tr>
+<tr class="odd">
+<td><code>process_local</code></td>
+<td>1</td>
+<td>2 GB</td>
+<td>1 h</td>
+<td>Trivial steps</td>
+</tr>
+<tr class="even">
+<td><code>process_array</code></td>
+<td>(class)</td>
+<td>(class)</td>
+<td>(class)</td>
+<td>Added to many-small-task steps: submitted as job arrays</td>
+</tr>
+</tbody>
+</table>
+<p>To change a class for your site, override it in your site file:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode groovy"><code class="sourceCode groovy"><span id="cb10-1"><a href="hpc.html#cb10-1" tabindex="-1"></a>process <span class="op">{</span></span>
+<span id="cb10-2"><a href="hpc.html#cb10-2" tabindex="-1"></a>    withLabel<span class="op">:</span> <span class="st">&#39;process_medium&#39;</span> <span class="op">{</span></span>
+<span id="cb10-3"><a href="hpc.html#cb10-3" tabindex="-1"></a>        cpus   <span class="op">=</span> <span class="dv">12</span></span>
+<span id="cb10-4"><a href="hpc.html#cb10-4" tabindex="-1"></a>        memory <span class="op">=</span> <span class="op">{</span> <span class="fl">48.</span>GB <span class="op">*</span> task<span class="op">.</span>attempt <span class="op">}</span></span>
+<span id="cb10-5"><a href="hpc.html#cb10-5" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-6"><a href="hpc.html#cb10-6" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>To change a single process, use its name: <code>withName: 'STAR_ALIGN' { cpus = 16 }</code>. Process names are listed in the execution report (<code>&lt;outdir&gt;/pipeline_info/report_*.html</code>).</p>
+</div>
+<div id="hpc--caps---max_cpus---max_memory---max_time" class="section level3 hasAnchor">
+<h3>Caps (<code>--max_cpus</code>, <code>--max_memory</code>, <code>--max_time</code>)<a href="hpc.html#hpc--caps---max_cpus---max_memory---max_time" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Every request is capped at <code>--max_cpus</code>, <code>--max_memory</code> and <code>--max_time</code> (Nextflow <code>process.resourceLimits</code>). Set these to the largest node and longest queue you may use; a request above the cap is lowered to the cap instead of being rejected by the scheduler. Defaults are 16 CPUs, 128 GB and 120 h.</p>
+<p>Check node sizes with <code>bhosts -l</code> / <code>lshosts</code> (LSF), <code>sinfo -o "%n %c %m"</code> (SLURM), <code>pbsnodes -a</code> (PBS) or <code>qhost</code> (SGE).</p>
+</div>
+</div>
+<div id="hpc--executors" class="section level2 hasAnchor">
+<h2>Executors<a href="hpc.html#hpc--executors" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Scheduler</th>
+<th>Profile</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>IBM Spectrum LSF</td>
+<td><code>lsf</code></td>
+<td>Memory is per job (<code>perJobMemLimit</code>); see <a href="hpc.html#hpc--memory">Memory</a></td>
+</tr>
+<tr class="even">
+<td>SLURM</td>
+<td><code>slurm</code></td>
+<td><code>--mem</code> per job by default; <code>--mem-per-cpu</code> option in the template</td>
+</tr>
+<tr class="odd">
+<td>PBS Pro / OpenPBS</td>
+<td><code>pbspro</code></td>
+<td><code>select=1:ncpus=N:mem=M</code> syntax</td>
+</tr>
+<tr class="even">
+<td>Torque / PBS</td>
+<td><code>pbs</code></td>
+<td><code>nodes=1:ppn=N,mem=M</code> syntax</td>
+</tr>
+<tr class="odd">
+<td>SGE / UGE / Son of Grid Engine</td>
+<td><code>sge</code></td>
+<td>Uses parallel environment <code>smp</code>; change it if your site uses another name</td>
+</tr>
+<tr class="even">
+<td>No scheduler (one large node)</td>
+<td><code>local</code></td>
+<td>All tasks run on the head’s node; capped by <code>--max_cpus</code> / <code>--max_memory</code></td>
+</tr>
+</tbody>
+</table>
+<p>Site templates with every value marked <code>EDIT</code> are in <code>conf/sites/</code>:</p>
+<ul>
+<li><code>TEMPLATE_slurm.config</code></li>
+<li><code>TEMPLATE_lsf.config</code></li>
+<li><code>TEMPLATE_pbspro.config</code> (also works for Torque with <code>-profile pbs</code>)</li>
+<li><code>TEMPLATE_sge.config</code></li>
+</ul>
+<p>Copy one to <code>conf/sites/&lt;yoursite&gt;.config</code>, edit it and run with:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="hpc.html#cb11-1" tabindex="-1"></a><span class="ex">./run_xqtl.sh</span> <span class="at">-profile</span> slurm,apptainer <span class="at">-c</span> conf/sites/<span class="op">&lt;</span>yoursite<span class="op">&gt;</span>.config <span class="at">-params-file</span> cohort.yml <span class="at">--mode</span> smoke</span></code></pre></div>
+<div id="hpc--single-node--profile-local" class="section level3 hasAnchor">
+<h3>Single node (<code>-profile local</code>)<a href="hpc.html#hpc--single-node--profile-local" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>On a workstation or one large allocated node, <code>-profile local,apptainer</code> runs every task on that machine, never using more than <code>--max_cpus</code> and <code>--max_memory</code> at once. A full cohort needs many CPU-days (see <a href="hpc.html#hpc--tuning-table">Tuning</a>); this mode suits small cohorts, the smoke test and re-running the export.</p>
+</div>
+</div>
+<div id="hpc--queues-and-partitions" class="section level2 hasAnchor">
+<h2>Queues and partitions<a href="hpc.html#hpc--queues-and-partitions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Many schedulers reject or misroute jobs whose walltime does not fit the queue. The pipeline chooses a queue for each task from its walltime with <code>--queue_rules</code>:</p>
+<pre class="text"><code>--queue_rules &#39;short:3h,medium:23h59m,long:120h&#39;</code></pre>
+<p>Rules are read left to right; the first queue whose limit is at least the task’s walltime is used, and the last queue takes anything longer. Because walltime grows with each retry, a retried task can move to a longer queue automatically. List queues in increasing walltime order.</p>
+<ul>
+<li><code>--queue NAME</code> sends every task to one queue and ignores the rules.</li>
+<li>With neither set, no queue is requested and the scheduler’s default is used.</li>
+<li><code>--gpu_queue</code> is used only for GPU tasks with <code>--use_gpu</code>.</li>
+</ul>
+<p>Find your limits with <code>bqueues -l</code> (LSF), <code>scontrol show partition</code> (SLURM), <code>qstat -Qf</code> (PBS) or <code>qconf -sq &lt;queue&gt;</code> (SGE).</p>
+</div>
+<div id="hpc--memory" class="section level2 hasAnchor">
+<h2>Memory<a href="hpc.html#hpc--memory" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The scheduler must receive the same memory number that the task will use, and in the units it expects. Getting this wrong is the most common cause of jobs being killed or never starting.</p>
+<div id="hpc--lsf" class="section level3 hasAnchor">
+<h3>LSF<a href="hpc.html#hpc--lsf" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><code>perJobMemLimit = true</code> (the default here, <code>--lsf_per_job_mem true</code>) tells Nextflow that memory limits apply to the whole job. Without it, Nextflow divides the request by the number of CPUs, and multi-core tasks are killed far below their request on clusters configured per job.</li>
+<li>Nextflow reads <code>LSF_UNIT_FOR_LIMITS</code> from <code>$LSF_ENVDIR/lsf.conf</code> to choose the unit for <code>-M</code> and <code>rusage[mem=...]</code>. The head must therefore run in a shell where the LSF environment is loaded (<code>LSF_ENVDIR</code> set). Check one submitted script (<code>.command.run</code> in any task directory) and confirm that the <code>#BSUB -M</code> value is in the unit your site expects.</li>
+<li>If <code>LSB_MEMLIMIT_ENFORCE=y</code> (as on seadragon), a task that exceeds its request is killed with exit status 130 and retried with more memory.</li>
+</ul>
+<p>To check how your site is configured:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="hpc.html#cb13-1" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">&#39;LSF_UNIT_FOR_LIMITS|LSB_MEMLIMIT_ENFORCE|LSB_RESOURCE_ENFORCE|LSB_JOB_MEMLIMIT&#39;</span> <span class="va">$LSF_ENVDIR</span>/lsf.conf</span></code></pre></div>
+</div>
+<div id="hpc--slurm" class="section level3 hasAnchor">
+<h3>SLURM<a href="hpc.html#hpc--slurm" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>By default the pipeline requests memory per job (<code>--mem</code>). This is correct on almost all SLURM sites.</li>
+<li>Some sites require <code>--mem-per-cpu</code>. The SLURM template contains a commented <code>clusterOptions</code> line that converts the request; enable it if jobs are rejected with a memory-specification error.</li>
+<li>Sites that set <code>DefMemPerCPU</code> without enforcing <code>--mem</code> can still kill jobs through cgroups; the smoke test (S10) shows whether memory is enforced.</li>
+</ul>
+</div>
+<div id="hpc--pbs-and-sge" class="section level3 hasAnchor">
+<h3>PBS and SGE<a href="hpc.html#hpc--pbs-and-sge" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>PBS Pro: memory goes into the <code>select</code> statement (<code>mem=</code>), per job.</p></li>
+<li><p>Torque: <code>-l mem=</code> per job; some Torque sites need <code>pmem</code> (per process) instead. Add it with <code>--cluster_options</code>.</p></li>
+<li><p>SGE: memory is requested with <code>-l h_vmem</code> (per slot on many sites). If your site expects per-slot values, divide the request in your site file:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode groovy"><code class="sourceCode groovy"><span id="cb14-1"><a href="hpc.html#cb14-1" tabindex="-1"></a>process<span class="op">.</span>clusterOptions <span class="op">=</span> <span class="op">{</span> <span class="st">&quot;-l h_vmem=</span><span class="ss">${</span><span class="op">(</span>task<span class="op">.</span>memory<span class="op">.</span><span class="fu">toMega</span><span class="op">()</span> <span class="st">/ task.cpus) as int}M&quot; }</span></span></code></pre></div></li>
+</ul>
+</div>
+<div id="hpc--retries-after-memory-or-time-kills" class="section level3 hasAnchor">
+<h3>Retries after memory or time kills<a href="hpc.html#hpc--retries-after-memory-or-time-kills" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><code>conf/base.config</code> retries a task up to 3 times when it exits with a status that schedulers use for resource kills: 104, 130, 134, 137, 139, 140, 143, 247 or 271. Other failures stop the run after running tasks finish (<code>errorStrategy 'finish'</code>), so you can fix the problem and continue with <code>-resume</code>.</p>
+<p>If a task fails with a resource error on all attempts, raise its class or the cap in your site file rather than editing the pipeline.</p>
+</div>
+</div>
+<div id="hpc--cpus-and-threads" class="section level2 hasAnchor">
+<h2>CPUs and threads<a href="hpc.html#hpc--cpus-and-threads" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Each tool receives the number of CPUs from <code>task.cpus</code> explicitly (for example <code>STAR --runThreadN ${task.cpus}</code>, <code>salmon -p</code>, <code>plink2 --threads</code>, <code>torch.set_num_threads</code>). Tools therefore never use more cores than requested, even on schedulers that do not confine CPUs.</p>
+<p>The container receives the scheduler’s job variables (<code>LSB_*</code>, <code>SLURM_*</code>, <code>PBS_*</code>, <code>JOB_ID</code>, <code>SGE_TASK_ID</code>, <code>NSLOTS</code>) through the engine’s environment whitelist. Every multi-threaded process also sets <code>OMP_NUM_THREADS</code>, <code>MKL_NUM_THREADS</code> and <code>OPENBLAS_NUM_THREADS</code> to <code>task.cpus</code>, which keeps R and numpy linear algebra within the request.</p>
+<p>On LSF sites with <code>LSB_RESOURCE_ENFORCE="cpu"</code> (seadragon), a task only sees the cores it requested; the smoke test reports this (S06 shows <code>nproc</code> equal to the request).</p>
+</div>
+<div id="hpc--job-arrays-queue-size-and-submission-rate" class="section level2 hasAnchor">
+<h2>Job arrays, queue size and submission rate<a href="hpc.html#hpc--job-arrays-queue-size-and-submission-rate" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li><strong>Job arrays.</strong> Processes with many short identical tasks (per-chromosome or per-chunk steps, label <code>process_array</code>) are submitted as job arrays of up to <code>--job_array_size</code> tasks (default 50). This reduces scheduler load and queue wait. Arrays work with LSF, SLURM, PBS Pro and SGE; the <code>local</code> executor ignores them. <code>--job_array_size 0</code> turns arrays off.</li>
+<li><strong><code>--queue_size</code></strong> (default 100; seadragon 200) is the maximum number of jobs Nextflow keeps queued or running at once. Lower it if your site limits jobs per user.</li>
+<li><strong><code>--submit_rate_limit</code></strong> (default <code>'10 sec'</code>, meaning 10 submissions per second) throttles submission. Use <code>'1 sec'</code> or <code>'30 min'</code>-style values only if the scheduler administrators ask.</li>
+<li>Polling: status is checked every 30 s and the queue every 2 min, which is gentle on the scheduler.</li>
+</ul>
+</div>
+<div id="hpc--gpus" class="section level2 hasAnchor">
+<h2>GPUs<a href="hpc.html#hpc--gpus" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>GPUs are optional. All tensorQTL steps run on CPU by default, which takes longer but needs nothing special. To use GPUs:</p>
+<ol style="list-style-type: decimal">
+<li>Use the CUDA image (<code>xqtl-federated_&lt;version&gt;-cuda.sif</code>) through <code>--sif</code>.</li>
+<li>Add <code>--use_gpu true</code>.</li>
+<li>Set the GPU queue and request syntax in your site file:</li>
+</ol>
+<table>
+<thead>
+<tr class="header">
+<th>Scheduler</th>
+<th><code>gpu_cluster_options</code> example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LSF</td>
+<td><code>-gpu num=1</code> (seadragon) or <code>-gpu "num=1:mode=shared"</code></td>
+</tr>
+<tr class="even">
+<td>SLURM</td>
+<td><code>--gres=gpu:1</code> or <code>--gpus=1</code></td>
+</tr>
+<tr class="odd">
+<td>PBS Pro</td>
+<td><code>-l select=1:ngpus=1</code></td>
+</tr>
+<tr class="even">
+<td>SGE</td>
+<td><code>-l gpu=1</code></td>
+</tr>
+</tbody>
+</table>
+<p>With <code>--use_gpu</code>, tasks labelled <code>process_gpu_capable</code> go to <code>--gpu_queue</code>, request 4 CPUs plus the GPU flags, and Apptainer/Singularity are started with <code>--nv</code> so the container can see the NVIDIA driver. Without it, the same tasks run on CPU with 8 CPUs. Results are numerically equivalent within floating-point tolerance. The smoke test checks GPU tensorQTL only when <code>--use_gpu true</code> is given.</p>
+</div>
+<div id="hpc--container-runtime" class="section level2 hasAnchor">
+<h2>Container runtime<a href="hpc.html#hpc--container-runtime" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="hpc--apptainer-or-singularity" class="section level3 hasAnchor">
+<h3>Apptainer or Singularity<a href="hpc.html#hpc--apptainer-or-singularity" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><strong>Apptainer ≥ 1.0</strong> is recommended (<code>-profile &lt;scheduler&gt;,apptainer</code>).</li>
+<li>On sites where Apptainer is installed under the name <code>singularity</code>, or where only SingularityCE ≥ 3.8 is available, use <code>-profile &lt;scheduler&gt;,singularity</code>. Seadragon is in this group (Apptainer 1.5 invoked as <code>singularity</code>).</li>
+<li>Docker is used only for CI (<code>-profile test,docker</code>).</li>
+</ul>
+<p>The image is a local file. <code>run_xqtl.sh</code> passes its path as <code>--sif</code>, so nothing is pulled at run time and no image cache is needed (<code>NXF_APPTAINER_CACHEDIR</code> and <code>NXF_SINGULARITY_CACHEDIR</code> are unused).</p>
+</div>
+<div id="hpc--bind-paths" class="section level3 hasAnchor">
+<h3>Bind paths<a href="hpc.html#hpc--bind-paths" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Inside the container, only paths that are bound are visible. <code>autoMounts</code> binds the work directory and the paths of input files automatically, but data reached through symlinks or listed inside a samplesheet often live on other filesystems. List every filesystem that holds FASTQs, genotypes, the restricted file, the work directory and outputs:</p>
+<pre class="text"><code>--bind_paths &#39;/scratch,/project,/data&#39;</code></pre>
+<p>The smoke test checks a path you choose with <code>--bind_test_path /project/somefile.txt</code> (S09).</p>
+</div>
+<div id="hpc--work-directory-temporary-space-and-cleanup" class="section level3 hasAnchor">
+<h3>Work directory, temporary space and cleanup<a href="hpc.html#hpc--work-directory-temporary-space-and-cleanup" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><strong>Work directory (<code>-w</code>).</strong> Every task runs in its own subdirectory of the work directory. Put it on a large shared filesystem visible to all compute nodes, ideally scratch: <code>-w /scratch/$USER/xqtl_work</code>. A full cohort produces about 2 TB of transient alignment files at peak.</li>
+<li><strong>Temporary files.</strong> Tasks write temporary files inside their work directory, not to <code>/tmp</code>, because <code>/tmp</code> on compute nodes is often small. To use fast node-local disk instead, set <code>process.scratch = '/local/scratch'</code> (or <code>'$TMPDIR'</code>) in your site file; Nextflow then runs each task in that directory and copies outputs back.</li>
+<li><strong>Apptainer build/temp directories</strong> are not used at run time, since nothing is built or pulled.</li>
+<li><strong>Cleanup.</strong> Keep the work directory until the run has finished and the export has been reviewed, because <code>-resume</code> needs it. Then delete it, or run <code>nextflow clean -f -before &lt;last run name&gt;</code> from the launch directory. Intermediate BAMs are deleted by the pipeline once their counts are written.</li>
+</ul>
+</div>
+</div>
+<div id="hpc--running-offline" class="section level2 hasAnchor">
+<h2>Running offline<a href="hpc.html#hpc--running-offline" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Compute nodes at most sites have no internet access, and the pipeline never needs it:</p>
+<ul>
+<li><strong><code>NXF_OFFLINE=true</code></strong> is set by <code>run_xqtl.sh</code>. Without it, Nextflow tries to contact <code>www.nextflow.io</code> at every launch; on seadragon that added about 130 s per launch before timing out.</li>
+<li><strong>No plugins.</strong> The pipeline uses no Nextflow plugins, so nothing is downloaded at launch. Input validation is done by a Python step inside the image (<code>bin/xqtl_validate.py</code>).</li>
+<li><strong>The launcher is exported from the image.</strong> <code>apptainer run &lt;sif&gt; bootstrap ./xqtl</code> copies the pipeline code, a Java runtime and the Nextflow launcher out of the image, and writes <code>run_xqtl.sh</code> with <code>JAVA_HOME</code>, <code>NXF_HOME</code> and the image path set. The host needs only Apptainer or Singularity and a scheduler.</li>
+<li><strong>References are inside the image.</strong> Processes read the public references from <code>/opt/xqtl/refs</code> inside the container. Indices that must be built for your read length are written once by <code>--mode prepare_references</code> to <code>--site_refs</code>.</li>
+</ul>
+</div>
+<div id="hpc--running-the-head-inside-a-batch-job" class="section level2 hasAnchor">
+<h2>Running the head inside a batch job<a href="hpc.html#hpc--running-the-head-inside-a-batch-job" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Running Nextflow on a login node is fine for short runs, but many sites kill long login-node processes. For full runs, submit the head as an ordinary batch job; it then submits tasks as further jobs. Phase 0 confirmed this works on seadragon (head job on the <code>medium</code> queue).</p>
+<p>Templates are in <code>assets/head_job/</code> (<code>lsf.sh</code>, <code>slurm.sh</code>, <code>pbs.sh</code>, <code>sge.sh</code>). The essential settings are:</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Setting</th>
+<th>Value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CPUs</td>
+<td>1–2</td>
+<td>The head does little computation</td>
+</tr>
+<tr class="even">
+<td>Memory</td>
+<td>4–8 GB</td>
+<td>Java heap plus headroom</td>
+</tr>
+<tr class="odd">
+<td><code>NXF_OPTS</code></td>
+<td><code>-Xms1g -Xmx4g</code></td>
+<td>Keeps the JVM within the job’s memory limit</td>
+</tr>
+<tr class="even">
+<td>Walltime</td>
+<td>Longest queue (e.g. 120 h)</td>
+<td>The head must outlive all tasks; resume if it is killed</td>
+</tr>
+<tr class="odd">
+<td>Queue</td>
+<td>One that allows jobs to submit jobs</td>
+<td>Some sites forbid submission from compute nodes; ask your administrators</td>
+</tr>
+</tbody>
+</table>
+<p>Example for LSF:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="hpc.html#cb16-1" tabindex="-1"></a><span class="co">#BSUB -J xqtl_head</span></span>
+<span id="cb16-2"><a href="hpc.html#cb16-2" tabindex="-1"></a><span class="co">#BSUB -q long</span></span>
+<span id="cb16-3"><a href="hpc.html#cb16-3" tabindex="-1"></a><span class="co">#BSUB -W 120:00</span></span>
+<span id="cb16-4"><a href="hpc.html#cb16-4" tabindex="-1"></a><span class="co">#BSUB -n 1</span></span>
+<span id="cb16-5"><a href="hpc.html#cb16-5" tabindex="-1"></a><span class="co">#BSUB -M 8</span></span>
+<span id="cb16-6"><a href="hpc.html#cb16-6" tabindex="-1"></a><span class="co">#BSUB -R &quot;rusage[mem=8]&quot;</span></span>
+<span id="cb16-7"><a href="hpc.html#cb16-7" tabindex="-1"></a><span class="co">#BSUB -o xqtl_head.%J.out</span></span>
+<span id="cb16-8"><a href="hpc.html#cb16-8" tabindex="-1"></a><span class="bu">export</span> <span class="va">NXF_OPTS</span><span class="op">=</span><span class="st">&quot;-Xms1g -Xmx4g&quot;</span></span>
+<span id="cb16-9"><a href="hpc.html#cb16-9" tabindex="-1"></a><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$LS_SUBCWD</span><span class="st">&quot;</span></span>
+<span id="cb16-10"><a href="hpc.html#cb16-10" tabindex="-1"></a><span class="ex">./xqtl/run_xqtl.sh</span> <span class="at">-profile</span> seadragon <span class="at">-params-file</span> cohort.yml <span class="at">--mode</span> site <span class="at">-resume</span></span></code></pre></div>
+<p>If the head job is killed, resubmit it with <code>-resume</code>: finished tasks are reused, and jobs that were still running are resubmitted.</p>
+</div>
+<div id="hpc--site-specific-settings" class="section level2 hasAnchor">
+<h2>Site-specific settings<a href="hpc.html#hpc--site-specific-settings" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="hpc--account-project-and-qos-codes" class="section level3 hasAnchor">
+<h3>Account, project and QOS codes<a href="hpc.html#hpc--account-project-and-qos-codes" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Put flags required on every job in <code>--cluster_options</code>, usually in your site file:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Scheduler</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LSF</td>
+<td><code>-P myproject</code> or <code>-G mygroup</code></td>
+</tr>
+<tr class="even">
+<td>SLURM</td>
+<td><code>--account=myproj --qos=normal</code></td>
+</tr>
+<tr class="odd">
+<td>PBS</td>
+<td><code>-A myproject</code></td>
+</tr>
+<tr class="even">
+<td>SGE</td>
+<td><code>-P myproject</code></td>
+</tr>
+</tbody>
+</table>
+<p>GPU tasks receive both <code>cluster_options</code> and <code>gpu_cluster_options</code>.</p>
+</div>
+<div id="hpc--module-systems" class="section level3 hasAnchor">
+<h3>Module systems<a href="hpc.html#hpc--module-systems" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Nothing needs to be loaded inside tasks, because all software is in the image. On the head node, Apptainer or Singularity must be on <code>PATH</code> for the head and for the batch jobs. If your site provides it as a module, add <code>module load apptainer</code> to your shell profile or to the head job script, and add <code>process.beforeScript = 'module load apptainer'</code> to your site file if compute nodes do not inherit it.</p>
+</div>
+</div>
+<div id="hpc--validating-a-new-site" class="section level2 hasAnchor">
+<h2>Validating a new site<a href="hpc.html#hpc--validating-a-new-site" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Before running real data, run the smoke test with exactly the profile you will use for real runs:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="hpc.html#cb17-1" tabindex="-1"></a><span class="ex">./xqtl/run_xqtl.sh</span> <span class="at">-profile</span> seadragon,smoke <span class="at">--bind_test_path</span> /rsrch5/home/<span class="va">$USER</span>/somefile.txt <span class="dt">\</span></span>
+<span id="cb17-2"><a href="hpc.html#cb17-2" tabindex="-1"></a>    <span class="at">--restricted</span> /path/to/xqtl-restricted-1.tar.gz</span></code></pre></div>
+<p>For other sites: <code>-profile slurm,apptainer,smoke -c conf/sites/mysite.config</code>. Then run the same command again with <code>-resume</code>; every task should be reported as cached. The test takes 5–15 minutes, depending on queue wait, and uses only synthetic data generated inside the tasks.</p>
+<p>Results are written to <code>xqtl_smoke/smoke/smoke_summary.tsv</code>, ending with <code>VERDICT GO</code> or <code>NO-GO</code>:</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Test</th>
+<th>What it checks</th>
+<th>If it fails</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>S01 container R</td>
+<td>The image starts on compute nodes; R 4.3.1 runs</td>
+<td>Engine not on <code>PATH</code> on compute nodes; wrong <code>--sif</code> path; image not readable from nodes</td>
+</tr>
+<tr class="even">
+<td>S02 embedded tools</td>
+<td>Every tool in the image reports a version (<code>tool_versions.tsv</code>)</td>
+<td>Wrong or damaged image; re-verify the sha256</td>
+</tr>
+<tr class="odd">
+<td>S03 embedded references</td>
+<td>Reference files match the image manifest</td>
+<td>Wrong image or <code>--refs_dir</code></td>
+</tr>
+<tr class="even">
+<td>S04 restricted file</td>
+<td>The restricted file opens, has the expected version and checksums</td>
+<td>WARN if not given; FAIL if damaged or the wrong version. Request it by email (see <a href="setup.html#setup">Setup</a>)</td>
+</tr>
+<tr class="odd">
+<td>S05 plink2</td>
+<td>Genotype tooling runs</td>
+<td>Image problem</td>
+</tr>
+<tr class="even">
+<td>S06 resources</td>
+<td>4 CPUs and 8 GB are granted; a 4 GB allocation succeeds; whether CPUs are confined (scheduler view in <code>sched_view.txt</code>)</td>
+<td>Memory units or per-job/per-slot setting wrong (see <a href="hpc.html#hpc--memory">Memory</a>)</td>
+</tr>
+<tr class="odd">
+<td>S07 fan-out</td>
+<td>5 independent jobs run, usually on several nodes</td>
+<td>Queue or account settings</td>
+</tr>
+<tr class="even">
+<td>S08 job array</td>
+<td>A 5-task job array runs</td>
+<td>Arrays disabled at your site: set <code>--job_array_size 0</code></td>
+</tr>
+<tr class="odd">
+<td>S09 bind read</td>
+<td>A file on your project filesystem is visible in the container</td>
+<td>Add the filesystem to <code>--bind_paths</code></td>
+</tr>
+<tr class="even">
+<td>S10 memory enforcement and retry</td>
+<td>A task that exceeds its 2 GB request is killed and retried with 4 GB</td>
+<td>WARN means memory is not enforced; set <code>--max_memory</code> conservatively</td>
+</tr>
+<tr class="odd">
+<td>S11 tensorQTL</td>
+<td>CPU (or GPU with <code>--use_gpu</code>) cis-mapping recovers a planted signal</td>
+<td>Image or GPU driver problem</td>
+</tr>
+<tr class="even">
+<td>S12 Storey q-value</td>
+<td>The R <code>qvalue</code> bridge runs on tensorQTL output</td>
+<td>Image problem</td>
+</tr>
+</tbody>
+</table>
+<p>WARN and SKIP lines do not block a GO, but they tell you which defaults to adjust. Send the summary file to MDACC with your first export.</p>
+</div>
+<div id="hpc--worked-example-seadragon-md-anderson" class="section level2 hasAnchor">
+<h2>Worked example: seadragon (MD Anderson)<a href="hpc.html#hpc--worked-example-seadragon-md-anderson" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Seadragon runs IBM LSF with Apptainer 1.5.1, invoked as <code>singularity</code>. The built-in profile <code>conf/sites/seadragon.config</code> encodes the Phase 0 results (appendix <em>Seadragon validation</em>):</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode groovy"><code class="sourceCode groovy"><span id="cb18-1"><a href="hpc.html#cb18-1" tabindex="-1"></a>includeConfig <span class="st">&#39;../executors/lsf.config&#39;</span></span>
+<span id="cb18-2"><a href="hpc.html#cb18-2" tabindex="-1"></a>includeConfig <span class="st">&#39;../containers/singularity.config&#39;</span></span>
+<span id="cb18-3"><a href="hpc.html#cb18-3" tabindex="-1"></a>params <span class="op">{</span></span>
+<span id="cb18-4"><a href="hpc.html#cb18-4" tabindex="-1"></a>    queue_rules         <span class="op">=</span> <span class="st">&#39;short:3h,medium:23h59m,long:120h&#39;</span></span>
+<span id="cb18-5"><a href="hpc.html#cb18-5" tabindex="-1"></a>    gpu_queue           <span class="op">=</span> <span class="st">&#39;gpu&#39;</span></span>
+<span id="cb18-6"><a href="hpc.html#cb18-6" tabindex="-1"></a>    gpu_cluster_options <span class="op">=</span> <span class="st">&#39;-gpu num=1&#39;</span></span>
+<span id="cb18-7"><a href="hpc.html#cb18-7" tabindex="-1"></a>    bind_paths          <span class="op">=</span> <span class="st">&#39;/rsrch5,/rsrch9&#39;</span></span>
+<span id="cb18-8"><a href="hpc.html#cb18-8" tabindex="-1"></a>    max_cpus            <span class="op">=</span> <span class="dv">16</span></span>
+<span id="cb18-9"><a href="hpc.html#cb18-9" tabindex="-1"></a>    max_memory          <span class="op">=</span> <span class="st">&#39;120.GB&#39;</span></span>
+<span id="cb18-10"><a href="hpc.html#cb18-10" tabindex="-1"></a>    max_time            <span class="op">=</span> <span class="st">&#39;120.h&#39;</span></span>
+<span id="cb18-11"><a href="hpc.html#cb18-11" tabindex="-1"></a>    queue_size          <span class="op">=</span> <span class="dv">200</span></span>
+<span id="cb18-12"><a href="hpc.html#cb18-12" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-13"><a href="hpc.html#cb18-13" tabindex="-1"></a>executor <span class="op">{</span> perJobMemLimit <span class="op">=</span> <span class="kw">true</span> <span class="op">}</span></span></code></pre></div>
+<p>Why each value:</p>
+<ul>
+<li><strong>Queues.</strong> Seadragon’s submission filter (esub) rejects walltimes outside each queue’s range: <code>short</code> ≤ 3 h, <code>medium</code> more than 3 h and under 24 h, <code>long</code> 24–120 h. The rule <code>medium:23h59m</code> keeps 24-hour tasks out of <code>medium</code>.</li>
+<li><strong>Memory.</strong> <code>LSF_UNIT_FOR_LIMITS=GB</code> and <code>LSB_MEMLIMIT_ENFORCE=y</code>: memory is per job, in GB, and enforced. Phase 0 saw the over-limit task killed with exit 130 and retried successfully with 4 GB.</li>
+<li><strong>CPUs.</strong> <code>LSB_RESOURCE_ENFORCE="cpu gpu"</code> confines each job to its requested cores (Phase 0: <code>nproc=4</code> for a 4-core request).</li>
+<li><strong>Bind paths.</strong> Project data live on <code>/rsrch5</code> and <code>/rsrch9</code>.</li>
+<li><strong>Network.</strong> Compute nodes have no internet. Of the container registries, <code>ghcr.io</code> and <code>quay.io</code> were reachable from login nodes at about 0.6 MB/s; Docker Hub, <code>gcr.io</code> and Amazon ECR were blocked or unreliable. Download the SIF once (about 3–4 h at that speed) or copy it by Globus.</li>
+<li><strong>Building images.</strong> <code>apptainer build --fakeroot</code> with package installation fails on seadragon (apt exit 100). Never build images there; use the published SIF.</li>
+<li><strong>Head.</strong> Both a login-node head and a head inside an LSF job (<code>medium</code> queue, 1 core, 4 GB) passed Phase 0.</li>
+</ul>
+</div>
+<div id="hpc--tuning-table" class="section level2 hasAnchor">
+<h2>Tuning table<a href="hpc.html#hpc--tuning-table" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Approximate requirements for one cohort of about 350 samples with about 50 M read pairs each:</p>
+<table>
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Stage</th>
+<th>Class</th>
+<th>Jobs</th>
+<th>Typical CPU-hours</th>
+<th>Peak disk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Index build (<code>prepare_references</code>, once)</td>
+<td><code>process_high</code> + <code>process_high_memory</code></td>
+<td>3</td>
+<td>30–60</td>
+<td>60 GB</td>
+</tr>
+<tr class="even">
+<td>STAR + Salmon per sample</td>
+<td><code>process_medium</code></td>
+<td>~700</td>
+<td>1,000–1,800</td>
+<td>~2 TB BAMs (transient)</td>
+</tr>
+<tr class="odd">
+<td>Junctions, featureCounts, editing pileups, IRFinder-S</td>
+<td><code>process_low</code>/<code>process_medium</code></td>
+<td>~1,400</td>
+<td>400–700</td>
+<td>200 GB</td>
+</tr>
+<tr class="even">
+<td>Aggregation, normalization, MuSiC</td>
+<td><code>process_medium</code>/<code>process_high</code></td>
+<td>~40</td>
+<td>50–100</td>
+<td>50 GB</td>
+</tr>
+<tr class="odd">
+<td>HCP grid (per modality × ancestry)</td>
+<td><code>process_medium</code></td>
+<td>~60</td>
+<td>~60</td>
+<td>small</td>
+</tr>
+<tr class="even">
+<td>tensorQTL (per modality × ancestry)</td>
+<td><code>process_gpu_capable</code></td>
+<td>~50</td>
+<td>100–300 (CPU)</td>
+<td>100 GB</td>
+</tr>
+<tr class="odd">
+<td>GxE tier 1 (per modality × exposure)</td>
+<td><code>process_gpu_capable</code> + <code>process_long</code></td>
+<td>~20</td>
+<td>100–300 (CPU)</td>
+<td>small</td>
+</tr>
+<tr class="even">
+<td>G×C, GxE tier 2, LD, export</td>
+<td><code>process_medium</code></td>
+<td>~100</td>
+<td>20–50</td>
+<td>100–150 GB export</td>
+</tr>
+</tbody>
+</table>
+<p>To shorten runs, raise <code>--queue_size</code> (if allowed), use GPUs for tensorQTL, and place the work directory on the fastest shared filesystem.</p>
+</div>
+<div id="hpc--hpc-troubleshooting" class="section level2 hasAnchor">
+<h2>HPC troubleshooting<a href="hpc.html#hpc--hpc-troubleshooting" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Every task fails at once with “command not found: singularity/apptainer”</td>
+<td>Engine not on <code>PATH</code> on compute nodes</td>
+<td><code>process.beforeScript = 'module load apptainer'</code> in the site file</td>
+</tr>
+<tr class="even">
+<td>Jobs rejected at submission (“walltime exceeds queue limit”, esub errors)</td>
+<td>Queue rules do not match site limits</td>
+<td>Fix <code>--queue_rules</code>; check <code>bqueues -l</code> / <code>scontrol show partition</code></td>
+</tr>
+<tr class="odd">
+<td>Jobs pending forever</td>
+<td>Request larger than any node, or wrong queue/account</td>
+<td>Lower <code>--max_memory</code>/<code>--max_cpus</code>; set <code>--cluster_options</code></td>
+</tr>
+<tr class="even">
+<td>Multi-core LSF tasks killed far below their memory request</td>
+<td>Per-slot memory interpretation</td>
+<td>Keep <code>--lsf_per_job_mem true</code>; check <code>LSF_UNIT_FOR_LIMITS</code></td>
+</tr>
+<tr class="odd">
+<td>Exit 130/137/140 repeated on all attempts</td>
+<td>Class too small for your data</td>
+<td>Raise the class memory in the site file</td>
+</tr>
+<tr class="even">
+<td>“No such file” for an input that exists</td>
+<td>Filesystem not bound in the container</td>
+<td>Add it to <code>--bind_paths</code></td>
+</tr>
+<tr class="odd">
+<td>Each launch hangs about 2 minutes before starting</td>
+<td>Nextflow trying to reach the internet</td>
+<td>Use <code>run_xqtl.sh</code> (sets <code>NXF_OFFLINE=true</code>)</td>
+</tr>
+<tr class="even">
+<td>Head killed on the login node</td>
+<td>Login-node process limits</td>
+<td>Run the head as a batch job (see <a href="hpc.html#hpc--running-the-head-inside-a-batch-job">above</a>) and <code>-resume</code></td>
+</tr>
+<tr class="odd">
+<td><code>-resume</code> reruns everything</td>
+<td>Different launch directory or deleted work directory</td>
+<td>Launch from the same directory with the same <code>-w</code></td>
+</tr>
+<tr class="even">
+<td>Job arrays rejected</td>
+<td>Arrays disabled or capped</td>
+<td><code>--job_array_size 0</code> (or a smaller size within the site cap)</td>
+</tr>
+<tr class="odd">
+<td>GPU tasks fail with CUDA errors</td>
+<td>Driver not visible or CPU image used</td>
+<td>Use the <code>-cuda</code> SIF; check <code>nvidia-smi</code> on the GPU node; <code>--nv</code> is added automatically</td>
+</tr>
+<tr class="even">
+<td>Scheduler complains about submission rate</td>
+<td>Too many submissions per second</td>
+<td><code>--submit_rate_limit '2 sec'</code> and lower <code>--queue_size</code></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+
+
+
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="setup.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="export-spec.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": null,
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "section",
+    "scroll_highlight": true
+  },
+  "info": false
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

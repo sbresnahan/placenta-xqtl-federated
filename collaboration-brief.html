@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Collaboration brief | placenta-xqtl-federated</title>
+  <meta name="description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  <meta name="generator" content="bookdown 0.48 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Collaboration brief | placenta-xqtl-federated" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Collaboration brief | placenta-xqtl-federated" />
+  
+  <meta name="twitter:description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  
+
+<meta name="author" content="Sean T. Bresnahan, MD Anderson Cancer Center (Bhattacharya Lab)" />
+
+
+<meta name="date" content="2026-10-30" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="index.html"/>
+<link rel="next" href="setup.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">placenta-xqtl-federated</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Home</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#where-to-start"><i class="fa fa-check"></i>Where to start</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#quick-start"><i class="fa fa-check"></i>Quick start</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#the-restricted-file"><i class="fa fa-check"></i>The restricted file</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#licence"><i class="fa fa-check"></i>Licence</a></li>
+</ul></li>
+<li class="part"><span><b>Part I: For cohort investigators</b></span></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html"><i class="fa fa-check"></i>Collaboration brief</a>
+<ul>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--1-purpose-of-the-collaboration"><i class="fa fa-check"></i>1. Purpose of the collaboration</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--2-research-questions-and-planned-analyses"><i class="fa fa-check"></i>2. Research questions and planned analyses</a>
+<ul>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--21-identify-genetic-effects-on-different-rna-measurements"><i class="fa fa-check"></i>2.1 Identify genetic effects on different RNA measurements</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--22-compare-placental-findings-with-birth-and-childhood-health-studies"><i class="fa fa-check"></i>2.2 Compare placental findings with birth and childhood health studies</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--23-test-whether-pregnancy-conditions-modify-genetic-effects"><i class="fa fa-check"></i>2.3 Test whether pregnancy conditions modify genetic effects</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--24-interpret-the-findings"><i class="fa fa-check"></i>2.4 Interpret the findings</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--3-analyses-performed-by-participating-sites"><i class="fa fa-check"></i>3. Analyses performed by participating sites</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--4-analyses-performed-by-md-anderson"><i class="fa fa-check"></i>4. Analyses performed by MD Anderson</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--5-data-and-computing-needed-at-each-cohort"><i class="fa fa-check"></i>5. Data and computing needed at each cohort</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--6-files-requested-from-each-cohort"><i class="fa fa-check"></i>6. Files requested from each cohort</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--7-data-sharing-and-safeguards"><i class="fa fa-check"></i>7. Data sharing and safeguards</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--8-planned-extensions-beyond-the-first-release"><i class="fa fa-check"></i>8. Planned extensions beyond the first release</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--references"><i class="fa fa-check"></i>References</a></li>
+</ul></li>
+<li class="part"><span><b>Part II: Running the pipeline</b></span></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html"><i class="fa fa-check"></i>Setup</a>
+<ul>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--what-you-need"><i class="fa fa-check"></i>What you need</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--1-get-the-image"><i class="fa fa-check"></i>1. Get the image</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--2-check-the-image"><i class="fa fa-check"></i>2. Check the image</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--3-export-the-launcher-bootstrap"><i class="fa fa-check"></i>3. Export the launcher (<code>bootstrap</code>)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--4-what-run_xqtlsh-does"><i class="fa fa-check"></i>4. What <code>run_xqtl.sh</code> does</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--5-check-that-your-cluster-works-smoke-test"><i class="fa fa-check"></i>5. Check that your cluster works (smoke test)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--6-build-the-alignment-indices-once-per-site"><i class="fa fa-check"></i>6. Build the alignment indices (once per site)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--upgrading-to-a-new-pipeline-version"><i class="fa fa-check"></i>Upgrading to a new pipeline version</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--offline-documentation"><i class="fa fa-check"></i>Offline documentation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html"><i class="fa fa-check"></i>HPC configuration guide</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--configuration-layers"><i class="fa fa-check"></i>Configuration layers</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--resource-classes"><i class="fa fa-check"></i>Resource classes</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--caps---max_cpus---max_memory---max_time"><i class="fa fa-check"></i>Caps (<code>--max_cpus</code>, <code>--max_memory</code>, <code>--max_time</code>)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--executors"><i class="fa fa-check"></i>Executors</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--single-node--profile-local"><i class="fa fa-check"></i>Single node (<code>-profile local</code>)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--queues-and-partitions"><i class="fa fa-check"></i>Queues and partitions</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--memory"><i class="fa fa-check"></i>Memory</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--lsf"><i class="fa fa-check"></i>LSF</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--slurm"><i class="fa fa-check"></i>SLURM</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--pbs-and-sge"><i class="fa fa-check"></i>PBS and SGE</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--retries-after-memory-or-time-kills"><i class="fa fa-check"></i>Retries after memory or time kills</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--cpus-and-threads"><i class="fa fa-check"></i>CPUs and threads</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--job-arrays-queue-size-and-submission-rate"><i class="fa fa-check"></i>Job arrays, queue size and submission rate</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--gpus"><i class="fa fa-check"></i>GPUs</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--container-runtime"><i class="fa fa-check"></i>Container runtime</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--apptainer-or-singularity"><i class="fa fa-check"></i>Apptainer or Singularity</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--bind-paths"><i class="fa fa-check"></i>Bind paths</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--work-directory-temporary-space-and-cleanup"><i class="fa fa-check"></i>Work directory, temporary space and cleanup</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--running-offline"><i class="fa fa-check"></i>Running offline</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--running-the-head-inside-a-batch-job"><i class="fa fa-check"></i>Running the head inside a batch job</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--site-specific-settings"><i class="fa fa-check"></i>Site-specific settings</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--account-project-and-qos-codes"><i class="fa fa-check"></i>Account, project and QOS codes</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--module-systems"><i class="fa fa-check"></i>Module systems</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--validating-a-new-site"><i class="fa fa-check"></i>Validating a new site</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--worked-example-seadragon-md-anderson"><i class="fa fa-check"></i>Worked example: seadragon (MD Anderson)</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--tuning-table"><i class="fa fa-check"></i>Tuning table</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--hpc-troubleshooting"><i class="fa fa-check"></i>HPC troubleshooting</a></li>
+</ul></li>
+<li class="part"><span><b>Part III: Outputs and analysis</b></span></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html"><i class="fa fa-check"></i>Export specification</a>
+<ul>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--layout"><i class="fa fa-check"></i>Layout</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--file-classes"><i class="fa fa-check"></i>File classes</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--what-is-never-exported"><i class="fa fa-check"></i>What is never exported</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--leak-scan"><i class="fa fa-check"></i>Leak scan</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--rebuilding-the-export"><i class="fa fa-check"></i>Rebuilding the export</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--phenotype-inputs-phenotypes_dir"><i class="fa fa-check"></i>Phenotype inputs (<code>phenotypes_dir</code>)</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--site-side-processing-behind-the-export"><i class="fa fa-check"></i>Site-side processing behind the export</a></li>
+</ul></li>
+<li class="appendix"><span><b>Appendices</b></span></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>Reference data and software provenance</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--embedded-reference-data"><i class="fa fa-check"></i>Embedded reference data</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--genome"><i class="fa fa-check"></i>Genome</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--ancestry-pca-panel-deviation-from-the-atlas"><i class="fa fa-check"></i>Ancestry PCA panel (deviation from the atlas)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--rna-editing-sites-rediportal"><i class="fa fa-check"></i>RNA-editing sites (REDIportal)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--built-at-each-site"><i class="fa fa-check"></i>Built at each site</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--not-public-the-restricted-file"><i class="fa fa-check"></i>Not public: the restricted file</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--software"><i class="fa fa-check"></i>Software</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--mdacc-maintainer-procedures"><i class="fa fa-check"></i>MDACC maintainer procedures</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-the-public-reference-record-once-per-reference-release"><i class="fa fa-check"></i>Building the public reference record (once per reference release)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-the-restricted-file"><i class="fa fa-check"></i>Building the restricted file</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-an-image"><i class="fa fa-check"></i>Building an image</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--releasing-a-version"><i class="fa fa-check"></i>Releasing a version</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html"><i class="fa fa-check"></i>Seadragon validation (Phase 0)</a>
+<ul>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html#seadragon-validation--environment"><i class="fa fa-check"></i>Environment</a></li>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html#seadragon-validation--results-run-2-head-inside-an-lsf-job"><i class="fa fa-check"></i>Results (run 2, head inside an LSF job)</a></li>
+<li class="chapter" data-level="" data-path="seadragon-validation.html"><a href="seadragon-validation.html#seadragon-validation--findings-carried-into-the-pipeline"><i class="fa fa-check"></i>Findings carried into the pipeline</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html"><i class="fa fa-check"></i>Changelog</a>
+<ul>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--100-dev-unreleased"><i class="fa fa-check"></i>1.0.0-dev (unreleased)</a>
+<ul>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--added"><i class="fa fa-check"></i>Added</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--fixed"><i class="fa fa-check"></i>Fixed</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--notes"><i class="fa fa-check"></i>Notes</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--changed"><i class="fa fa-check"></i>Changed</a></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--not-yet-available"><i class="fa fa-check"></i>Not yet available</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/sbresnahan/placenta-xqtl-federated" target="_blank">Source on GitHub</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">placenta-xqtl-federated</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="collaboration-brief" class="section level1 hasAnchor">
+<h1>Collaboration brief<a href="collaboration-brief.html#collaboration-brief" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p><em>Collaboration brief: proposed analyses and summary files requested from participating cohorts</em></p>
+<p><strong>Project:</strong> Multi-ancestry placental xQTL atlas</p>
+<p><strong>Prepared for:</strong> Participating placental cohort investigators, including PACEplacenta collaborators</p>
+<p><strong>Coordinating institution:</strong> MD Anderson Cancer Center (MDACC), Bhattacharya Lab</p>
+<p><strong>Scientific contact:</strong> Sean T. Bresnahan (<a href="mailto:stbresnahan@mdanderson.org" class="email">stbresnahan@mdanderson.org</a>)</p>
+<p><strong>Analysis software:</strong> MDACC-provided self-contained pipeline (first release in preparation)</p>
+<div id="collaboration-brief--1-purpose-of-the-collaboration" class="section level2 hasAnchor">
+<h2>1. Purpose of the collaboration<a href="collaboration-brief.html#collaboration-brief--1-purpose-of-the-collaboration" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We are studying how fetal genetic differences affect RNA produced by the placenta and whether conditions during pregnancy, such as maternal glucose levels or BMI, change those effects. We will combine results from cohorts with different genetic ancestries to identify placental genes and RNA forms that may be relevant to birth outcomes and childhood metabolic health. <span class="math display">\[1, 2\]</span></p>
+<p>For cohorts that cannot transfer participant-level data to MDACC, each cohort runs the analyses on its own computing system. It reviews the summary files and sends MDACC only those approved under its data-sharing rules. No participant-level genotypes, RNA-seq files, molecular measurements, or clinical records are sent to MDACC. Separately, each site must upload quality-controlled genotype files to the external TOPMed Imputation Server, as described in Section 5. Cohorts able to share de-identified individual-level data may discuss a separate arrangement with MDACC under an appropriate agreement.</p>
+<p>This document describes the planned analyses, what each cohort would run locally, what MDACC would do with the shared results, and which files sites would send. The final section lists possible later analyses that would require discussion with collaborators before any additional work or data sharing.</p>
+</div>
+<div id="collaboration-brief--2-research-questions-and-planned-analyses" class="section level2 hasAnchor">
+<h2>2. Research questions and planned analyses<a href="collaboration-brief.html#collaboration-brief--2-research-questions-and-planned-analyses" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="collaboration-brief--21-identify-genetic-effects-on-different-rna-measurements" class="section level3 hasAnchor">
+<h3>2.1 Identify genetic effects on different RNA measurements<a href="collaboration-brief.html#collaboration-brief--21-identify-genetic-effects-on-different-rna-measurements" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>We aim to identify genetic variants that affect placental RNA measurements, including changes that gene-level expression alone may miss. Using a placenta-specific reference built from long-read RNA sequencing (HPLRv2), participating sites will measure nine types of RNA features: <strong>gene expression, isoform expression, isoform usage, splicing, intron retention, alternative transcription start sites, alternative polyadenylation, RNA editing, and RNA stability</strong>. For each RNA feature, sites will test which nearby fetal genetic variants are associated with its measurement (cis-xQTL analysis), separately for each eligible ancestry group. The analyses will also identify independent genetic signals within each region. <span class="math display">\[3, 4\]</span></p>
+<p>Sites will estimate the proportions of major placental cell types using a public single-cell RNA reference. These estimates will be included in the statistical models to account for differences among samples. At significant xQTL signals from the site’s own analysis, and at a list of xQTL signals supplied by MDACC, sites will also test whether the genetic association changes with the proportion of a cell type, such as trophoblast, endothelial, or stromal cells. <span class="math display">\[5\]</span></p>
+<p>MDACC will combine association results across cohorts and ancestry groups to identify consistent and varying genetic effects. We will also use each cohort’s linkage disequilibrium (LD) results, which describe correlations among nearby genetic variants, to narrow the list of candidate causal variants across ancestries. <span class="math display">\[6\]</span></p>
+</div>
+<div id="collaboration-brief--22-compare-placental-findings-with-birth-and-childhood-health-studies" class="section level3 hasAnchor">
+<h3>2.2 Compare placental findings with birth and childhood health studies<a href="collaboration-brief.html#collaboration-brief--22-compare-placental-findings-with-birth-and-childhood-health-studies" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>We will integrate placental xQTL results with publicly available genome-wide association study (GWAS) summary statistics for birth weight, gestational duration, childhood BMI and anthropometric traits, glycemic phenotypes, and youth-onset type 2 diabetes. Planned analyses include statistical fine-mapping, colocalization to assess whether placental xQTL and GWAS signals may share causal variants, and transcriptome-wide association analyses (TWAS), which use genetic evidence to prioritize genes and RNA isoforms. Functional annotation will further characterize credible variants and candidate regulatory mechanisms. <span class="math display">\[7–12\]</span></p>
+<p>These analyses use association summaries and LD matrices shared by sites, together with published GWAS results. They do not require sites to release participant-level childhood outcomes or other participant-level clinical data to MDACC. More advanced methods, including multivariate isoform-level TWAS, will be added after we confirm that they work with summary statistics from separate cohorts.</p>
+</div>
+<div id="collaboration-brief--23-test-whether-pregnancy-conditions-modify-genetic-effects" class="section level3 hasAnchor">
+<h3>2.3 Test whether pregnancy conditions modify genetic effects<a href="collaboration-brief.html#collaboration-brief--23-test-whether-pregnancy-conditions-modify-genetic-effects" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Genotype-by-exposure (GxE) analysis will test whether the association between fetal genotype and placental RNA phenotypes changes with gestational exposures. The initial local workflow includes genotype-by-gestational-age interaction scans and, where sufficiently measured and permitted, interactions with <strong>pre-pregnancy BMI, gestational diabetes mellitus (GDM), and oral glucose tolerance test (OGTT) glucose</strong>. Exposure variables remain at the cohort site; only interaction statistics and aggregate exposure descriptors are requested. <span class="math display">\[13\]</span></p>
+<p>In the first release, sites will run interaction tests separately for each eligible ancestry group. MDACC will combine results from cohorts with comparable exposures and models. Planned extensions will examine more extensive interaction statistics, colocalization of exposure-modified signals with GWAS loci, and whether exposure-dependent regulatory annotations are enriched for childhood metabolic trait heritability.</p>
+</div>
+<div id="collaboration-brief--24-interpret-the-findings" class="section level3 hasAnchor">
+<h3>2.4 Interpret the findings<a href="collaboration-brief.html#collaboration-brief--24-interpret-the-findings" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>We plan to report placental xQTL associations across cohorts and ancestry groups, likely causal variants, comparisons across types of RNA measurements, genes and isoforms prioritized at GWAS loci, and genetic effects that vary with gestational exposures. Public results will report combined findings. Cohort-specific results will be shared only as agreed with each participating cohort.</p>
+</div>
+</div>
+<div id="collaboration-brief--3-analyses-performed-by-participating-sites" class="section level2 hasAnchor">
+<h2>3. Analyses performed by participating sites<a href="collaboration-brief.html#collaboration-brief--3-analyses-performed-by-participating-sites" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Each cohort runs analyses separately for each genetic ancestry group with at least 50 samples. Optional analyses depend on the available data and exposures. The letters in Table 1 identify the types of summary files requested from sites; Table 3 describes each file type.</p>
+<p><strong>Table 1.</strong> Analyses performed at each cohort and summary files shared with MDACC</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Task at the cohort</th>
+<th>Analyses performed at the participating site</th>
+<th>Summary files requested by MDACC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Genotype preparation and ancestry</td>
+<td>Quality control (QC) before and after site-initiated imputation on the TOPMed Imputation Server; ancestry assignment using a public reference; sample and variant summaries for each ancestry group. <span class="math display">\[14, 15\]</span></td>
+<td>Aggregate QC and variant summaries (D, I).</td>
+</tr>
+<tr class="even">
+<td>RNA measurement</td>
+<td>Measurement of nine types of RNA features using common HPLRv2 references; matching molecular features to the common reference; cell-type deconvolution.</td>
+<td>Feature definitions and aggregate QC (E, I).</td>
+</tr>
+<tr class="odd">
+<td>Data processing and statistical models</td>
+<td>Cohort- and ancestry-specific normalization, sample/feature filtering, genotype principal components, latent factors, and covariate selection.</td>
+<td>Model settings without participant-level covariate values (F).</td>
+</tr>
+<tr class="even">
+<td>Genetic association testing</td>
+<td>Per-modality cis-association testing, permutation-based feature significance, and conditionally independent signals; nominal variant-by-feature statistics.</td>
+<td>Association and signal tables (A, B).</td>
+</tr>
+<tr class="odd">
+<td>Effects by cell type or pregnancy exposure</td>
+<td>Genotype-by-cell-type proportion at the site’s significant xQTL signals and an MDACC-supplied signal list; ancestry-stratified, transcriptome-wide genotype-by-exposure scans and follow-up interaction tests at the same signals where relevant covariates exist.</td>
+<td>Interaction statistics and aggregate exposure descriptors (G, H).</td>
+</tr>
+<tr class="even">
+<td>LD, quality checks, and file preparation</td>
+<td>Cohort-derived LD matrices; allele-frequency and imputation summaries; local quality checks; file list and checksums, and automated checks for sample identifiers.</td>
+<td>LD, QC, and file documentation (C, D, I, J).</td>
+</tr>
+</tbody>
+</table>
+<p>All sites use the same set of reference RNA features so their results can be compared. Splicing analyses use a shared set of reference junction clusters; locally identified clusters are matched using genomic coordinates.</p>
+</div>
+<div id="collaboration-brief--4-analyses-performed-by-md-anderson" class="section level2 hasAnchor">
+<h2>4. Analyses performed by MD Anderson<a href="collaboration-brief.html#collaboration-brief--4-analyses-performed-by-md-anderson" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Before combining results, MDACC will check file format and integrity, RNA feature coordinates, allele coding, and allele frequencies across cohorts. Table 2 lists the planned analyses and the files they use. The letters refer to the file types defined in Table 3.</p>
+<p><strong>Table 2.</strong> Analyses at MDACC and the files used from each cohort</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Central analysis</th>
+<th>Scientific purpose</th>
+<th>Files used (Table 3)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Within- and cross-ancestry meta-analysis</td>
+<td>Combine cohort estimates; assess heterogeneity and consistency; establish feature-level significance.</td>
+<td>A, B, D, E, F</td>
+</tr>
+<tr class="even">
+<td>Cross-ancestry fine-mapping</td>
+<td>Prioritize putative causal variants and credible sets using association statistics and LD estimated by the cohorts.</td>
+<td>A, C</td>
+</tr>
+<tr class="odd">
+<td>GWAS colocalization</td>
+<td>Identify loci with statistical evidence of shared placental regulatory and birth or metabolic trait signals.</td>
+<td>A, C plus public GWAS</td>
+</tr>
+<tr class="even">
+<td>Summary-statistic TWAS and functional interpretation</td>
+<td>Prioritize genes and isoforms, associate regulatory predictions with GWAS, and evaluate functional annotation enrichment.</td>
+<td>A, C plus public annotations and GWAS</td>
+</tr>
+<tr class="odd">
+<td>Combined interaction analyses</td>
+<td>Meta-analyze genotype-by-cell-type and genotype-by-exposure statistics; assess consistency across ancestry groups and cohorts.</td>
+<td>G, H and relevant summary descriptors</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="collaboration-brief--5-data-and-computing-needed-at-each-cohort" class="section level2 hasAnchor">
+<h2>5. Data and computing needed at each cohort<a href="collaboration-brief.html#collaboration-brief--5-data-and-computing-needed-at-each-cohort" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The pipeline is intended for cohorts with fetal genotype data (SNP arrays, whole-exome sequencing, or whole-genome sequencing where suitable for downstream imputation and QC) and placental bulk RNA-seq. Broad transcript coverage, such as total RNA-seq, is important for isoform, splicing, transcript-end, and RNA-editing analyses; 3′-capture assays may not support the complete modality set. Data availability and sequencing design will be reviewed with each site before analysis.</p>
+<p>Each site runs the analyses on its own research computing system using a supplied, self-contained software container that includes the reference data and runs without internet access, which keeps software and reference versions consistent across sites. After approval, MDACC also supplies by email a small restricted file containing the shared splicing reference clusters and the list of MDACC xQTL signals that every site tests for cell-type and exposure interactions. It uses the site’s fetal genotypes, RNA sequencing data, and a limited sample metadata table. <strong>Required local metadata</strong> are an RNA-seq identifier, genotype identifier, fetal sex, and gestational age at delivery. <strong>Optional local metadata</strong> include pre-pregnancy BMI, GDM, OGTT glucose, maternal age, parity, and smoking; interaction modules are enabled only when relevant variables and sufficient samples are available.</p>
+<p>Genotype imputation is required and must be performed through the <strong>TOPMed Imputation Server</strong>. Each participating site is responsible for uploading quality-controlled genotype files directly to the TOPMed Imputation Server in accordance with its terms of use and the site’s data-governance requirements. <span class="math display">\[15\]</span></p>
+</div>
+<div id="collaboration-brief--6-files-requested-from-each-cohort" class="section level2 hasAnchor">
+<h2>6. Files requested from each cohort<a href="collaboration-brief.html#collaboration-brief--6-files-requested-from-each-cohort" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Each site prepares summary files separately for each eligible ancestry group. Variants are identified by GRCh38 chromosome, position, and reference and alternate alleles. RNA features use the common annotation IDs and coordinates. The files contain no sample identifiers or participant-level records. The main requested results are variant-by-feature effect estimates (betas), standard errors (SEs), p-values, minor-allele frequencies (MAFs), minor-allele counts (MACs), sample sizes, and LD matrices. Table 3 gives the complete list of requested files and estimated sizes. Letters A–J match the file types in Tables 1 and 2.</p>
+<p><strong>Table 3.</strong> Summary files requested from each cohort</p>
+<table>
+<colgroup>
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">File ID</th>
+<th>File type</th>
+<th>Contents and purpose</th>
+<th>Level of detail</th>
+<th>Approx. size per ancestry group</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">A</td>
+<td>Variant-RNA association results</td>
+<td>For each tested variant and RNA feature: effect allele, regression coefficient (beta), standard error (SE), p-value, effect-allele frequency, MAF, MAC, and analyzed sample size (N); used for meta-analysis and GWAS integration.</td>
+<td>Variant x feature</td>
+<td>30–60 GB</td>
+</tr>
+<tr class="even">
+<td align="center">B</td>
+<td>Lead variants and independent signals</td>
+<td>Best variant, permutation significance, q-value, and independent signals; supports feature-level evidence synthesis.</td>
+<td>Feature or signal</td>
+<td>&lt; 1 GB</td>
+</tr>
+<tr class="odd">
+<td align="center">C</td>
+<td>Genetic correlation (LD) matrices</td>
+<td>Pairwise variant correlations in genomic windows for quality-filtered common variants; supports fine-mapping, colocalization, and summary-based TWAS.</td>
+<td>Variant x variant matrix per window</td>
+<td>~70 GB</td>
+</tr>
+<tr class="even">
+<td align="center">D</td>
+<td>Variant quality and frequency summaries</td>
+<td>Allele frequency, imputation quality, Hardy–Weinberg statistics, and sample counts; supports harmonization and QC.</td>
+<td>Variant</td>
+<td>&lt; 1 GB</td>
+</tr>
+<tr class="odd">
+<td align="center">E</td>
+<td>RNA feature descriptions</td>
+<td>Molecular feature coordinates, grouping, and aggregate detection fraction; supports cross-site feature matching.</td>
+<td>Feature</td>
+<td>&lt; 1 GB</td>
+</tr>
+<tr class="even">
+<td align="center">F</td>
+<td>Model settings</td>
+<td>Normalization method, covariate names, and latent-factor count; <strong>no individual covariate values</strong>.</td>
+<td>Model</td>
+<td>KB</td>
+</tr>
+<tr class="odd">
+<td align="center">G</td>
+<td>Genetic effects by cell type</td>
+<td>Interaction coefficients (betas), SEs, and p-values at the site’s significant xQTL signals and the MDACC-supplied signal list.</td>
+<td>Variant x feature x cell type</td>
+<td>&lt; 1 GB</td>
+</tr>
+<tr class="even">
+<td align="center">H</td>
+<td>Genetic effects by pregnancy exposure</td>
+<td>Genotype-by-exposure interaction betas, SEs, p-values, permutation results, and aggregate exposure summaries (n, mean, SD, or prevalence).</td>
+<td>Feature or variant x feature x exposure</td>
+<td>1–5 GB</td>
+</tr>
+<tr class="odd">
+<td align="center">I</td>
+<td>Group-level quality summaries</td>
+<td>Ancestry-group counts, distributions of sequencing metrics, and aggregate cell-type proportions.</td>
+<td>Summary metric</td>
+<td>KB</td>
+</tr>
+<tr class="even">
+<td align="center">J</td>
+<td>File list and data dictionary</td>
+<td>File paths, checksums, file sizes, row counts, data types, descriptions, and software and reference versions.</td>
+<td>Shared file</td>
+<td>KB</td>
+</tr>
+</tbody>
+</table>
+<p>We estimate approximately 100–150 GB of files per ancestry group, mostly association statistics (A) and LD matrices (C). Actual sizes depend on sample size, the number of RNA features, quality filters, and optional analyses. Each site can review the files, file list, and data dictionary before sharing them. Transfers require the cohort’s approval and an agreed secure transfer method, such as Globus.</p>
+</div>
+<div id="collaboration-brief--7-data-sharing-and-safeguards" class="section level2 hasAnchor">
+<h2>7. Data sharing and safeguards<a href="collaboration-brief.html#collaboration-brief--7-data-sharing-and-safeguards" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Files sent to MDACC exclude</strong> individual genotypes or sequencing reads (FASTQ/BAM), participant identifiers, per-sample molecular or clinical data, exposure values, latent factors, or cell-type proportions. Summary results are prepared separately for ancestry groups with at least 50 analyzed samples.</p>
+<p>MDACC will store approved shared files on access-controlled research computing infrastructure and use them for the collaborative placental xQTL analyses described here. Per-cohort files will not be redistributed or publicly released without the contributing cohort’s agreement. Publicly released findings will combine results across cohorts. Authorship, acknowledgement, access, and any additional uses should be established with collaborators in advance.</p>
+</div>
+<div id="collaboration-brief--8-planned-extensions-beyond-the-first-release" class="section level2 hasAnchor">
+<h2>8. Planned extensions beyond the first release<a href="collaboration-brief.html#collaboration-brief--8-planned-extensions-beyond-the-first-release" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The analyses in Table 4 may be added after the first pipeline release. Participating cohorts would discuss and approve any additional work, including sample-size requirements, covariates, files to share, and data-governance requirements. MDACC would use summary results from each cohort where possible. Analyses requiring individual-level data from multiple cohorts would need separate approval and an appropriate data-transfer agreement.</p>
+<p><strong>Table 4.</strong> Possible analyses after the first pipeline release</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Planned analysis</th>
+<th>Purpose</th>
+<th>Possible additional site work or files</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sex-stratified and exposure-stratified xQTL mapping</td>
+<td>Compare regulatory effects by fetal sex and metabolic exposure strata.</td>
+<td>Stratified association and signal tables, subject to minimum cell sizes.</td>
+</tr>
+<tr class="even">
+<td>Expanded genotype-by-exposure association testing and colocalization</td>
+<td>Identify interaction signals beyond the signals tested in the first release and assess overlap with childhood metabolic GWAS.</td>
+<td>More extensive interaction summary statistics and matching LD.</td>
+</tr>
+<tr class="odd">
+<td>Heritability partitioning and mediation from summary data</td>
+<td>Test whether placental modality-specific and exposure-dependent annotations are enriched for GWAS heritability, using stratified LD score regression (S-LDSC), graphREML, or mediated expression score regression (MESC). <span class="math display">\[16–18\]</span></td>
+<td>MDACC analyses using existing summary results and public GWAS and LD resources.</td>
+</tr>
+<tr class="even">
+<td>Validation of summary-based TWAS models</td>
+<td>Test whether centrally derived isoform models predict phenotypes in held-out local samples.</td>
+<td>Aggregate out-of-sample prediction metrics, if jointly agreed.</td>
+</tr>
+<tr class="odd">
+<td>Site-directed analyses using the placenta annotation</td>
+<td>Support cohort interests such as variance QTLs (varQTLs), maternal eQTLs, and expression-methylation QTLs (eQTMs).</td>
+<td>Can be performed entirely at the cohort site; no additional files need to be shared with MDACC.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="collaboration-brief--references" class="section level2 hasAnchor">
+<h2>References<a href="collaboration-brief.html#collaboration-brief--references" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>1. Peng, S. et al. Genetic regulation of the placental transcriptome underlies birth weight and risk of childhood obesity. PLoS Genetics 14, e1007799 (2018).</p>
+<p>2. Bhattacharya, A. et al. Placental genomics mediates genetic associations with complex health traits and disease. Nature Communications 13, 706 (2022).</p>
+<p>3. Bresnahan, S. T. et al. Long-read assembly reveals vast transcriptional complexity in the placenta associated with metabolic and endocrine function. Nature Communications 17, 4795 (2026). <a href="doi:10.1038/s41467-026-71303-4" class="uri">doi:10.1038/s41467-026-71303-4</a>.</p>
+<p>4. Munro, D. et al. Multimodal analysis of RNA sequencing data powers discovery of complex trait genetics. Nature Communications 15, 10387 (2024).</p>
+<p>5. Wang, X., Park, J., Susztak, K., Zhang, N. R. &amp; Li, M. Bulk tissue cell type deconvolution with multi-subject single-cell expression reference. Nature Communications 10, 380 (2019).</p>
+<p>6. Lu, Z. et al. Improved multi-ancestry fine-mapping identifies cis-regulatory variants underlying molecular traits and disease risk. Preprint (2024). <a href="doi:10.1101/2024.04.15.24305836" class="uri">doi:10.1101/2024.04.15.24305836</a>.</p>
+<p>7. EGG Consortium et al. Maternal and fetal genetic effects on birth weight and their relevance to cardio-metabolic risk factors. Nature Genetics 51, 804–814 (2019).</p>
+<p>8. Solé-Navais, P. et al. Genetic effects on the timing of parturition and links to fetal birth weight. Nature Genetics 55, 559–567 (2023).</p>
+<p>9. Kumasaka, N. et al. Genome-wide association study on longitudinal and cross-sectional traits of child health and development in a Japanese population. Preprint (2025). <a href="doi:10.1101/2025.02.18.25322458" class="uri">doi:10.1101/2025.02.18.25322458</a>.</p>
+<p>10. Srinivasan, S. et al. The first genome-wide association study for type 2 diabetes in youth: the ProDiGY Consortium. Diabetes 70, 996–1005 (2021).</p>
+<p>11. Wallace, C. A more accurate method for colocalisation analysis allowing for multiple causal variants. PLoS Genetics 17, e1009440 (2021).</p>
+<p>12. Bhattacharya, A. et al. Isoform-level transcriptome-wide association uncovers genetic risk mechanisms for neuropsychiatric disorders in the human brain. Nature Genetics 55, 2117–2128 (2023).</p>
+<p>13. BIOS Consortium et al. A linear mixed-model approach to study multivariate gene–environment interactions. Nature Genetics 51, 180–186 (2019).</p>
+<p>14. Conomos, M. P., Miller, M. B. &amp; Thornton, T. A. Robust inference of population structure for ancestry prediction and correction of stratification in the presence of relatedness. Genetic Epidemiology 39, 276–293 (2015).</p>
+<p>15. Taliun, D. et al. Sequencing of 53,831 diverse genomes from the NHLBI TOPMed Program. Nature 590, 290–299 (2021).</p>
+<p>16. Gazal, S. et al. Linkage disequilibrium-dependent architecture of human complex traits shows action of negative selection. Nature Genetics 49, 1421–1427 (2017).</p>
+<p>17. Li, H., Kamath, T., Mazumder, R. et al. Improved heritability partitioning and enrichment analyses using summary statistics with graphREML. Nature Genetics (2026). <a href="doi:10.1038/s41588-026-02649-0" class="uri">doi:10.1038/s41588-026-02649-0</a>.</p>
+<p>18. Yao, D. W., O’Connor, L. J., Price, A. L. &amp; Gusev, A. Quantifying genetic effects on disease mediated by assayed gene expression levels. Nature Genetics 52, 626–633 (2020).</p>
+
+</div>
+</div>
+
+
+
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="setup.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": null,
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "section",
+    "scroll_highlight": true
+  },
+  "info": false
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
