@@ -19,12 +19,12 @@
 # Nothing in the image needs network access at run time.
 # =============================================================================
 
-ARG DEBIAN_IMAGE=debian:bookworm-slim@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3
+# Base image: Debian 12 (bookworm-slim), pinned by digest in both FROM lines below.
 
 # -----------------------------------------------------------------------------
 # Stage 1: IRFinder-S, compiled with the system toolchain (Debian gcc 12 + boost 1.74)
 # -----------------------------------------------------------------------------
-FROM ${DEBIAN_IMAGE} AS irfinder
+FROM debian:bookworm-slim@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3 AS irfinder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates git g++ make \
@@ -36,7 +36,7 @@ RUN bash /build/build_irfinder.sh /opt/xqtl
 # -----------------------------------------------------------------------------
 # Stage 2: operating system + conda environments (the large, stable layers)
 # -----------------------------------------------------------------------------
-FROM ${DEBIAN_IMAGE} AS envs
+FROM debian:bookworm-slim@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3 AS envs
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG MICROMAMBA_URL=https://github.com/mamba-org/micromamba-releases/releases/download/2.3.2-0/micromamba-linux-64
 ARG MICROMAMBA_SHA256=ffc3cb8d52d4d6b354bdbb979c407719c485392b74e462cbd50811aa88e58f85
@@ -70,9 +70,11 @@ COPY containers/requirements-pip.txt /build/requirements-pip.txt
 RUN /opt/conda/envs/xqtl/bin/python -m pip install --no-cache-dir \
         -r /build/requirements-pip.txt --extra-index-url "${TORCH_INDEX}"
 
-# R packages not on conda (pinned commits / CRAN version)
+# R packages not on conda (pinned commits / CRAN version). Rhcpp and colocboost compile C++
+# with the environment's conda compiler (x86_64-conda-linux-gnu-c++), so the environment's
+# bin directory must be on PATH for this step.
 COPY containers/install_r_extra.R /build/install_r_extra.R
-RUN /opt/conda/envs/xqtl/bin/Rscript /build/install_r_extra.R \
+RUN PATH="/opt/conda/envs/xqtl/bin:${PATH}" Rscript /build/install_r_extra.R \
  && rm -rf /tmp/Rtmp* /root/.cache
 
 # Environment lock files (exact package builds), kept in the image for provenance

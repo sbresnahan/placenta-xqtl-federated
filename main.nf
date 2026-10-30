@@ -11,6 +11,8 @@
  */
 
 include { SMOKE } from './workflows/smoke.nf'
+include { SITE } from './workflows/site.nf'
+include { EXPORT_ONLY } from './workflows/export.nf'
 
 def modes() {
     return ['prepare_references', 'imputation_prep', 'site', 'phenotyping_only', 'export', 'central', 'smoke']
@@ -94,8 +96,25 @@ workflow {
         pjson.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(new LinkedHashMap(params)))
         VALIDATE(channel.value(pjson), channel.value(file("${projectDir}/assets/schema/cohort.schema.json")), params.mode)
 
+        // resolved parameters (schema defaults filled in) drive the workflows
+        cfg = VALIDATE.out.resolved.map { f -> new groovy.json.JsonSlurperClassic().parseText(f.text) }
+
         if (params.validate_only) {
             VALIDATE.out.report.view { r -> "Validation passed: ${r}" }
+        }
+        else if (params.mode == 'site' && !params.phenotypes_dir) {
+            error("--mode site from FASTQs (phenotyping) is not available in this pipeline version (${workflow.manifest.version}); set phenotypes_dir to map ready phenotype BEDs (docs/EXPORT_SPEC.md)")
+        }
+        else if (params.mode == 'site') {
+            // a previous export is removed first, so a failed leak scan never leaves a stale export behind
+            file("${params.outdir}/export").deleteDir()
+            SITE(cfg)
+            SITE.out.export.view { _d -> "Export written and leak-scanned: ${params.outdir}/export (share only this folder)" }
+        }
+        else if (params.mode == 'export') {
+            file("${params.outdir}/export").deleteDir()
+            EXPORT_ONLY(cfg)
+            EXPORT_ONLY.out.export.view { _d -> "Export rebuilt and leak-scanned: ${params.outdir}/export (share only this folder)" }
         }
         else {
             notYet(params.mode)

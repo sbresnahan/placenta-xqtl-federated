@@ -68,6 +68,22 @@
       ],
       "description": "Directory written by --mode prepare_references."
     },
+    "phenotypes_dir": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "Directory of ready phenotype inputs (<modality>.bed.gz with gene-TSS coordinates, expression.counts.bed.gz, qc_metrics.tsv, cell_proportions.tsv). When set, --mode site maps these instead of running the phenotyping workflow (site_refs is then not required)."
+    },
+    "image_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "sha256 of the pipeline image; set by run_xqtl.sh and recorded in the export manifest."
+    },
     "genotypes": {
       "type": "object",
       "additionalProperties": false,
@@ -286,6 +302,35 @@
         "seed": {
           "type": "integer",
           "default": 20261029
+        },
+        "nperm": {
+          "type": "integer",
+          "minimum": 100,
+          "default": 10000,
+          "description": "tensorQTL permutations (atlas: 10000)."
+        },
+        "hcp_max_phenotypes": {
+          "type": "integer",
+          "minimum": 1000,
+          "default": 20000,
+          "description": "phenotypes sampled (seeded) to fit HCP factors."
+        },
+        "eval_chrom": {
+          "type": "string",
+          "default": "chr1",
+          "description": "chromosome used to count eGenes for k selection (atlas: chr1)."
+        },
+        "eval_min_phenotypes": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 300,
+          "description": "if eval_chrom has fewer phenotypes, k is selected genome-wide."
+        },
+        "independent_chunk_size": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 100,
+          "description": "significant phenotypes/groups per conditional-analysis task."
         }
       }
     },

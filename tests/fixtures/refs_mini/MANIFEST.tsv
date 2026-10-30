@@ -1,2 +1,6 @@
 path	sha256	bytes	description	source	license
 README.txt	004229e5faef430561e98b2eda10531c9466da9660ba2793e54ade2d994ad16b	38	smoke-test fixture	synthetic	CC0
+ancestry/1kGP_hg38_pca_panel.pgen	08e07ae71cf7f4de32f4832a23058ebffb59c6560dc33ec184d485784c4e2d7e	106813	test fixture	1000 Genomes high-coverage chr22 subset (IGSR)	IGSR: free, no restrictions
+ancestry/1kGP_hg38_pca_panel.pvar.zst	132514a14163fc758c25c9b752b949c5aea7145749f4c0e05351834df2d1f6e5	18635	test fixture	1000 Genomes high-coverage chr22 subset (IGSR)	IGSR: free, no restrictions
+ancestry/1kGP_hg38_pca_panel.psam	2994ba23acd8c0e9d59fbb6cc0201567cb797aefd75641dc13539f6193aa388c	1769	test fixture	1000 Genomes high-coverage chr22 subset (IGSR)	IGSR: free, no restrictions
+ancestry/1kg_superpop.tsv	244f0fc0852239d2070c4d1cc0ead9040aad0d357edc1e7265b87d2512fab9c4	1936	test fixture	1000 Genomes high-coverage chr22 subset (IGSR)	IGSR: free, no restrictions

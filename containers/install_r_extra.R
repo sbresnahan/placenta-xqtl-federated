@@ -3,6 +3,10 @@
 # Requires network at build time only; the image itself never needs it.
 options(repos = c(CRAN = "https://cloud.r-project.org"), Ncpus = max(1L, parallel::detectCores() - 1L),
         timeout = 600)
+# bioconda installs GenomeInfoDbData through a post-link download that does not fail the
+# environment build when bioconductor.org is unreachable; stop here with a clear message.
+if (!requireNamespace("GenomeInfoDbData", quietly = TRUE))
+  stop("GenomeInfoDbData is missing: the bioconda post-link download failed; rebuild the environment")
 pins <- list(
   # HCP hidden covariates (atlas 19/25 steps)
   Rhcpp = "mvaniterson/Rhcpp@a285e2baf379ef4ca21d14dc64733dd8dfc4f0d8",

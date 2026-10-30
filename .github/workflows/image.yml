@@ -69,7 +69,7 @@ jobs:
           sudo docker image prune --all --force
           df -h /
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.plan.outputs.build == 'true'
 
       - name: Version
@@ -92,13 +92,31 @@ jobs:
           echo "version=$v" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
-      - name: Cache downloaded references
+      # restore and save are separate so the download is cached even when the image build fails
+      - name: Restore downloaded references
         if: steps.plan.outputs.build == 'true'
-        uses: actions/cache@v4
+        id: refcache
+        uses: actions/cache/restore@v4
         with:
           path: refs_cache
           key: refs-${{ hashFiles('assets/refs_sources.tsv') }}
           restore-keys: refs-
+
+      - name: Download public references (sha256-verified)
+        if: steps.plan.outputs.build == 'true'
+        env:
+          RELEASE: ${{ steps.plan.outputs.release }}
+        run: |
+          args=(download --cache refs_cache)
+          [ "$RELEASE" = true ] || args+=(--allow-unpinned)
+          scripts/fetch_references.sh "${args[@]}"
+
+      - name: Save downloaded references
+        if: steps.plan.outputs.build == 'true' && steps.refcache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: refs_cache
+          key: refs-${{ hashFiles('assets/refs_sources.tsv') }}
 
       - uses: r-lib/actions/setup-pandoc@v2
         if: steps.plan.outputs.build == 'true'
@@ -116,6 +134,9 @@ jobs:
             any::bookdown
             any::rmarkdown
             any::knitr
+      - name: Render the documentation book
+        if: steps.plan.outputs.build == 'true'
+        run: Rscript book/render_book.R
 
       - uses: docker/setup-buildx-action@v3
         if: steps.plan.outputs.build == 'true'
@@ -134,9 +155,20 @@ jobs:
           VERSION: ${{ steps.ver.outputs.version }}
           TAG: ${{ steps.ver.outputs.tag }}
         run: |
-          args=(--variant "$VARIANT" --version "$VERSION" --tag "$IMAGE:$TAG" --refs-cache refs_cache)
+          args=(--variant "$VARIANT" --version "$VERSION" --tag "$IMAGE:$TAG" --refs-cache refs_cache
+                --skip-download --skip-book)
           [ "$RELEASE" = true ] && args+=(--release)
-          containers/build_image.sh "${args[@]}"
+          set +e
+          containers/build_image.sh "${args[@]}" -- --progress=plain 2>&1 | tee build.log
+          rc=${PIPESTATUS[0]}
+          set -e
+          if [ "$rc" -ne 0 ]; then
+            # job logs need a GitHub login; annotations are public, so surface the error there
+            msg=$(grep -v '^#[0-9]* \(sha256\|extracting\|DONE\|CACHED\)' build.log | tail -n 40 | cut -c1-240 \
+                  | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=docker build failed (last lines)::${msg}"
+            exit "$rc"
+          fi
 
       - name: Self-checks in the image
         if: steps.plan.outputs.build == 'true'
@@ -155,6 +187,14 @@ jobs:
         env:
           TAG: ${{ steps.ver.outputs.tag }}
         run: docker push "$IMAGE:$TAG"
+
+      - name: Upload build log
+        if: failure() && steps.plan.outputs.build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.variant }}
+          path: build.log
+          if-no-files-found: ignore
 
       - name: Upload manifests
         if: steps.plan.outputs.build == 'true'

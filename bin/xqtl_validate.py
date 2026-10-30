@@ -36,9 +36,10 @@ RESTRICTED_HINT = (
 MODE_REQUIRES = {
     "prepare_references": ["site_refs"],
     "imputation_prep": ["genotypes.raw"],
+    # site_refs is not needed when phenotypes_dir supplies ready phenotype inputs (see main())
     "site": ["samplesheet", "metadata", "restricted", "site_refs", "genotypes.imputed_dir"],
     "phenotyping_only": ["samplesheet", "metadata", "restricted", "site_refs"],
-    "export": [],
+    "export": ["samplesheet", "metadata"],
     "central": [],
     "smoke": [],
 }
@@ -242,6 +243,23 @@ def _restricted_ok(path, params, rep):
     return ok
 
 
+ISOFORM_MODALITIES = ("isoform_expression", "isoform_usage")
+
+
+def check_phenotypes_dir(params, rep):
+    d = params["phenotypes_dir"]
+    if not os.path.isdir(d):
+        rep.err("phenotypes_dir", f"directory not found: {d}")
+        return
+    mods = (params.get("mapping") or {}).get("modalities") or []
+    need = [f"{m}.bed.gz" for m in mods] + ["qc_metrics.tsv"]
+    missing = [f for f in need if not os.path.exists(os.path.join(d, f))]
+    if missing:
+        rep.err("phenotypes_dir", f"missing file(s) in {d}: {missing}")
+    else:
+        rep.ok("phenotypes_dir", f"{len(mods)} modality BED(s) in {d}")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--params", required=True, help="JSON dump of Nextflow params")
@@ -267,7 +285,15 @@ def main(argv=None):
     if not errors:
         rep.ok("schema", "cohort parameters match the schema")
 
-    for key in MODE_REQUIRES[a.mode]:
+    required = list(MODE_REQUIRES[a.mode])
+    if a.mode == "site" and params.get("phenotypes_dir"):
+        required.remove("site_refs")
+        check_phenotypes_dir(params, rep)
+    mods = (params.get("mapping") or {}).get("modalities") or []
+    if any(m in mods for m in ISOFORM_MODALITIES) and "expression" not in mods:
+        rep.err("mapping.modalities", "isoform_expression / isoform_usage need 'expression' in mapping.modalities "
+                "(expression connectivity outliers are removed from the isoform modalities)")
+    for key in required:
         val = get_path(params, key)
         if val is None:
             msg = f"--mode {a.mode} needs '{key}' in cohort.yml"

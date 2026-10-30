@@ -1,0 +1,4 @@
+modality	phenotype_id	gene_id	variant_id	effect_per_alt
+expression	ENSGFIX0000006	ENSGFIX0000006	chr22:19504472:T:A	1.2
+expression	ENSGFIX0000016	ENSGFIX0000016	chr22:20146624:A:G	-1.0
+splicing	ENSGFIX0000026__chr22:20508948:20509648:clu_26_-	ENSGFIX0000026	chr22:20467587:A:T	1.5
