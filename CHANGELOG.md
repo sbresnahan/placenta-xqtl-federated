@@ -31,12 +31,15 @@ All notable changes to this pipeline are recorded here. Versions follow [semanti
 ### Fixed
 - Image build: `containers/install_r_extra.R` now runs with the environment's `bin` on `PATH` so Rhcpp and colocboost find the conda C++ compiler; it also stops early if the bioconda `GenomeInfoDbData` post-link download failed.
 - CI: base image pinned by digest directly in the `FROM` lines (hadolint DL3006); `actions/checkout` and `actions/setup-java` v5.
+- Leak scan: text columns were skipped under pandas >= 3 (new `str` dtype), so sample IDs in string columns of parquet/TSV exports could pass; the scanner now checks every non-numeric, non-boolean, non-datetime column.
+- CI unit tests: dependencies pinned to the image versions (`tests/requirements-ci.txt`), plus a second run with the latest pandas/pyarrow/numpy.
 - `image.yml`: references are downloaded and cached in their own steps (cached even when the build fails), the book is rendered in its own step, and a failed `docker build` posts its last log lines as a public annotation and uploads `build.log`.
 
 ### Notes
 - The CUDA image variant uses PyTorch `cu132` wheels (no older CUDA build exists for the pinned PyTorch release); GPU nodes need a driver supporting CUDA 13.2.
 
 ### Changed
+- `image.yml` no longer runs on pushes or tags until M6 is complete; manual runs still work.
 - `conf/test.config` uses the site fixture and re-applies `resourceLimits` (2 CPU, 6 GB), because `base.config` evaluates the limits before profiles set `params.max_*`.
 
 ### Not yet available

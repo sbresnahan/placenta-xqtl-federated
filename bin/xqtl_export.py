@@ -247,9 +247,14 @@ class Scanner:
 
     def table(self, df, where):
         self.strings([str(c) for c in df.columns], where + " [column names]")
+        # Scan every column that is not numeric/boolean/datetime. A whitelist of text dtypes is
+        # unsafe: pandas >= 3 infers a new 'str' dtype that an object/string check misses.
         for c in df.columns:
-            if df[c].dtype == object or str(df[c].dtype).startswith(("string", "category")):
-                self.strings(pd.unique(df[c].dropna().astype(str)), f"{where} [column {c}]")
+            s = df[c]
+            if (pd.api.types.is_numeric_dtype(s) or pd.api.types.is_bool_dtype(s)
+                    or pd.api.types.is_datetime64_any_dtype(s)):
+                continue
+            self.strings(pd.unique(s.dropna().astype(str)), f"{where} [column {c}]")
 
     def file(self, path, rel):
         self.strings([os.path.basename(rel)], rel + " [file name]")

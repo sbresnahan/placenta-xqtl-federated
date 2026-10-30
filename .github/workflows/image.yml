@@ -1,6 +1,6 @@
 # Build the self-contained offline image.
 #
-#   push to main touching the image inputs, or manual run  ->  development image
+#   manual run (automatic push/tag builds are off until M6, see 'on:')  ->  development image
 #       ghcr.io/sbresnahan/placenta-xqtl-federated:dev   (unpinned references allowed)
 #   tag vX.Y.Z (must equal manifest.version in nextflow.config)  ->  release
 #       ghcr.io/sbresnahan/placenta-xqtl-federated:X.Y.Z  (+ :X.Y.Z-cuda)
@@ -12,15 +12,14 @@
 name: image
 
 on:
-  push:
-    branches: [main]
-    tags: ["v*"]
-    paths:
-      - "containers/**"
-      - "assets/refs_sources.tsv"
-      - "assets/refs_manifest.tsv"
-      - "scripts/fetch_references.sh"
-      - ".github/workflows/image.yml"
+  # Automatic builds are switched off until M6 is complete (no image on push to main or on tags).
+  # To re-enable, restore:
+  #   push:
+  #     branches: [main]
+  #     tags: ["v*"]
+  #     paths: [containers/**, assets/refs_sources.tsv, assets/refs_manifest.tsv,
+  #             scripts/fetch_references.sh, .github/workflows/image.yml]
+  # Manual runs (Actions -> image -> Run workflow) still work.
   workflow_dispatch:
     inputs:
       cuda:

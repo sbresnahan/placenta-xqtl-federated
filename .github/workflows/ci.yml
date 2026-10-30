@@ -35,9 +35,14 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q --no-install-recommends samtools tabix
-          python -m pip install --quiet pytest jsonschema pyyaml pandas pyarrow
-      - name: pytest
+          python -m pip install --quiet -r tests/requirements-ci.txt
+      - name: pytest (image versions, tests/requirements-ci.txt)
         run: python -m pytest -q -rs tests/unit
+      - name: pytest (latest pandas/pyarrow/numpy)
+        # guards against dtype changes such as pandas 3 'str' columns
+        run: |
+          python -m pip install --quiet --upgrade pandas pyarrow numpy
+          python -m pytest -q -rs tests/unit
 
   checks:
     name: configs, lint, shell, Dockerfile
@@ -118,7 +123,7 @@ jobs:
         env:
           NXF_OPTS_EXTRA: --image ${{ env.DEV_IMAGE }}
         run: |
-          python3 -m pip install --quiet pandas pyarrow
+          python3 -m pip install --quiet -r tests/requirements-ci.txt
           tests/scripts/test_site.sh "$PWD/site_test" docker
       - name: Upload test outputs
         if: always() && steps.pull.outputs.available == 'true'
