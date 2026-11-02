@@ -125,6 +125,21 @@ jobs:
         run: |
           python3 -m pip install --quiet -r tests/requirements-ci.txt
           tests/scripts/test_site.sh "$PWD/site_test" docker
+      - name: Phenotyping end to end (chr22 SNUH FASTQs -> site indices -> phenotype BEDs)
+        if: steps.pull.outputs.available == 'true'
+        env:
+          NXF_OPTS_EXTRA: --image ${{ env.DEV_IMAGE }}
+        run: |
+          # development images built before the phenotyping release lack Picard / the IRFinder-S patch
+          if ! docker run --rm --entrypoint bash "$DEV_IMAGE" -c 'command -v picard' > /dev/null; then
+            echo "::notice::development image predates phenotyping support; phenotyping test skipped"
+            exit 0
+          fi
+          mkdir -p "$PWD/pheno_test"
+          docker run --rm --entrypoint bash "$DEV_IMAGE" -c \
+            "gzip -cdf /opt/xqtl/refs/genome/GRCh38_no_alt_analysis_set.fa.gz | awk '/^>/{p = (\$1 == \">chr22\")} p'" \
+            > "$PWD/pheno_test/chr22.fa"
+          XQTL_CHR22_FA="$PWD/pheno_test/chr22.fa" tests/scripts/test_phenotyping.sh "$PWD/pheno_test" docker
       - name: Upload test outputs
         if: always() && steps.pull.outputs.available == 'true'
         uses: actions/upload-artifact@v4

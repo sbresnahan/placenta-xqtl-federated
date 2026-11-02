@@ -1,0 +1,9 @@
+sample_id,fastq_1,fastq_2
+SRR18553497,../fastq/SRR18553497_R1.fastq.gz,../fastq/SRR18553497_R2.fastq.gz
+SRR18553498,../fastq/SRR18553498_R1.fastq.gz,../fastq/SRR18553498_R2.fastq.gz
+SRR18553501,../fastq/SRR18553501_R1.fastq.gz,../fastq/SRR18553501_R2.fastq.gz
+SRR18553511,../fastq/SRR18553511_R1.fastq.gz,../fastq/SRR18553511_R2.fastq.gz
+SRR18553512,../fastq/SRR18553512_R1.fastq.gz,../fastq/SRR18553512_R2.fastq.gz
+SRR18553513,../fastq/SRR18553513_R1.fastq.gz,../fastq/SRR18553513_R2.fastq.gz
+SRR18553520,../fastq/SRR18553520_R1.fastq.gz,../fastq/SRR18553520_R2.fastq.gz
+SRR18553521,../fastq/SRR18553521_R1.fastq.gz,../fastq/SRR18553521_R2.fastq.gz

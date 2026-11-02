@@ -7,7 +7,7 @@ frozen_clusters.tsv.gz  chrom, start, end, strand, cluster_id, atlas_clusters
     The atlas pools leafCutter clusters across cohorts within each ancestry (step 17:
     clusters sharing a junction are merged). Here the per-ancestry pooled clusters are
     merged once more across ancestries the same way (connected components over shared
-    junctions), giving one frozen cluster set with IDs clu_1, clu_2, ... ordered by
+    junctions), giving one frozen cluster set with IDs clu_1_+, clu_2_-, ... ordered by
     position. atlas_clusters lists the per-ancestry clusters it came from (EAS:clu_12;...).
 
 mdacc_signals.tsv.gz  phenotype_id, variant_id, modality, ancestry, signal_rank,
@@ -15,7 +15,7 @@ mdacc_signals.tsv.gz  phenotype_id, variant_id, modality, ancestry, signal_rank,
     Lead signals with q <= QVALUE_MAX from {ANC}_{MOD}_cisqtl.parquet plus conditionally
     independent signals from {ANC}_{MOD}_cisqtl_independent.parquet, for the nine atlas
     modalities. Modality names are converted to the federated names. Splicing phenotype
-    IDs (gene__chrom:start:end:clu_N_strand) are rewritten to the frozen cluster IDs so
+    IDs (gene__chrom_start_end_clu_N_strand) are rewritten to the frozen cluster IDs so
     they match what every site produces. Intron-retention IDs come from MAJIQ in the
     atlas and from IRFinder-S at the sites; they are kept as atlas IDs here and matched
     at the site by intron coordinates (feature_key = chrom:start:end, when parseable).
@@ -43,6 +43,9 @@ MODALITIES = {
     "stability": "stability",
 }
 JUNC = re.compile(r"^(?P<chrom>[^:]+):(?P<start>\d+):(?P<end>\d+):clu_(?P<clu>\d+)_(?P<strand>[+\-.NA]+)$")
+# splicing phenotype IDs: gene__chrom_start_end_clu_N_strand (Pantry assemble replaces ':' by '_');
+# the colon form is accepted too
+PHENO_JUNC = re.compile(r"^(?P<chrom>[^:_]+)[:_](?P<start>\d+)[:_](?P<end>\d+)[:_]clu_(?P<clu>\d+)_(?P<strand>[+\-.])$")
 COORD = re.compile(r"(chr[0-9XYM]+)[_:](\d+)[-_:](\d+)")
 
 
@@ -95,7 +98,9 @@ def frozen_clusters(counts: dict[str, str]) -> pd.DataFrame:
     for k, js in enumerate(comps, start=1):
         for chrom, s, e, strand in sorted(js, key=lambda j: (j[1], j[2])):
             src = sorted({f"{a}:clu_{c}" for a, c in junc_nodes[(chrom, s, e, strand)]})
-            rows.append((chrom, s, e, strand, f"clu_{k}", ";".join(src)))
+            # leafCutter-style ID with the strand suffix (a component never mixes strands: atlas clusters
+            # are strand-specific and junctions are keyed with their strand)
+            rows.append((chrom, s, e, strand, f"clu_{k}_{strand}", ";".join(src)))
     df = pd.DataFrame(rows, columns=["chrom", "start", "end", "strand", "cluster_id", "atlas_clusters"])
     return df.sort_values(["chrom", "start", "end"], key=lambda s: s.map(chrom_key) if s.name == "chrom" else s,
                           kind="stable").reset_index(drop=True)
@@ -134,13 +139,13 @@ def read_signals(results: str, anc: str, label: str, qmax: float) -> pd.DataFram
 
 def canonical_splicing(pid: str, jmap: dict) -> str:
     gene, _, junc = pid.rpartition("__")
-    m = JUNC.match(junc)
+    m = PHENO_JUNC.match(junc)
     if not m:
         raise ValueError(f"unexpected splicing phenotype id {pid!r}")
     key = (m["chrom"], int(m["start"]), int(m["end"]), m["strand"])
     if key not in jmap:
         raise ValueError(f"splicing signal {pid!r}: junction not in the frozen cluster set")
-    new = f"{m['chrom']}:{m['start']}:{m['end']}:{jmap[key]}_{m['strand']}"
+    new = f"{m['chrom']}_{m['start']}_{m['end']}_{jmap[key]}"   # the form xqtl_assemble_bed.py writes
     return f"{gene}__{new}" if gene else new
 
 

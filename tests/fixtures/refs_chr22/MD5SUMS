@@ -1,0 +1,8 @@
+125d372a8448c6c4504b21b127675a69  ./README.txt
+dc901a5fe0a3a4100cf0f9587a9d8ed0  ./annotation/gencode.v45.chr22.PANTRY.gtf.gz
+9d81d3988c4f3a99901837889f266f08  ./txrevise/txrevise.grp_1.contained.gff3.gz
+b373536c13b4c1f718f56cbb84a5590c  ./txrevise/txrevise.grp_1.downstream.gff3.gz
+e605da84bcd0912d5d685885380a0dea  ./txrevise/txrevise.grp_1.upstream.gff3.gz
+153d4ab0345cb78e6d6b9373954d4d2c  ./txrevise/txrevise.grp_2.contained.gff3.gz
+723658350860bf62dd9b6b217afbaaed  ./txrevise/txrevise.grp_2.downstream.gff3.gz
+275a88cf84b6c8b4fdac91ee69b1d18c  ./txrevise/txrevise.grp_2.upstream.gff3.gz

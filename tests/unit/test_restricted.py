@@ -96,3 +96,11 @@ def test_bad_header_rejected(tmp_path, inputs):
         assert not ok
     else:
         assert rc != 0
+
+
+@pytest.mark.parametrize("cid", ["clu_1", "clu_1_-", "cluster1_+"])
+def test_frozen_cluster_ids_need_strand_suffix(tmp_path, inputs, cid):
+    clu = gz(tmp_path, "bad.tsv.gz", f"chrom\tstart\tend\tstrand\tcluster_id\nchr1\t100\t200\t+\t{cid}\n")
+    out = make(tmp_path, (clu, inputs[1]))
+    ok, msgs, _ = R.verify(out, "1")
+    assert not ok and any("clu_<n>_<strand>" in m for m in msgs)

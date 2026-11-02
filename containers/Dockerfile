@@ -64,6 +64,14 @@ COPY containers/env/align.yml /build/env/align.yml
 RUN micromamba create -y -p /opt/conda/envs/align -f /build/env/align.yml \
  && micromamba clean -a -y
 
+# Picard (own environment: its OpenJDK + r-base must not shadow the analysis R); only the
+# launcher is put on PATH
+COPY containers/env/picard.yml /build/env/picard.yml
+RUN micromamba create -y -p /opt/conda/envs/picard -f /build/env/picard.yml \
+ && micromamba clean -a -y \
+ && mkdir -p /opt/xqtl/bin \
+ && ln -s /opt/conda/envs/picard/bin/picard /opt/xqtl/bin/picard
+
 # tensorQTL stack (Phase-0 validated pins). TORCH_INDEX selects CPU or CUDA torch wheels.
 ARG TORCH_INDEX=https://download.pytorch.org/whl/cpu
 COPY containers/requirements-pip.txt /build/requirements-pip.txt
@@ -136,7 +144,7 @@ COPY --from=docs_html . /opt/xqtl/docs_html/
 
 # Pipeline code (smallest, most frequently changing layer)
 COPY . /opt/xqtl/pipeline/
-ENV PATH=/opt/xqtl/pipeline/bin:/opt/conda/envs/align/bin:/opt/conda/envs/xqtl/bin:/opt/xqtl/IRFinder/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+ENV PATH=/opt/xqtl/pipeline/bin:/opt/xqtl/bin:/opt/conda/envs/align/bin:/opt/conda/envs/xqtl/bin:/opt/xqtl/IRFinder/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     XQTL_ROOT=/opt/xqtl \
     R_PROFILE_USER=/dev/null \
     R_ENVIRON_USER=/dev/null \

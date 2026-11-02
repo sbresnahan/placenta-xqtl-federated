@@ -122,7 +122,7 @@ STAR, Salmon and IRFinder-S indices are too large to ship in the image, so each 
 /path/to/xqtl/run_xqtl.sh -profile <site profile> -params-file cohort.yml --mode prepare_references
 ```
 
-The indices are written to `site_refs:` in `cohort.yml` and reused by every later run. This mode becomes available with the phenotyping release (see the [changelog](../CHANGELOG.md)).
+The indices are written to `site_refs:` in `cohort.yml` and reused by every later run. Expect 1–2 hours and about 32–40 GB of memory; details are in [Phenotyping](PHENOTYPING.md#before-the-first-run-site-indices).
 
 ## Upgrading to a new pipeline version
 

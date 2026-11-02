@@ -26,9 +26,16 @@ All notable changes to this pipeline are recorded here. Versions follow [semanti
   - tensorQTL permutation, chunked conditionally independent and nominal passes (`xqtl_tensorqtl.py`, `xqtl_merge_parquet.py`);
   - the combined-modality arm (`xqtl_combine_modalities.py`) and in-sample LD (`xqtl_ld.py`).
 - Export files A–F, I and J with a mandatory leak scan (`xqtl_export.py`); `--mode export` rebuilds the export from a finished site run. Specification: `docs/EXPORT_SPEC.md`.
+- `--mode prepare_references`: site indices in `site_refs` (genome with Picard dictionary, annotation derivatives, STAR, Salmon expression and txrevise indices, IRFinder-S reference, REDIportal sites, `MANIFEST.tsv`).
+- Phenotyping from FASTQs (`modules/local/phenotyping.nf`, `workflows/phenotyping.nf`), now run by `--mode site` when `phenotypes_dir` is not set: STAR, Salmon, regtools, featureCounts, IRFinder-S, RNA-editing levels and Picard QC per sample; the nine modality BEDs, count BEDs, `qc_metrics.tsv` and MuSiC cell-type proportions per cohort. Splicing uses the frozen clusters from the restricted file plus site-specific novel clusters. See `docs/PHENOTYPING.md`.
+- `--mode phenotyping_only`: phenotype BEDs and normalized matrices without genotypes; nothing is exported.
+- File E has a `novel` column (splicing junctions in site-specific clusters); `isoform_expression.counts.bed.gz` is accepted in `phenotypes_dir`.
+- Validator checks that `site_refs` is complete when phenotyping runs and warns if it was built for a different read length; `xqtl_restricted.py verify` checks the frozen cluster ID format.
+- Test fixture `tests/fixtures/phenotyping/` and `tests/fixtures/refs_chr22/`: 8 public SNUH placenta RNA-seq runs (PRJNA820329) cut to chr22, with GENCODE v45 chr22 and txrevise events as a stand-in annotation. `tests/scripts/test_phenotyping.sh` runs `prepare_references` and `phenotyping_only` end to end.
 - Test fixture `tests/fixtures/site/`: 130 1000 Genomes samples (chr22) with synthetic phenotypes and planted cis effects (`make_site_fixture.sh`). `tests/scripts/test_site.sh` checks signal recovery, the AFR below-minimum stratum and the leak scan end to end, and runs in CI with the development image.
 
 ### Fixed
+- MDACC restricted-file builder: frozen cluster IDs now carry the strand (`clu_<n>_<strand>`), and atlas splicing signal IDs in the underscore form (`GENE__chr_start_end_clu_N_strand`) are converted to the frozen clusters.
 - Image build: `containers/install_r_extra.R` now runs with the environment's `bin` on `PATH` so Rhcpp and colocboost find the conda C++ compiler; it also stops early if the bioconda `GenomeInfoDbData` post-link download failed.
 - CI: base image pinned by digest directly in the `FROM` lines (hadolint DL3006); `actions/checkout` and `actions/setup-java` v5.
 - Leak scan: text columns were skipped under pandas >= 3 (new `str` dtype), so sample IDs in string columns of parquet/TSV exports could pass; the scanner now checks every non-numeric, non-boolean, non-datetime column.
@@ -43,4 +50,4 @@ All notable changes to this pipeline are recorded here. Versions follow [semanti
 - `conf/test.config` uses the site fixture and re-applies `resourceLimits` (2 CPU, 6 GB), because `base.config` evaluates the limits before profiles set `params.max_*`.
 
 ### Not yet available
-- `prepare_references`, `imputation_prep`, `phenotyping_only` and `central` modes stop with a message until their milestones are complete. `--mode site` currently needs `phenotypes_dir` (FASTQ phenotyping arrives with M4), and G×C/GxE (files G and H) arrive with M5.
+- `imputation_prep` and `central` modes stop with a message until their milestones are complete. G×C/GxE (files G and H) arrive with M5.

@@ -3,9 +3,10 @@
  * HCP grid and k selection -> tensorQTL (permutation, conditionally independent, nominal) ->
  * combined-modality arm -> LD -> export (files A-F, I, J) with the mandatory leak scan.
  *
- * Phenotype inputs come from params.phenotypes_dir: <modality>.bed.gz per modality (gene-TSS
- * coordinates; grouped modalities use GENE__feature IDs), expression.counts.bed.gz (raw counts for
- * TMM-VST), qc_metrics.tsv and cell_proportions.tsv (per RNA-seq sample).
+ * Phenotype inputs come from the phenotypes directory (params.phenotypes_dir, or the output of the
+ * phenotyping workflow): <modality>.bed.gz per modality (gene-TSS coordinates; grouped modalities
+ * use GENE__feature IDs), expression.counts.bed.gz and isoform_expression.counts.bed.gz (counts
+ * for TMM-VST), qc_metrics.tsv and cell_proportions.tsv (per RNA-seq sample).
  */
 
 include { GENO_QC ; GENO_MERGE ; ANCESTRY ; STRATUM_GENO ; LD_MATRICES } from '../modules/local/genotypes.nf'
@@ -27,8 +28,8 @@ def nSignificant(summary) {
     return lines[1].tokenize('\t')[hdr.indexOf('n_significant')] as int
 }
 
-def phenoFile(c, name) {
-    return file("${c.phenotypes_dir}/${name}")
+def phenoFile(d, name) {
+    return file("${d}/${name}")
 }
 
 def isIsoform(m) {
@@ -38,12 +39,13 @@ def isIsoform(m) {
 workflow SITE {
     take:
     cfg     // value channel: resolved cohort parameters (map)
+    pheno   // value channel: phenotypes directory
 
     main:
     mcfg = cfg.map { c -> c.mapping + [maf: c.qc.maf_min, exclude_cell_types: c.gxc.exclude_cell_types] }
     metadata = cfg.map { c -> file(c.metadata, checkIfExists: true) }
-    qc_metrics = cfg.map { c -> phenoFile(c, 'qc_metrics.tsv') }
-    cell_props = cfg.map { c -> phenoFile(c, 'cell_proportions.tsv').exists() ? phenoFile(c, 'cell_proportions.tsv') : [] }
+    qc_metrics = pheno.map { d -> phenoFile(d, 'qc_metrics.tsv') }
+    cell_props = pheno.map { d -> phenoFile(d, 'cell_proportions.tsv').exists() ? phenoFile(d, 'cell_proportions.tsv') : [] }
 
     // ---------------- genotypes ----------------
     vcfs = cfg.flatMap { c ->
@@ -67,14 +69,22 @@ workflow SITE {
     LD_MATRICES(geno.join(STRATUM_GENO.out.variant_qc), cfg.map { c -> c.ld })
 
     // ---------------- phenotypes: normalization within stratum ----------------
-    mods = cfg.flatMap { c ->
-        c.mapping.modalities.collect { m ->
-            def bed = phenoFile(c, "${m}.bed.gz")
-            if (!bed.exists()) {
-                error("Modality '${m}' is listed in mapping.modalities but ${bed} does not exist")
+    // modalities a site could not produce (3' libraries, no REDIportal sites) are skipped with a warning
+    mods = cfg.combine(pheno).flatMap { c, d ->
+        def avail = c.mapping.modalities.findAll { m ->
+            def ok = phenoFile(d, "${m}.bed.gz").exists()
+            if (!ok) {
+                if (c.phenotypes_dir) {
+                    error("Modality '${m}' is listed in mapping.modalities but ${phenoFile(d, "${m}.bed.gz")} does not exist")
+                }
+                log.warn("Modality '${m}' was not produced by phenotyping at this site and is skipped")
             }
-            def counts = (m == 'expression' && phenoFile(c, 'expression.counts.bed.gz').exists()) ? phenoFile(c, 'expression.counts.bed.gz') : []
-            tuple(m, bed, counts)
+            ok
+        }
+        avail.collect { m ->
+            def cf = phenoFile(d, "${m}.counts.bed.gz")
+            def counts = (m in ['expression', 'isoform_expression'] && cf.exists()) ? cf : []
+            tuple(m, phenoFile(d, "${m}.bed.gz"), counts)
         }
     }
     norm_in = STRATUM_GENO.out.samples.combine(mods)

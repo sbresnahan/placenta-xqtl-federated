@@ -5,6 +5,8 @@
 # Two one-line portability patches for current compilers (no behavioural change):
 #   * CoverageBlocks.cpp uses uint64_t without <cstdint>
 #   * winflat_with_beta.c uses strcmp without <string.h>
+# and one for small test references: the fixed 32 GB RAM gate before STAR-based reference
+# building can be lowered with IRFINDER_MIN_RAM_MB (default unchanged, 32000).
 # Set BOOST_LIBDIR when boost is outside the system library path.
 # Needs: git, make, g++/gcc (<= 13 tested), boost-iostreams and zlib headers/libs.
 #   containers/build_irfinder.sh /opt/xqtl            (image)
@@ -19,6 +21,8 @@ cd "$src/IRFinder"
 [ "$(git rev-parse HEAD)" = "$commit" ] || { echo "IRFinder $tag is not commit $commit" >&2; exit 1; }
 sed -i '1i #include <cstdint>' src/irfinder/src/ReadBlock/CoverageBlocks.cpp
 sed -i '1i #include <string.h>' src/winflat/winflat_with_beta.c
+grep -q 'if \[ "${MEMM}" -lt 32000 \]' bin/util/bash_utils.sh
+sed -i 's/if \[ "${MEMM}" -lt 32000 \]/if [ "${MEMM}" -lt "${IRFINDER_MIN_RAM_MB:-32000}" ]/' bin/util/bash_utils.sh
 jobs=$(nproc 2>/dev/null || echo 2)
 (cd src/trim && make clean >/dev/null && make >/dev/null)
 (cd src/winflat && make clean >/dev/null && make >/dev/null)

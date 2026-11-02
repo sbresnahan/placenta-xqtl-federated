@@ -66,7 +66,13 @@ tmm_vst <- function(counts_mat) {                    # samples x features
   eff <- lib * edgeR::calcNormFactors(g, method = "TMM")
   dds <- DESeq2::DESeqDataSetFromMatrix(round(g), colData = data.frame(row.names = colnames(g)), design = ~ 1)
   DESeq2::sizeFactors(dds) <- eff / exp(mean(log(eff)))
-  t(SummarizedExperiment::assay(DESeq2::vst(dds, blind = TRUE, nsub = min(1000L, nrow(g)))))
+  # vst() fits the dispersion trend on nsub = 1000 features with mean normalized count > 5. Small
+  # feature sets (test fixtures, single chromosomes) have fewer; then fit on all features instead
+  # (varianceStabilizingTransformation is what vst() calls on the subset).
+  n_ok <- sum(rowMeans(DESeq2::counts(dds, normalized = TRUE)) > 5)
+  vs <- if (n_ok >= 1000L) DESeq2::vst(dds, blind = TRUE, nsub = 1000L) else
+    DESeq2::varianceStabilizingTransformation(dds, blind = TRUE)
+  t(SummarizedExperiment::assay(vs))
 }
 bicor_samples <- function(X) {
   med <- apply(X, 1, median, na.rm = TRUE)
@@ -162,7 +168,8 @@ feat[status == "kept" & !(phenotype_id %in% out$phenotype_id), status := "zero_c
 fm <- bed[, .(phenotype_id, chr, start, end)]
 feat <- merge(fm, feat, by = "phenotype_id", sort = FALSE)
 feat[, group_id := sub("__.*$", "", phenotype_id)]
-if ("novel" %in% names(bed)) feat[, novel := bed$novel[match(phenotype_id, bed$phenotype_id)]]
+# splicing: site-local clusters absent from the frozen set carry the nclu_ cluster token
+if (mod == "splicing") feat[, novel := grepl("[:_]nclu_[0-9]+_", phenotype_id)]
 fwrite(feat, paste0(opt$out, ".features.tsv"), sep = "\t", quote = FALSE)
 fwrite(data.table(modality = mod, method = method, features_in = n_in, features_kept = nrow(out),
                   samples_in = length(cols), connectivity_outliers = length(outliers),

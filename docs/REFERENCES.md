@@ -17,7 +17,7 @@ The image holds the public references at `/opt/xqtl/refs`. The build downloads e
 | `music/placenta_music_reference.rds` | Placental single-cell reference for MuSiC deconvolution (built from public GEO data, GSE182381) | MDACC record | CC-BY-4.0 (to be confirmed at upload) |
 | `ancestry/1kGP_hg38_pca_panel.{pgen,pvar.zst,psam}` | 1000 Genomes high-coverage reference panel for ancestry PCA (see below) | MDACC record, derived from 1000 Genomes (IGSR) | IGSR: free, no restrictions |
 | `ancestry/1kg_superpop.tsv` | 1000 Genomes sample → super-population labels | MDACC record, from IGSR | IGSR: free, no restrictions |
-| `editing/rediportal_hg38.bed.gz` | Known RNA-editing sites (optional; see below) | MDACC record, from REDIportal | To be confirmed before inclusion |
+| `editing/rediportal_hg38.bed.gz` | Known RNA-editing sites (optional; see below) | MDACC record, from REDIportal | Usable without restriction |
 | `genome/atlas_genome_contigs.tsv` | Contig names, lengths and MD5s of the genome FASTA the atlas used (provenance check only) | MDACC record | CC-BY-4.0 |
 | `MANIFEST.tsv`, `README.txt` | sha256, size, description, source and licence of every file above | Written by the build | — |
 
@@ -33,11 +33,15 @@ The atlas pruned each cohort's genotypes (MAF ≥ 0.05, missingness ≤ 0.05, `-
 
 ### RNA-editing sites (REDIportal)
 
-The atlas used REDIportal sites to define the RNA-editing phenotype. REDIportal's terms for redistributing the site list have not been confirmed, so this file is **optional**: it is left out of the MDACC record (`INCLUDE_REDIPORTAL=no`) until the terms are confirmed. Without it, the RNA-editing phenotype will take a site-supplied BED of editing sites (a parameter added with the phenotyping release).
+The atlas used REDIportal sites to define the RNA-editing phenotype. The REDIportal paper states that its tables are downloadable and usable without restriction ([Picardi et al. 2017, Nucleic Acids Research](https://pmc.ncbi.nlm.nih.gov/articles/PMC5210607/)), so the MDACC record includes the preprocessed hg38 site list (`INCLUDE_REDIPORTAL=yes`). The file stays optional in the pipeline: if it is absent, `rna_editing` is skipped with a warning. A site can also pass its own BED6 of editing sites with `--editing_sites` to `--mode prepare_references`.
 
 ### Built at each site
 
-STAR, Salmon and IRFinder-S indices are tens of gigabytes and depend on the aligner versions, so they are not shipped. `--mode prepare_references` builds them once per site from the genome and annotation above, into `site_refs:`.
+STAR, Salmon and IRFinder-S indices are tens of gigabytes and depend on the aligner versions, so they are not shipped. `--mode prepare_references` builds them once per site from the genome and annotation above, into `site_refs:` ([Phenotyping](PHENOTYPING.md#before-the-first-run-site-indices)).
+
+### Test fixtures
+
+The phenotyping test (`tests/fixtures/refs_chr22/`) uses GENCODE v45 chr22 (comprehensive gene annotation `gencode.v45.annotation.gtf.gz`, sha256-pinned in `tests/fixtures/make_refs_fixture.sh`) as a public stand-in for HPLRv2, processed with Pantry's txrevise steps. Its reads come from 8 public placenta RNA-seq runs of BioProject PRJNA820329 (Seoul National University Hospital), cut to chr22 read pairs. The fixture is for testing only; real runs use the HPLRv2 annotation in the image.
 
 ### Not public: the restricted file
 

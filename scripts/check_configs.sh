@@ -34,6 +34,8 @@ check local,apptainer          local  apptainer
 check local,dev,smoke          local  none
 check test,docker              local  docker
 check test,dev                 local  none
+check test_phenotyping,docker  local  docker
+check test_phenotyping,dev     local  none
 for t in conf/sites/TEMPLATE_*.config; do
     sched=$(basename "$t" .config | sed 's/TEMPLATE_//')
     if out=$(nextflow -c "$t" config -flat -profile "$sched,apptainer" . 2>&1); then

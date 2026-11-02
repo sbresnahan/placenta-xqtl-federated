@@ -260,6 +260,37 @@ def check_phenotypes_dir(params, rep):
         rep.ok("phenotypes_dir", f"{len(mods)} modality BED(s) in {d}")
 
 
+SITE_REFS_FILES = ["MANIFEST.tsv", "genome/genome.fa", "genome/genome.fa.fai", "genome/genome.dict",
+                   "annotation/annotation.gtf", "annotation/exonic.gtf", "annotation/intronic.gtf",
+                   "annotation/refFlat.txt", "annotation/gene_gc_length.tsv", "star/SA",
+                   "salmon/expression", "irfinder/IRFinder/ref-cover.bed"]
+
+
+def check_site_refs(params, rep):
+    """Indices written by --mode prepare_references (needed by phenotyping)."""
+    d = params.get("site_refs")
+    if not d:
+        return
+    if not os.path.isdir(d):
+        rep.err("site_refs", f"directory not found: {d}. Build it with --mode prepare_references")
+        return
+    missing = [f for f in SITE_REFS_FILES if not os.path.exists(os.path.join(d, f))]
+    if missing:
+        rep.err("site_refs", f"incomplete site_refs {d} (missing {missing[:4]}); rerun --mode prepare_references")
+        return
+    with open(os.path.join(d, "MANIFEST.tsv")) as fh:
+        man = dict(line.rstrip("\n").split("\t", 1) for line in fh if "\t" in line)
+    rl = (params.get("rnaseq") or {}).get("read_length")
+    if rl is not None and str(man.get("read_length")) != str(rl):
+        rep.warn("site_refs.read_length", f"STAR index built for read length {man.get('read_length')}, "
+                 f"rnaseq.read_length is {rl}; alignment still works but rebuilding is recommended")
+    if not os.path.exists(os.path.join(d, "editing", "edit_sites.bed")):
+        mods = (params.get("mapping") or {}).get("modalities") or []
+        if "rna_editing" in mods:
+            rep.warn("site_refs.editing", "no REDIportal editing sites in site_refs: rna_editing will be skipped")
+    rep.ok("site_refs", d)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--params", required=True, help="JSON dump of Nextflow params")
@@ -289,6 +320,8 @@ def main(argv=None):
     if a.mode == "site" and params.get("phenotypes_dir"):
         required.remove("site_refs")
         check_phenotypes_dir(params, rep)
+    elif a.mode in ("site", "phenotyping_only") and not a.no_file_check:
+        check_site_refs(params, rep)
     mods = (params.get("mapping") or {}).get("modalities") or []
     if any(m in mods for m in ISOFORM_MODALITIES) and "expression" not in mods:
         rep.err("mapping.modalities", "isoform_expression / isoform_usage need 'expression' in mapping.modalities "

@@ -110,7 +110,10 @@ def stratum(a):
         if os.path.exists(ns):
             norm.append(pd.read_csv(ns, sep="\t"))
     if feats:
-        write_table(pd.concat(feats, ignore_index=True), pre + "_E_features", a.format)
+        fe = pd.concat(feats, ignore_index=True)
+        if "novel" in fe.columns:  # splicing only: junction in a site-specific (non-frozen) cluster
+            fe["novel"] = fe["novel"].fillna(False).astype(bool)
+        write_table(fe, pre + "_E_features", a.format)
 
     n_by_mod = {}
     settings = []

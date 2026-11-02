@@ -39,7 +39,7 @@ Modalities without groups have one arm. The `combined` arm maps all modalities o
 | B | tensorQTL `map_cis` lead per phenotype or group, with beta-approximated permutation p-values and q-values; conditionally independent signals from `map_independent` | arm, phenotype_id, variant_id, slope, slope_se, pval_nominal, pval_beta, qval, qvalue_method, (group_id, group_size), rank |
 | C | in-sample LD: signed r stored as float16, for variants with MAF ≥ `ld.maf_min` and imputation R² ≥ `ld.rsq_min`, in `ld.window_mb` windows with a `ld.step_mb` step. Each `.npz` holds exactly one square matrix `R`; the row order is in the matching `.variants.tsv.gz` | R; variant_id, chrom, pos, ref, alt, eaf |
 | D | per-variant QC in the stratum | variant_id, eaf, maf, n, hwe_p, rsq, typed |
-| E | phenotype features: coordinates (gene TSS), group, detection fraction, filter status | modality, phenotype_id, chr, start, end, detection_fraction, status, group_id |
+| E | phenotype features: coordinates (gene TSS), group, detection fraction, filter status. `novel` is true for splicing junctions in site-specific clusters (`nclu_`), which cannot be meta-analysed across studies ([Phenotyping](PHENOTYPING.md#splicing-frozen-and-novel-clusters)) | modality, phenotype_id, chr, start, end, detection_fraction, status, group_id, novel |
 | F | model settings: normalization, HCP grid with eGene counts, selected k, covariate **names** (no values), permutations, window, MAF threshold, seed | JSON |
 | I | aggregate counts (genotype QC steps, normalization), and 5/25/50/75/95 % quantiles, mean and SD of sequencing metrics and cell-type proportions (computed only when n ≥ 10) | table, item, statistic, value |
 | J | manifest with sha256 and the image sha256, restricted-file version and pipeline version; data dictionary | |
@@ -81,12 +81,13 @@ Any previous `export/` folder is removed first.
 
 ## Phenotype inputs (`phenotypes_dir`)
 
-`--mode site` normally builds phenotypes from FASTQs. If `phenotypes_dir` is set, it maps ready inputs instead, and `site_refs` is not required. The directory must contain:
+`--mode site` normally builds phenotypes from FASTQs ([Phenotyping](PHENOTYPING.md)); `<outdir>/phenotypes/` of that run has the layout below. If `phenotypes_dir` is set, it maps ready inputs instead, and `site_refs` is not required. The directory must contain:
 
 | File | Content |
 |---|---|
 | `<modality>.bed.gz` | one per modality in `mapping.modalities`. BED columns `#chr start end phenotype_id`, then one column per RNA-seq sample. Coordinates are the gene TSS (`start = TSS - 1`, `end = TSS`), so all features of a gene share one cis window. Grouped modalities use `GENE__feature` IDs |
 | `expression.counts.bed.gz` | raw gene counts in the same layout (used for TMM-VST) |
+| `isoform_expression.counts.bed.gz` | raw transcript counts in the same layout (optional: with it `isoform_expression` uses TMM-VST, without it quantile normalization + inverse normal transform) |
 | `qc_metrics.tsv` | `sample` column + sequencing QC metrics (used for HCP and file I) |
 | `cell_proportions.tsv` | `sample` column + estimated cell-type proportions (optional) |
 

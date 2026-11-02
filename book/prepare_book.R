@@ -19,14 +19,15 @@ repo_url <- "https://github.com/sbresnahan/placenta-xqtl-federated"
 chapters <- data.frame(
   file  = c("docs/COLLABORATION_BRIEF.md",
             "docs/SETUP.md", "docs/HPC.md", "docs/CONFIGURATION.md", "docs/WALKTHROUGH.md",
+            "docs/PHENOTYPING.md",
             "docs/TROUBLESHOOTING.md",
             "docs/EXPORT_SPEC.md", "docs/CENTRAL_ANALYSIS.md",
             "docs/REFERENCES.md", "docs/SEADRAGON_VALIDATION.md", "CHANGELOG.md"),
   part  = c("Part I: For cohort investigators",
-            rep("Part II: Running the pipeline", 5),
+            rep("Part II: Running the pipeline", 6),
             rep("Part III: Outputs and analysis", 2),
             rep("APPENDIX", 3)),
-  title = c("Collaboration brief", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA),
+  title = c("Collaboration brief", rep(NA, 11)),
   stringsAsFactors = FALSE
 )
 

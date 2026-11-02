@@ -24,6 +24,7 @@ import gzip
 import hashlib
 import io
 import os
+import re
 import sys
 import tarfile
 
@@ -36,6 +37,9 @@ HINT = (
     "email from the scientific contact (Sean T. Bresnahan, stbresnahan@mdanderson.org), stating "
     "your cohort, the pipeline version and the approved data-sharing agreement. See docs/SETUP.md."
 )
+
+
+CLUSTER_ID = re.compile(r"^clu_\d+_([+\-.])$")
 
 
 def sha256_bytes(b: bytes) -> str:
@@ -89,7 +93,27 @@ def verify(path: str, expected_version: str | None) -> tuple[bool, list[str], di
             continue
         if header[: len(cols)] != cols:
             msgs.append(f"{name} header {header} does not start with {cols}")
+    if not msgs:
+        msgs += check_cluster_ids(members["splicing/frozen_clusters.tsv.gz"])
     return not msgs, msgs, members
+
+
+def check_cluster_ids(blob: bytes) -> list[str]:
+    """Frozen cluster IDs must be leafCutter-style clu_<n>_<strand> matching the row's strand."""
+    lines = gzip.decompress(blob).decode().splitlines()[1:]
+    bad = []
+    for line in lines:
+        f = line.split("\t")
+        if len(f) < 5:
+            bad.append(line)
+            continue
+        m = CLUSTER_ID.match(f[4])
+        if not m or m.group(1) != f[3]:
+            bad.append(line)
+    if bad:
+        return [f"splicing/frozen_clusters.tsv.gz: {len(bad)} row(s) without a clu_<n>_<strand> cluster_id "
+                f"matching the strand column, e.g. {bad[0]!r}"]
+    return []
 
 
 def cmd_verify(a) -> int:

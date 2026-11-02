@@ -9,6 +9,9 @@ process NORMALIZE {
     label 'process_low'
     publishDir path: { "${params.outdir}/site/${anc}" }, mode: params.publish_mode,
         pattern: '*.{features.tsv,norm_summary.tsv,outliers.tsv}'
+    // --mode phenotyping_only delivers the normalized matrices themselves
+    publishDir path: { "${params.outdir}/normalized" }, mode: params.publish_mode,
+        pattern: '*.{bed.gz,phenotype_groups.txt}', enabled: params.mode == 'phenotyping_only'
 
     input:
     tuple val(anc), val(mod), path(bed), path(counts), path(exclude), path(samples)
@@ -22,7 +25,7 @@ process NORMALIZE {
     def c = counts ? "--counts ${counts}" : ''
     def x = exclude ? "--exclude ${exclude}" : ''
     """
-    xqtl_normalize.R --bed ${bed} ${c} ${x} --modality ${mod} --samples ${samples} --out ${anc}_${mod}
+    xqtl_normalize.R --bed ${bed} ${c} ${x} --modality ${mod} --samples ${samples} --min-samples ${params.normalize_min_samples} --out ${anc}_${mod}
     """
 }
 

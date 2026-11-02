@@ -63,9 +63,9 @@ def test_frozen_clusters_merge_across_ancestries(tmp_path):
     fc = ART.frozen_clusters({a: str(sp / a / "splicing/intermediate/leafcutter_harmonized_perind_numers.counts.gz")
                               for a in ("EAS", "EUR")})
     got = {(r.chrom, r.start, r.end, r.strand): r.cluster_id for r in fc.itertuples()}
-    assert got[("chr1", 100, 200, "+")] == got[("chr1", 150, 300, "+")] == got[("chr1", 100, 300, "+")] == "clu_1"
-    assert got[("chr1", 500, 600, "-")] == "clu_2"
-    assert got[("chr2", 10, 20, "+")] == "clu_3"
+    assert got[("chr1", 100, 200, "+")] == got[("chr1", 150, 300, "+")] == got[("chr1", 100, 300, "+")] == "clu_1_+"
+    assert got[("chr1", 500, 600, "-")] == "clu_2_-"
+    assert got[("chr2", 10, 20, "+")] == "clu_3_+"
     assert fc.loc[(fc.start == 100) & (fc.end == 300), "atlas_clusters"].item() == "EAS:clu_1;EUR:clu_7"
 
 
@@ -78,10 +78,10 @@ def test_signal_table(tmp_path):
     s = pd.read_csv(os_, sep="\t")
     assert list(s.columns[:5]) == R.REQUIRED["signals/mdacc_signals.tsv.gz"]
     spl = s[s.modality == "splicing"].set_index("atlas_phenotype_id")
-    # canonical IDs use the frozen cluster; EUR clu_7 -> clu_1, EUR clu_8 -> clu_3
-    assert spl.loc["ENSG1__chr1:100:200:clu_1_+", "phenotype_id"] == "ENSG1__chr1:100:200:clu_1_+"
-    assert spl.loc["ENSG1__chr1:150:300:clu_7_+", "phenotype_id"] == "ENSG1__chr1:150:300:clu_1_+"
-    assert spl.loc["ENSG2__chr2:10:20:clu_8_+", "phenotype_id"] == "ENSG2__chr2:10:20:clu_3_+"
+    # canonical IDs use the frozen cluster, in the underscore form sites write; EUR clu_7 -> clu_1, EUR clu_8 -> clu_3
+    assert spl.loc["ENSG1__chr1:100:200:clu_1_+", "phenotype_id"] == "ENSG1__chr1_100_200_clu_1_+"
+    assert spl.loc["ENSG1__chr1:150:300:clu_7_+", "phenotype_id"] == "ENSG1__chr1_150_300_clu_1_+"
+    assert spl.loc["ENSG2__chr2:10:20:clu_8_+", "phenotype_id"] == "ENSG2__chr2_10_20_clu_3_+"
     # EUR lead with q = 0.30 is excluded; its independent rank-2 signal is kept
     eur1 = s[(s.ancestry == "EUR") & (s.atlas_phenotype_id == "ENSG1__chr1:150:300:clu_7_+")]
     assert eur1.variant_id.tolist() == ["chr1:170:A:C"] and eur1.signal_rank.tolist() == [2]

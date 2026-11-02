@@ -159,3 +159,33 @@ def test_user_exposure_extends_default_map(tmp_path):
     assert ex["ppBMI"]["enabled"] is True       # user override
     assert ex["ppBMI"]["min"] == 14             # default fields of the same exposure kept
     assert rc == 0, rows
+
+
+def _site_refs(tmp_path, read_length="101"):
+    d = tmp_path / "refs"
+    for f in V.SITE_REFS_FILES:
+        (d / f).parent.mkdir(parents=True, exist_ok=True)
+        (d / f).write_text("x")
+    (d / "MANIFEST.tsv").write_text(f"key\tvalue\nread_length\t{read_length}\n")
+    return str(d)
+
+
+def test_site_refs_complete_and_read_length_warning(tmp_path):
+    rep = V.Report()
+    V.check_site_refs({"site_refs": _site_refs(tmp_path, "76"), "rnaseq": {"read_length": 101},
+                       "mapping": {"modalities": ["expression", "rna_editing"]}}, rep)
+    st = {c: s for c, s, _ in rep.rows}
+    assert st["site_refs"] == "PASS"
+    assert st["site_refs.read_length"] == "WARN"
+    assert st["site_refs.editing"] == "WARN"
+
+
+def test_site_refs_missing_or_incomplete_fails(tmp_path):
+    rep = V.Report()
+    V.check_site_refs({"site_refs": str(tmp_path / "nope")}, rep)
+    assert rep.failed
+    d = _site_refs(tmp_path)
+    os.remove(os.path.join(d, "star", "SA"))
+    rep = V.Report()
+    V.check_site_refs({"site_refs": d}, rep)
+    assert rep.failed and "star/SA" in rep.rows[-1][2]

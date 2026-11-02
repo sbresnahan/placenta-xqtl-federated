@@ -13,6 +13,8 @@
 include { SMOKE } from './workflows/smoke.nf'
 include { SITE } from './workflows/site.nf'
 include { EXPORT_ONLY } from './workflows/export.nf'
+include { PREPARE_REFERENCES } from './workflows/prepare_references.nf'
+include { PHENOTYPING ; PHENOTYPING_ONLY } from './workflows/phenotyping.nf'
 
 def modes() {
     return ['prepare_references', 'imputation_prep', 'site', 'phenotyping_only', 'export', 'central', 'smoke']
@@ -38,11 +40,12 @@ def helpMessage() {
       --outdir DIR              output directory (default: results)
       --restricted FILE         xqtl-restricted-<version>.tar.gz (supplied by email; see docs/SETUP.md)
       --site_refs DIR           indices written by --mode prepare_references
+      --phenotypes_dir DIR      map ready phenotype BEDs instead of phenotyping FASTQs (--mode site)
       --validate_only           check inputs and stop
       -profile                  site/executor profile, e.g. seadragon | slurm,apptainer | local,apptainer
       -resume                   reuse finished tasks
 
-    Resources and scheduler: docs/HPC.md
+    Phenotyping: docs/PHENOTYPING.md      Resources and scheduler: docs/HPC.md
     """.stripIndent()
 }
 
@@ -102,13 +105,24 @@ workflow {
         if (params.validate_only) {
             VALIDATE.out.report.view { r -> "Validation passed: ${r}" }
         }
-        else if (params.mode == 'site' && !params.phenotypes_dir) {
-            error("--mode site from FASTQs (phenotyping) is not available in this pipeline version (${workflow.manifest.version}); set phenotypes_dir to map ready phenotype BEDs (docs/EXPORT_SPEC.md)")
+        else if (params.mode == 'prepare_references') {
+            PREPARE_REFERENCES(cfg)
+            PREPARE_REFERENCES.out.manifest.view { _m -> "Site indices written to ${params.site_refs} (pass --site_refs ${params.site_refs} to --mode site)" }
+        }
+        else if (params.mode == 'phenotyping_only') {
+            PHENOTYPING_ONLY(cfg)
+            PHENOTYPING_ONLY.out.normalized.view { _n -> "Phenotype BEDs: ${params.outdir}/phenotypes; normalized matrices: ${params.outdir}/normalized" }
         }
         else if (params.mode == 'site') {
             // a previous export is removed first, so a failed leak scan never leaves a stale export behind
             file("${params.outdir}/export").deleteDir()
-            SITE(cfg)
+            if (params.phenotypes_dir) {
+                SITE(cfg, cfg.map { c -> file(c.phenotypes_dir, checkIfExists: true) })
+            }
+            else {
+                PHENOTYPING(cfg)
+                SITE(cfg, PHENOTYPING.out.dir)
+            }
             SITE.out.export.view { _d -> "Export written and leak-scanned: ${params.outdir}/export (share only this folder)" }
         }
         else if (params.mode == 'export') {
