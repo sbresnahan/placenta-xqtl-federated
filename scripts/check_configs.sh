@@ -40,10 +40,25 @@ for t in conf/sites/TEMPLATE_*.config; do
     sched=$(basename "$t" .config | sed 's/TEMPLATE_//')
     if out=$(nextflow -c "$t" config -flat -profile "$sched,apptainer" . 2>&1); then
         echo "OK    -c $t -profile $sched,apptainer"
+        # values set in the site file must reach the container binds and the resource caps
+        if echo "$out" | grep -q "^apptainer.runOptions = '-B /scratch -B /project'" \
+           && echo "$out" | grep -q "^process.resourceLimits.memory = '256 GB'"; then
+            echo "OK    -c $t : bind paths and resource caps from the site file"
+        else
+            echo "FAIL  -c $t : bind paths or resource caps from the site file not applied"; fail=1
+        fi
     else
         echo "FAIL  -c $t"; echo "$out" | tail -5 | sed 's/^/      /'; fail=1
     fi
 done
+# seadragon: bind paths and resource caps from the site profile
+sd=$(nextflow config -flat -profile seadragon .)
+if echo "$sd" | grep -q "^singularity.runOptions = '-B /rsrch5 -B /rsrch9'" \
+   && echo "$sd" | grep -q "^process.resourceLimits.memory = '120 GB'"; then
+    echo "OK    seadragon bind paths and resource caps"
+else
+    echo "FAIL  seadragon bind paths or resource caps"; fail=1
+fi
 # Queue selection by walltime on seadragon (short <= 3h, medium < 24h, long <= 120h)
 q=$(nextflow config -flat -profile seadragon . | grep -c "process.queue")
 [ "$q" -ge 1 ] && echo "OK    seadragon queue rule present" || { echo "FAIL  seadragon queue rule"; fail=1; }

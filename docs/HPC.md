@@ -200,6 +200,8 @@ Inside the container, only paths that are bound are visible. `autoMounts` binds 
 
 The smoke test checks a path you choose with `--bind_test_path /project/somefile.txt` (S09).
 
+In a site file, `bind_paths`, `max_cpus`, `max_memory` and `max_time` take effect through the block at the end of the templates in `conf/sites/`, which sets `apptainer.runOptions`, `singularity.runOptions` and `process.resourceLimits` from them. Keep that block when you write your own site file: the container and executor profiles are read before the site file, so without it the values set there are not applied. Values given on the command line always apply.
+
 ### Work directory, temporary space and cleanup
 
 - **Work directory (`-w`).** Every task runs in its own subdirectory of the work directory. Put it on a large shared filesystem visible to all compute nodes, ideally scratch: `-w /scratch/$USER/xqtl_work`. A full cohort produces about 2 TB of transient alignment files at peak.
@@ -314,6 +316,10 @@ params {
     queue_size          = 200
 }
 executor { perJobMemLimit = true }
+// set again from the params above (see Bind paths)
+process.resourceLimits = [cpus: params.max_cpus as int, memory: params.max_memory as nextflow.util.MemoryUnit,
+                          time: params.max_time as nextflow.util.Duration]
+singularity.runOptions = '-B /rsrch5 -B /rsrch9'   // derived from bind_paths
 ```
 
 Why each value:

@@ -182,7 +182,16 @@ jobs:
         if: steps.plan.outputs.build == 'true'
         env:
           TAG: ${{ steps.ver.outputs.tag }}
-        run: docker push "$IMAGE:$TAG"
+        # GHCR occasionally answers the final manifest upload with "unknown blob" for a layer it
+        # has just accepted; pushing again re-checks every layer and usually succeeds.
+        run: |
+          for attempt in 1 2 3 4; do
+            docker push "$IMAGE:$TAG" && exit 0
+            [ "$attempt" = 4 ] && break
+            echo "::warning title=docker push::attempt $attempt failed; retrying in $((attempt * 30)) s"
+            sleep $((attempt * 30))
+          done
+          exit 1
 
       - name: Upload build log
         if: failure() && steps.plan.outputs.build == 'true'
