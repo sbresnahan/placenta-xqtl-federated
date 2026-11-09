@@ -128,7 +128,7 @@
     "imputation_prep": {
       "type": "object",
       "additionalProperties": false,
-      "description": "--mode imputation_prep filters (atlas filter_vcf_for_imputation).",
+      "description": "--mode imputation_prep filters.",
       "properties": {
         "geno_missing_max": {
           "type": "number",
@@ -349,7 +349,7 @@
           "type": "integer",
           "minimum": 100,
           "default": 10000,
-          "description": "tensorQTL permutations (atlas: 10000)."
+          "description": "tensorQTL permutations."
         },
         "hcp_max_phenotypes": {
           "type": "integer",
@@ -360,7 +360,7 @@
         "eval_chrom": {
           "type": "string",
           "default": "chr1",
-          "description": "chromosome used to count eGenes for k selection (atlas: chr1)."
+          "description": "chromosome used to count eGenes for k selection."
         },
         "eval_min_phenotypes": {
           "type": "integer",
@@ -414,7 +414,7 @@
           "default": [
             "Maternal"
           ],
-          "description": "Cell types never used as G x C targets (atlas: the maternal decidual fraction)."
+          "description": "Cell types never used as G x C targets (default: the maternal decidual fraction)."
         },
         "fdr": {
           "type": "number",
@@ -427,7 +427,7 @@
           "type": "integer",
           "minimum": 10,
           "default": 20,
-          "description": "Minimum complete samples for one pair x cell-type fit (atlas 49)."
+          "description": "Minimum complete samples for one pair x cell-type fit."
         },
         "maternal_threshold": {
           "type": "number",
@@ -547,7 +547,7 @@
         },
         "sensitivity": {
           "type": "object",
-          "description": "SNP x covariate sensitivity of tier-1 hits (atlas 55). Off unless a covariate is enabled; ancestry_pcs uses the PC rows of the mapping covariates.",
+          "description": "SNP x covariate sensitivity of tier-1 hits. Off unless a covariate is enabled; ancestry_pcs uses the PC rows of the mapping covariates.",
           "additionalProperties": {
             "type": "object",
             "additionalProperties": false,
@@ -602,7 +602,7 @@
         "dosages": {
           "type": "boolean",
           "default": false,
-          "description": "Use imputed dosages instead of hard calls (the atlas used hard calls)."
+          "description": "Use imputed dosages instead of hard calls."
         },
         "tier2": {
           "type": "string",

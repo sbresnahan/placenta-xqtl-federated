@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# M6 acceptance test: --mode central on two independent test cohorts, end to end.
+# End-to-end test: --mode central on two independent test cohorts, end to end.
 #   1. cohort 1 = tests/fixtures/site (TESTCOHORT, parquet export) -- reused from a finished test_site.sh
 #      work dir when one is given, otherwise run here;
 #   2. cohort 2 = tests/fixtures/site2 (TESTCOHORT2, 120 other 1000 Genomes samples, the same planted effects,

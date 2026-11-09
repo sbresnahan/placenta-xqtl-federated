@@ -1,6 +1,6 @@
 /*
  * --mode imputation_prep : pre-imputation genotypes -> per-chromosome GRCh38 VCFs for the TOPMed
- * Imputation Server (atlas 01_genotype_imputation: liftover + filter_vcf_for_imputation).
+ * Imputation Server (liftover + variant filters).
  * Scripts: bin/xqtl_impprep.sh (convert, filter), bin/xqtl_impprep.py (sex check, report).
  */
 

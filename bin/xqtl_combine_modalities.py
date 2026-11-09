@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""xqtl_combine_modalities.py -- PANTRY-style combined cross-modality BED (atlas 30_combine_modalities.py).
+"""xqtl_combine_modalities.py -- PANTRY-style combined cross-modality BED.
 
   xqtl_combine_modalities.py --out EUR_combined expression=EUR_expression.bed.gz splicing=EUR_splicing.bed.gz ...
 

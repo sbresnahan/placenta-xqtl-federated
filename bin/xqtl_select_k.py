@@ -6,7 +6,7 @@
                    --maf 0.01 --fdr 0.05 --seed 20261029 [--grouped] --out-k k.txt EVAL_TSV...
 
 k* = the k with the most eGenes (unique phenotypes or groups at q <= fdr in the eval scope); ties go
-to the smaller k (atlas rule). The same k* is used for the grouped and ungrouped arm of a modality.
+to the smaller k. The same k* is used for the grouped and ungrouped arm of a modality.
 Writes {ANC}_{arm}.settings.json for each --arm and the bare k* to --out-k.
 """
 import argparse

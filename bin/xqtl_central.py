@@ -16,7 +16,7 @@ Subcommands
                  on a shared variant set -> .npz inputs for xqtl_finemap.py (SuShiE summary mode)
   coloc-prep     xQTL x GWAS (catalog by path) inputs for xqtl_coloc.R (SuSiE-coloc, colocBoost)
   gxc            G x C pair x cell-type IVW (ACAT / single p otherwise), BH, central primary cell type
-  gxe-tier1      tier-1 GxE synthesis across contributions (atlas 54_tier1_meta), scope labels
+  gxe-tier1      tier-1 GxE synthesis across contributions, scope labels
   gxe-tier2      tier-2 variant-level IVW after rescaling to the pooled exposure SD, top variant per
                  phenotype, BH within modality x exposure
   twas-inputs    OTTERS / mvOTTERS stage-I inputs (annotation + eQTL summary statistics per ancestry)
@@ -54,7 +54,7 @@ def log(msg):
 # statistics
 # ---------------------------------------------------------------------------------------------
 def acat(p):
-    """Cauchy combination of p-values (equal weights); NaNs ignored (atlas 54_tier1_meta)."""
+    """Cauchy combination of p-values (equal weights); NaNs ignored (ACAT; Liu & Xie 2020)."""
     p = np.asarray(p, dtype=float)
     p = p[np.isfinite(p)]
     if len(p) == 0:
@@ -619,10 +619,7 @@ def load_ld(prefix, positions, hm, contrib):
     r = w.iloc[int(np.argmax(cov))]
     npz = os.path.join(d, "C_ld", os.path.basename(str(r["file"])))
     if not os.path.exists(npz):
-        cand = glob.glob(os.path.join(d, "C_ld", f"*_C_ld_{r['chrom']}_{r['start']}_{r['end']}.npz"))
-        if not cand:
-            return None
-        npz = cand[0]
+        raise FileNotFoundError(f"{npz}: LD file named in {wins[0]} is missing")
     var = pd.read_csv(npz[:-4] + ".variants.tsv.gz", sep="\t", usecols=["variant_id"])
     R = np.load(npz)["R"].astype(np.float64)
     h = hm[hm["contrib"] == contrib].set_index("variant_id")
@@ -1092,7 +1089,7 @@ def in_bed(chrom, pos, bed):
 
 
 def enrichment(pips, annot, staged_dir, thr):
-    """Variant-level enrichment of high-PIP variants (pip >= thr) per annotation class (atlas 34)."""
+    """Variant-level enrichment of high-PIP variants (pip >= thr) per annotation class."""
     v = pips.sort_values("pip", ascending=False).drop_duplicates("variant_id").copy()
     sp = v["variant_id"].str.split(":", expand=True)
     chrom, pos = sp[0].to_numpy(), sp[1].astype(int).to_numpy()

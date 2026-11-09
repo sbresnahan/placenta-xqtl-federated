@@ -17,7 +17,7 @@ include { VERIFY_RESTRICTED ; EXPORT_STRATUM ; EXPORT_FINALIZE } from '../module
 include { RESTRICTED_SIGNALS ; GX_SIGNALS ; GXC ; GXE_EXPOSURES ; GXE_SCAN ; GXE_MERGE ;
           GXE_SENSITIVITY } from '../modules/local/interactions.nf'
 
-// HCP grid: cohort.yml mapping.hcp_grid, else 0..60 by 10 (n < 350) or 0..100 by 10 (atlas rule).
+// HCP grid: cohort.yml mapping.hcp_grid, else 0..60 by 10 (n < 350) or 0..100 by 10.
 // k values that leave fewer than 10 residual degrees of freedom are dropped.
 def hcpGrid(c, samples) {
     def n = samples.readLines().size() - 1

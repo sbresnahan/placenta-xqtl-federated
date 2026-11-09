@@ -2,7 +2,7 @@
 # Build a local environment equivalent to the image's software layer, for development
 # and tests on machines without a container runtime. Not used at sites.
 #   scripts/dev_env.sh [PREFIX]      (default ./.xqtl-env)
-# Then:  export PATH="$PREFIX/align/bin:$PREFIX/xqtl/bin:$PREFIX/irfinder/bin:$PWD/bin:$PATH"
+# Then:  export PATH="$PREFIX/bin:$PREFIX/align/bin:$PREFIX/xqtl/bin:$PREFIX/irfinder/bin:$PWD/bin:$PATH"
 set -euo pipefail
 here=$(cd "$(dirname "$0")/.." && pwd)
 prefix=${1:-$here/.xqtl-env}
@@ -18,4 +18,12 @@ env -u R_LIBS -u R_LIBS_USER -u R_LIBS_SITE "$prefix/xqtl/bin/Rscript" "$here/co
 # (own environment: Salmon 1.10.2 pins an older boost, so boost must not go into align/)
 "$mm" create -y -p "$prefix/irfinder" -c conda-forge "libboost-devel=1.84" zlib make
 CPATH="$prefix/irfinder/include" BOOST_LIBDIR="$prefix/irfinder/lib" "$here/containers/build_irfinder.sh" "$prefix/irfinder"
-echo "export PATH=\"$prefix/align/bin:$prefix/xqtl/bin:$prefix/irfinder/bin:$here/bin:\$PATH\""
+# Picard and SuShiE in their own environments, as in the image; only the `picard` and
+# `sushie-python` launchers go on PATH (in $prefix/bin)
+"$mm" create -y -p "$prefix/picard" -f "$here/containers/env/picard.yml"
+"$mm" create -y -p "$prefix/sushie" -c conda-forge python=3.12 pip
+"$prefix/sushie/bin/python" -m pip install --no-cache-dir -r "$here/containers/requirements-sushie.txt"
+mkdir -p "$prefix/bin"
+ln -sf "$prefix/picard/bin/picard" "$prefix/bin/picard"
+ln -sf "$prefix/sushie/bin/python" "$prefix/bin/sushie-python"
+echo "export PATH=\"$prefix/bin:$prefix/align/bin:$prefix/xqtl/bin:$prefix/irfinder/bin:$here/bin:\$PATH\""

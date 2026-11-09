@@ -2,7 +2,7 @@
 """xqtl_splicing_clusters.py -- frozen + site-local leafCutter clusters for the splicing modality.
 
 Splicing at every site is quantified against the frozen cluster set from the restricted file
-(the atlas pooled leafCutter clusters), so the same phenotype IDs exist at every site and can be
+(leafCutter clusters pooled across the MDACC discovery cohorts), so the same phenotype IDs exist at every site and can be
 meta-analysed. Site-local leafCutter clusters that share no intron with the frozen set are kept
 as novel clusters (cluster token nclu_N_strand) and are flagged in the export.
 

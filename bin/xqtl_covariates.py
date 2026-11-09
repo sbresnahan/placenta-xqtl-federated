@@ -5,7 +5,7 @@
       --geno-pcs EUR.geno_pcs.tsv [--cell-props cell_proportions.tsv] [--hcp EUR_expression.hcp_k10.tsv]
       [--exclude Maternal] --out EUR_expression.covariates_k10.tsv
 
-Atlas 25_build_covariates.py at a single site (no cohort indicators):
+Covariate table for one stratum x modality (one cohort, so no cohort indicators):
   tiers (pruning priority)  sex < genotype PCs < cell types < HCP factors
   sex                       M -> 0, F -> 1 (replicates must agree), missing -> mode
   cell types                replicate mean; the dominant type is dropped as the compositional

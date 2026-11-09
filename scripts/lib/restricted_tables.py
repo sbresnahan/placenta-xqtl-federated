@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
-"""Build the two tables of the restricted file from atlas outputs (MDACC only).
+"""Build the two tables of the restricted file from MDACC discovery outputs (MDACC only).
 
 Called by scripts/make_restricted_bundle.sh.
 
-frozen_clusters.tsv.gz  chrom, start, end, strand, cluster_id, atlas_clusters
-    The atlas pools leafCutter clusters across cohorts within each ancestry (step 17:
-    clusters sharing a junction are merged). Here the per-ancestry pooled clusters are
-    merged once more across ancestries the same way (connected components over shared
+frozen_clusters.tsv.gz  chrom, start, end, strand, cluster_id, source_clusters
+    The input clusters are pooled across cohorts within each ancestry (clusters sharing a
+    junction are merged). Here the per-ancestry pooled clusters are merged once more across ancestries the same way (connected components over shared
     junctions), giving one frozen cluster set with IDs clu_1_+, clu_2_-, ... ordered by
-    position. atlas_clusters lists the per-ancestry clusters it came from (EAS:clu_12;...).
+    position. source_clusters lists the per-ancestry clusters it came from (EAS:clu_12;...).
 
 mdacc_signals.tsv.gz  phenotype_id, variant_id, modality, ancestry, signal_rank,
-                      atlas_phenotype_id, scan, feature_key
+                      source_phenotype_id, scan, feature_key
     Lead signals with q <= QVALUE_MAX from {ANC}_{MOD}_cisqtl.parquet plus conditionally
-    independent signals from {ANC}_{MOD}_cisqtl_independent.parquet, for the nine atlas
-    modalities. Modality names are converted to the federated names. Splicing phenotype
+    independent signals from {ANC}_{MOD}_cisqtl_independent.parquet, for the nine
+    modalities. Modality labels of the input files are converted to the pipeline names. Splicing phenotype
     IDs (gene__chrom_start_end_clu_N_strand) are rewritten to the frozen cluster IDs so
-    they match what every site produces. Intron-retention IDs come from MAJIQ in the
-    atlas and from IRFinder-S at the sites; they are kept as atlas IDs here and matched
+    they match what every site produces. Intron-retention IDs are MAJIQ segments in the
+    input and IRFinder-S introns at the sites; they are kept as input IDs here and matched
     at the site by intron coordinates (feature_key = chrom:start:end, when parseable).
 """
 from __future__ import annotations
@@ -30,7 +29,7 @@ import sys
 
 import pandas as pd
 
-# atlas modality label -> federated modality name
+# input modality label -> pipeline modality name
 MODALITIES = {
     "expression": "expression",
     "isoform_expression": "isoform_expression",
@@ -98,10 +97,10 @@ def frozen_clusters(counts: dict[str, str]) -> pd.DataFrame:
     for k, js in enumerate(comps, start=1):
         for chrom, s, e, strand in sorted(js, key=lambda j: (j[1], j[2])):
             src = sorted({f"{a}:clu_{c}" for a, c in junc_nodes[(chrom, s, e, strand)]})
-            # leafCutter-style ID with the strand suffix (a component never mixes strands: atlas clusters
+            # leafCutter-style ID with the strand suffix (a component never mixes strands: input clusters
             # are strand-specific and junctions are keyed with their strand)
             rows.append((chrom, s, e, strand, f"clu_{k}_{strand}", ";".join(src)))
-    df = pd.DataFrame(rows, columns=["chrom", "start", "end", "strand", "cluster_id", "atlas_clusters"])
+    df = pd.DataFrame(rows, columns=["chrom", "start", "end", "strand", "cluster_id", "source_clusters"])
     return df.sort_values(["chrom", "start", "end"], key=lambda s: s.map(chrom_key) if s.name == "chrom" else s,
                           kind="stable").reset_index(drop=True)
 
@@ -121,19 +120,19 @@ def read_signals(results: str, anc: str, label: str, qmax: float) -> pd.DataFram
         ind = _ids(pd.read_parquet(ind_p))
         if len(ind):
             rank = ind["rank"] if "rank" in ind.columns else 1
-            parts.append(pd.DataFrame({"atlas_phenotype_id": ind["phenotype_id"], "variant_id": ind["variant_id"],
+            parts.append(pd.DataFrame({"source_phenotype_id": ind["phenotype_id"], "variant_id": ind["variant_id"],
                                        "signal_rank": rank}))
     if os.path.exists(lead_p):
         lead = _ids(pd.read_parquet(lead_p))
         if "qval" in lead.columns:
             lead = lead[lead["qval"] <= qmax]
-            parts.append(pd.DataFrame({"atlas_phenotype_id": lead["phenotype_id"],
+            parts.append(pd.DataFrame({"source_phenotype_id": lead["phenotype_id"],
                                        "variant_id": lead["variant_id"], "signal_rank": 1}))
     if not parts:
         return None
     df = pd.concat(parts, ignore_index=True)
     df["signal_rank"] = df["signal_rank"].astype(int)
-    return (df.sort_values("signal_rank").drop_duplicates(["atlas_phenotype_id", "variant_id"])
+    return (df.sort_values("signal_rank").drop_duplicates(["source_phenotype_id", "variant_id"])
               .reset_index(drop=True))
 
 
@@ -186,10 +185,10 @@ def main(argv=None) -> int:
                     continue
                 df["modality"], df["ancestry"], df["scan"] = mod, anc, scan
                 if mod == "splicing":
-                    df["phenotype_id"] = [canonical_splicing(p, jmap) for p in df["atlas_phenotype_id"]]
+                    df["phenotype_id"] = [canonical_splicing(p, jmap) for p in df["source_phenotype_id"]]
                 else:
-                    df["phenotype_id"] = df["atlas_phenotype_id"]
-                df["feature_key"] = [feature_key(p) if mod == "intron_retention" else "" for p in df["atlas_phenotype_id"]]
+                    df["phenotype_id"] = df["source_phenotype_id"]
+                df["feature_key"] = [feature_key(p) if mod == "intron_retention" else "" for p in df["source_phenotype_id"]]
                 print(f"  {anc} {lab}: {len(df)} signals")
                 out.append(df)
     if not out:
@@ -198,7 +197,7 @@ def main(argv=None) -> int:
     sig = pd.concat(out, ignore_index=True)
     sig = (sig.sort_values(["modality", "ancestry", "phenotype_id", "signal_rank", "scan"])
               .drop_duplicates(["phenotype_id", "variant_id", "modality", "ancestry"]))
-    cols = ["phenotype_id", "variant_id", "modality", "ancestry", "signal_rank", "atlas_phenotype_id", "scan", "feature_key"]
+    cols = ["phenotype_id", "variant_id", "modality", "ancestry", "signal_rank", "source_phenotype_id", "scan", "feature_key"]
     os.makedirs(os.path.dirname(os.path.abspath(a.out_signals)), exist_ok=True)
     # gzip with mtime 0 so the archive is byte-reproducible
     for df, path in ((fc, a.out_clusters), (sig[cols], a.out_signals)):

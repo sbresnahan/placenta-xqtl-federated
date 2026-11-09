@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# Ported from the atlas 03_phenotyping/build_bulk_tpm_matrix.py (GPL-3.0). Changes: gzipped GTFs
-# accepted; the seadragon config.yml mode was removed.
 """Script 2: Build a gene-symbol x sample TPM matrix from Salmon quant.sf files.
 
 Aggregates per-sample Salmon transcript TPMs to gene-level TPMs using the

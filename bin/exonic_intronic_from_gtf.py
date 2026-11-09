@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Vendored unchanged from the atlas 03_phenotyping/exonic_intronic_from_gtf.py (from PANTRY, MIT).
+# From Pantry (github.com/PejLab/Pantry, MIT licence), unchanged.
 """
 Extract consensus exonic regions and intronic gaps from a GTF file.
 

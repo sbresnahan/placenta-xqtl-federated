@@ -4,10 +4,10 @@
 #   xqtl_stratum_geno.sh --pfile cohort --info cohort.info.tsv --samples stratum_EUR.samples.tsv \
 #       --anc EUR [--maf 0.01 --mac 5 --hwe 1e-6 --geno 0.05 --mind 0.05 --npcs 5 --sd 6 --threads N]
 #
-# Atlas logic: variant filters within the stratum; cohort-only PCA (--indep-pairwise 200 50 0.2,
-# --pca 20; 22_genotype_pca.sh); PC1-PC5 are the covariates; samples beyond 6 SD on any of them
-# are removed and the MAC floor is re-applied to the remaining samples (24_outlier_exclusion.py).
-# PCs are not recomputed after outlier removal (as in the atlas).
+# Method: variant filters within the stratum; cohort-only PCA (--indep-pairwise 200 50 0.2,
+# --pca 20); PC1-PC5 are the covariates; samples beyond 6 SD on any of them
+# are removed and the MAC floor is re-applied to the remaining samples.
+# PCs are not recomputed after outlier removal.
 #
 # Outputs (prefix ANC):
 #   ANC.{pgen,pvar,psam}        final genotypes (dosages) for mapping

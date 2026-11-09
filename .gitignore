@@ -20,3 +20,7 @@ xqtl-restricted-*.tar.gz
 refs_cache/
 refs/
 .DS_Store
+
+# MDACC packaging settings (filled copy of scripts/packaging/mdacc.env.template)
+scripts/packaging/*.env
+mdacc.env

@@ -14,7 +14,7 @@
 
 repo_url <- "https://github.com/sbresnahan/placenta-xqtl-federated"
 
-# Chapter order. Chapters whose file does not exist yet are skipped (with a note);
+# Chapter order. Chapters whose file is missing are skipped (with a note);
 # a link to a skipped chapter is reported as broken.
 chapters <- data.frame(
   file  = c("docs/COLLABORATION_BRIEF.md",
@@ -22,7 +22,7 @@ chapters <- data.frame(
             "docs/PHENOTYPING.md",
             "docs/TROUBLESHOOTING.md",
             "docs/INTERACTIONS.md", "docs/EXPORT_SPEC.md", "docs/CENTRAL_ANALYSIS.md",
-            "docs/REFERENCES.md", "docs/SEADRAGON_VALIDATION.md", "CHANGELOG.md"),
+            "docs/REFERENCES.md", "docs/TESTING.md", "CHANGELOG.md"),
   part  = c("Part I: For cohort investigators",
             rep("Part II: Running the pipeline", 6),
             rep("Part III: Outputs and analysis", 3),
@@ -69,7 +69,7 @@ prepare_book <- function(repo = normalizePath(file.path(dirname(sys_script()), "
   unlink(build, recursive = TRUE)
   dir.create(build, recursive = TRUE)
   present <- file.exists(file.path(repo, chapters$file))
-  for (f in chapters$file[!present]) message("note: ", f, " not present yet; chapter skipped")
+  for (f in chapters$file[!present]) message("note: ", f, " not present; chapter skipped")
   ch <- chapters[present, ]
   ch$id <- vapply(ch$file, chapter_id, "")
   docs <- lapply(ch$file, function(f) readLines(file.path(repo, f), warn = FALSE, encoding = "UTF-8"))

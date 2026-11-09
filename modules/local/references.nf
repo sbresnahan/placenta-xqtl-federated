@@ -139,7 +139,7 @@ process EDIT_SITES {
     tuple path('editing/edit_sites.bed'), path('editing/edit_site_genes.tsv'), emit: sites
 
     script:
-    // sites are restricted to chromosomes present in the annotation (keeps chr22 tests small)
+    // sites are restricted to chromosomes present in the annotation
     """
     mkdir -p editing
     cut -f1 ${gtf} | sort -u > chroms.txt

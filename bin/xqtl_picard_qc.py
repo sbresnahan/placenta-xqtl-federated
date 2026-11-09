@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """xqtl_picard_qc.py -- PicardTools sequencing-QC metrics for the HCP prior matrix.
 
-Port of the atlas 05_qtl_mapping/picard_qc.py + picard_persample.py
-(github.com/sbresnahan/Placenta_xQTL_atlas, GPL-3.0). The metric panel, Picard tool set and
-subject-specific bias covariates are unchanged; the cohort/config/seadragon plumbing is
-replaced by four subcommands that Nextflow calls:
+Picard QC metrics and subject-specific bias covariates per sample, in four subcommands that
+Nextflow calls:
 
   generate-refflat  --gtf GTF[.gz] --output refFlat.txt
   gene-gc-length    --gtf GTF[.gz] --fasta genome.fa --output gene_gc_length.tsv
@@ -20,7 +18,7 @@ CollectInsertSizeMetrics, CollectRnaSeqMetrics (REF_FLAT, STRAND=NONE), CollectG
 unsuffixed and other categories suffixed. merge adds SubjectBias.GC and
 SubjectBias.GENE_LENGTH (Mostafavi et al. 2013: per-sample Pearson correlation of
 log2(TPM+1) with gene exonic GC content / exonic length) and fills missing cells with
-cohort column medians (atlas picard_persample.py behaviour). Zero-variance and redundant
+cohort column medians. Zero-variance and redundant
 columns are pruned downstream by xqtl_hcp.R.
 """
 
@@ -152,12 +150,10 @@ def extract_full_panel(rows, prefix):
       FIRST_OF_PAIR / SECOND_OF_PAIR, or extra LIBRARY rows) are suffixed
       with their category value.
     - FIELD_RENAME maps Picard >= 2.27 names back to the pipeline's
-      historical column names on the primary row.
+      metric column names on the primary row.
 
-    NOTE: for multi-category tables the primary row is the library-level
-    PAIR row. The legacy whitelist read the FIRST data row (FIRST_OF_PAIR
-    for paired-end BAMs), so AlignMetrics.* values are library-level now —
-    column names are unchanged.
+    For multi-category tables the primary row is the library-level PAIR row,
+    so AlignMetrics.* values are library-level.
     """
     if not rows:
         return {}

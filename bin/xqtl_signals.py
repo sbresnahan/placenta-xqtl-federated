@@ -6,8 +6,7 @@
       [--fdr 0.05] --out EUR_expression
 
 --cis is the stratum's lead table: the expression permutation table for expression, the
-ungrouped (feature-level) permutation table for the other modalities (atlas 49 reads
-{ANC}_{MOD}_ungrouped_cisqtl_top). Its top variant is the site lead of each phenotype with
+ungrouped (feature-level) permutation table for the other modalities. Its top variant is the site lead of each phenotype with
 qval <= --fdr.
 
 Writes
@@ -19,7 +18,7 @@ Writes
                          rank), with the site lead and MDACC lead variants; phenotype_absent rows
                          are kept as untested.
 
-Intron retention: the MDACC list uses atlas MAJIQ segments (GENE__IR_GENE_chr_s_e_strand_n), the
+Intron retention: the MDACC list uses MAJIQ segments (GENE__IR_GENE_chr_s_e_strand_n), the
 site IRFinder-S introns (GENE__IR_chr_s_e_strand). An MDACC segment maps to the shortest site
 intron of the same gene, chromosome and strand that contains it (site start <= segment start and
 site end >= segment end - 1); the original ID is kept in mdacc_phenotype_id.

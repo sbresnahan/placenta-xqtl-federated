@@ -1,6 +1,6 @@
-"""Tests for the MDACC packaging scripts, on a small synthetic mock of the atlas outputs.
+"""Tests for the MDACC packaging scripts, on a small synthetic mock of the MDACC inputs.
 
-Covers scripts/lib/atlas_restricted_tables.py, scripts/make_restricted_bundle.sh,
+Covers scripts/lib/restricted_tables.py, scripts/make_restricted_bundle.sh,
 scripts/make_public_reference_record.sh (needs plink2 + samtools) and
 scripts/pin_reference_record.py. All inputs are synthetic.
 """
@@ -17,7 +17,7 @@ import pytest
 from conftest import REPO, load
 
 R = load("xqtl_restricted")
-spec = importlib.util.spec_from_file_location("art", os.path.join(REPO, "scripts", "lib", "atlas_restricted_tables.py"))
+spec = importlib.util.spec_from_file_location("art", os.path.join(REPO, "scripts", "lib", "restricted_tables.py"))
 ART = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ART)
 
@@ -29,7 +29,7 @@ def _counts(path, junctions):
             fh.write(f"{j} 3/10 4/12\n")
 
 
-def mock_atlas(root):
+def mock_inputs(root):
     """EAS and EUR pooled splicing clusters plus tensorQTL tables for two modalities."""
     sp = root / "output"
     for anc, js in {
@@ -59,36 +59,36 @@ def mock_atlas(root):
 
 
 def test_frozen_clusters_merge_across_ancestries(tmp_path):
-    sp, _ = mock_atlas(tmp_path)
+    sp, _ = mock_inputs(tmp_path)
     fc = ART.frozen_clusters({a: str(sp / a / "splicing/intermediate/leafcutter_harmonized_perind_numers.counts.gz")
                               for a in ("EAS", "EUR")})
     got = {(r.chrom, r.start, r.end, r.strand): r.cluster_id for r in fc.itertuples()}
     assert got[("chr1", 100, 200, "+")] == got[("chr1", 150, 300, "+")] == got[("chr1", 100, 300, "+")] == "clu_1_+"
     assert got[("chr1", 500, 600, "-")] == "clu_2_-"
     assert got[("chr2", 10, 20, "+")] == "clu_3_+"
-    assert fc.loc[(fc.start == 100) & (fc.end == 300), "atlas_clusters"].item() == "EAS:clu_1;EUR:clu_7"
+    assert fc.loc[(fc.start == 100) & (fc.end == 300), "source_clusters"].item() == "EAS:clu_1;EUR:clu_7"
 
 
 def test_signal_table(tmp_path):
-    sp, q = mock_atlas(tmp_path)
+    sp, q = mock_inputs(tmp_path)
     oc, os_ = tmp_path / "c.tsv.gz", tmp_path / "s.tsv.gz"
     rc = ART.main(["--ancestries", "EAS EUR", "--qtl-results", str(q), "--out-clusters", str(oc), "--out-signals", str(os_),
                    "--splicing-counts", str(sp / "{ANC}/splicing/intermediate/leafcutter_harmonized_perind_numers.counts.gz")])
     assert rc == 0
     s = pd.read_csv(os_, sep="\t")
     assert list(s.columns[:5]) == R.REQUIRED["signals/mdacc_signals.tsv.gz"]
-    spl = s[s.modality == "splicing"].set_index("atlas_phenotype_id")
+    spl = s[s.modality == "splicing"].set_index("source_phenotype_id")
     # canonical IDs use the frozen cluster, in the underscore form sites write; EUR clu_7 -> clu_1, EUR clu_8 -> clu_3
     assert spl.loc["ENSG1__chr1:100:200:clu_1_+", "phenotype_id"] == "ENSG1__chr1_100_200_clu_1_+"
     assert spl.loc["ENSG1__chr1:150:300:clu_7_+", "phenotype_id"] == "ENSG1__chr1_150_300_clu_1_+"
     assert spl.loc["ENSG2__chr2:10:20:clu_8_+", "phenotype_id"] == "ENSG2__chr2_10_20_clu_3_+"
     # EUR lead with q = 0.30 is excluded; its independent rank-2 signal is kept
-    eur1 = s[(s.ancestry == "EUR") & (s.atlas_phenotype_id == "ENSG1__chr1:150:300:clu_7_+")]
+    eur1 = s[(s.ancestry == "EUR") & (s.source_phenotype_id == "ENSG1__chr1:150:300:clu_7_+")]
     assert eur1.variant_id.tolist() == ["chr1:170:A:C"] and eur1.signal_rank.tolist() == [2]
     expr = s[s.modality == "expression"]
     assert sorted(zip(expr.variant_id, expr.signal_rank)) == [("chr1:150:A:G", 1), ("chr1:900:G:C", 2)]
     assert "ENSG3" not in set(s.phenotype_id)              # q = 0.5
-    assert set(s.modality) == {"splicing", "expression", "isoform_usage"}   # atlas 'isoforms' renamed
+    assert set(s.modality) == {"splicing", "expression", "isoform_usage"}   # input label 'isoforms' renamed
     # byte-reproducible output
     b1 = os_.read_bytes()
     ART.main(["--ancestries", "EAS EUR", "--qtl-results", str(q), "--out-clusters", str(oc), "--out-signals", str(os_),
@@ -99,13 +99,13 @@ def test_signal_table(tmp_path):
 def _env(tmp_path, sp, q):
     e = tmp_path / "mock.env"
     e.write_text(f'RESTRICTED_VERSION=7\nANCESTRIES="EAS EUR"\nQVALUE_MAX=0.05\n'
-                 f'ATLAS_SPLICING_COUNTS="{sp}/{{ANC}}/splicing/intermediate/leafcutter_harmonized_perind_numers.counts.gz"\n'
-                 f'ATLAS_QTL_RESULTS={q}\n')
+                 f'MDACC_SPLICING_COUNTS="{sp}/{{ANC}}/splicing/intermediate/leafcutter_harmonized_perind_numers.counts.gz"\n'
+                 f'MDACC_QTL_RESULTS={q}\n')
     return e
 
 
 def test_make_restricted_bundle_dry_run_and_build(tmp_path):
-    sp, q = mock_atlas(tmp_path)
+    sp, q = mock_inputs(tmp_path)
     env = _env(tmp_path, sp, q)
     sh = os.path.join(REPO, "scripts", "make_restricted_bundle.sh")
     out = tmp_path / "bundle"
@@ -135,7 +135,7 @@ def test_make_public_reference_record(tmp_path):
     for t in ("plink2", "samtools"):
         if not shutil.which(t):
             pytest.skip(f"{t} not on PATH")
-    a = tmp_path / "atlas"
+    a = tmp_path / "inputs"
     a.mkdir()
     for n in ("hplr.gtf", "norm.gtf", "class.txt", "rediportal.bed"):
         (a / n).write_text(f"synthetic {n}\n")
@@ -156,10 +156,10 @@ def test_make_public_reference_record(tmp_path):
                                                                    for i, s in enumerate(samples[:60])))
     env = tmp_path / "rec.env"
     env.write_text("\n".join([
-        f"ATLAS_HPLR_GTF={a}/hplr.gtf", f"ATLAS_NORMALIZED_GTF={a}/norm.gtf", f"ATLAS_CLASSIFICATION={a}/class.txt",
-        f"ATLAS_TXREVISE_DIR={tx}", f"ATLAS_MUSIC_RDS={a}/music.rds", f"ATLAS_GENOME_FASTA={a}/genome.fa",
+        f"MDACC_HPLR_GTF={a}/hplr.gtf", f"MDACC_NORMALIZED_GTF={a}/norm.gtf", f"MDACC_CLASSIFICATION={a}/class.txt",
+        f"MDACC_TXREVISE_DIR={tx}", f"MDACC_MUSIC_RDS={a}/music.rds", f"MDACC_GENOME_FASTA={a}/genome.fa",
         f"KGP_PFILE={a}/kg", f"KGP_SUPERPOP={a}/superpop.tsv", "PANEL_MAF=0.01", 'PANEL_PRUNE="50 5 0.9"',
-        f"ATLAS_REDIPORTAL_BED={a}/rediportal.bed", "INCLUDE_REDIPORTAL=no"]) + "\n")
+        f"MDACC_REDIPORTAL_BED={a}/rediportal.bed", "INCLUDE_REDIPORTAL=no"]) + "\n")
     sh = os.path.join(REPO, "scripts", "make_public_reference_record.sh")
     out = tmp_path / "record"
     dry = subprocess.run(["bash", sh, "--env", str(env), "--out", str(out), "--dry-run"], capture_output=True, text=True)
@@ -169,11 +169,11 @@ def test_make_public_reference_record(tmp_path):
     files = pd.read_csv(out / "files.tsv", sep="\t")
     expect = {"HPLRv2.0.annotated.gtf.gz", "HPLRv2.0.annotated.PANTRY.gtf.gz", "HPLRv2_classification.annotated.txt.gz",
               "placenta_music_reference.rds", "1kGP_hg38_pca_panel.pgen", "1kGP_hg38_pca_panel.pvar.zst",
-              "1kGP_hg38_pca_panel.psam", "1kg_superpop.tsv", "atlas_genome_contigs.tsv"} | {
+              "1kGP_hg38_pca_panel.psam", "1kg_superpop.tsv", "mdacc_genome_contigs.tsv"} | {
         f"txrevise.{g}.{p}.gff3.gz" for g in ("grp_1", "grp_2") for p in ("upstream", "contained", "downstream")}
     assert set(files.name) == expect                      # no REDIportal unless INCLUDE_REDIPORTAL=yes
     assert len((out / "1kGP_hg38_pca_panel.psam").read_text().splitlines()) == 61   # header + 60 labelled
-    contigs = pd.read_csv(out / "atlas_genome_contigs.tsv", sep="\t")
+    contigs = pd.read_csv(out / "mdacc_genome_contigs.tsv", sep="\t")
     assert contigs.name.tolist() == ["chr1", "chr2"] and contigs.length.tolist() == [10, 6]
     # every listed checksum is right
     for row in files.itertuples():

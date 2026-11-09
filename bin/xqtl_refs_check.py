@@ -64,7 +64,7 @@ def main(argv=None) -> int:
     if a.expected:
         exp = {r["path"]: r for r in read_manifest(a.expected, allow_empty=True)}
         if not exp:
-            print(f"NOTE\t{a.expected} has no entries (development build): release pins not checked")
+            print(f"NOTE\t{a.expected} has no entries (unpinned build): release pins not checked")
         got = {r["path"]: r for r in rows}
         for k, r in exp.items():
             if k not in got:

@@ -2,7 +2,7 @@
 
 Federated multi-ancestry placental xQTL analysis. Each participating cohort runs this pipeline on its own computers and shares only summary-level files (A–J) with MD Anderson Cancer Center (MDACC). No individual-level genotype, expression or phenotype data leave the site.
 
-The pipeline reproduces the analyses of the [placental xQTL atlas](https://github.com/sbresnahan/Placenta_xQTL_atlas) (modules 01–07) at each site:
+At each site the pipeline runs:
 
 - genotype preparation for the TOPMed Imputation Server, post-imputation QC and ancestry assignment;
 - nine molecular phenotypes from placental RNA-seq against the long-read placental transcriptome (HPLRv2): gene and isoform expression, alternative TSS and polyadenylation, splicing, intron retention, RNA editing, RNA stability, and cell-type proportions;
@@ -14,7 +14,7 @@ MDACC then meta-analyses the exports across cohorts and ancestries (`--mode cent
 
 **Documentation:** <https://sbresnahan.github.io/placenta-xqtl-federated/> (also included inside the image for offline reading). The same pages are in [`docs/`](docs/).
 
-> **Status: 1.0.0-dev.** All run modes are implemented and tested on synthetic and public fixtures (see [CHANGELOG.md](CHANGELOG.md)). The first release (1.0.0) follows validation on MDACC's cluster.
+> **Status: pre-release (1.0.0-dev).** Validation on a production cluster is in progress; see [CHANGELOG.md](CHANGELOG.md).
 
 ## Quick start
 
@@ -61,7 +61,7 @@ The [walkthrough](docs/WALKTHROUGH.md) covers every step, including the TOPMed u
 | [Export specification](docs/EXPORT_SPEC.md) | Files A–J, the leak scan, rebuilding the export |
 | [Central analysis](docs/CENTRAL_ANALYSIS.md) | MDACC: meta-analysis, fine-mapping, colocalization, TWAS inputs; limits of the shared files |
 | [Reference data and software](docs/REFERENCES.md) | Provenance, checksums and licences of everything in the image; MDACC release procedure |
-| [Seadragon validation](docs/SEADRAGON_VALIDATION.md) | Phase 0 results on MDACC's cluster |
+| [Testing and validation](docs/TESTING.md) | Automated tests and test data, cluster checks on seadragon, release checks |
 | [Changelog](CHANGELOG.md) | Release history |
 
 ## Repository layout
@@ -81,20 +81,10 @@ scripts/                     reference download, MDACC packaging and release scr
 
 ## Development
 
-```bash
-scripts/dev_env.sh /path/to/env        # conda/micromamba environment matching the image
-export PATH=/path/to/env/align/bin:/path/to/env/xqtl/bin:/path/to/env/irfinder/bin:$PWD/bin:$PATH
-python -m pytest tests/unit            # unit tests
-scripts/check_configs.sh               # every profile resolves
-nextflow run main.nf -profile local,dev,smoke --refs_dir tests/fixtures/refs_mini \
-    --restricted tests/fixtures/xqtl-restricted-test.tar.gz
-Rscript book/render_book.R             # documentation site into book/_book
-tests/scripts/test_bootstrap.sh        # bootstrap + run_xqtl.sh against a mock image tree
-containers/build_image.sh              # the image (needs Docker with buildx); see docs/REFERENCES.md
-```
+The local development environment, the automated tests and the image build are described in [Testing and validation](docs/TESTING.md).
 
 ## Licence and citation
 
-GPL-3.0 (see [LICENSE](LICENSE)). Embedded third-party software and reference data keep their own licences. Please cite the placental xQTL atlas and the tools listed in the collaboration brief.
+GPL-3.0 (see [LICENSE](LICENSE)). Embedded third-party software and reference data keep their own licences. Please cite the tools listed in the collaboration brief.
 
 Contact: Sean T. Bresnahan, MD Anderson Cancer Center, Bhattacharya Lab (stbresnahan@mdanderson.org).

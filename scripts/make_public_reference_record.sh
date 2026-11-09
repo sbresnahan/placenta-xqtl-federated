@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # MDACC only, run once per reference release on seadragon: package the public reference
-# files derived from the atlas for upload to a public Zenodo record.
+# files for upload to a public Zenodo record.
 #
-#   scripts/make_public_reference_record.sh --env scripts/packaging/seadragon.env --out DIR [--dry-run] [--threads N]
+#   scripts/make_public_reference_record.sh --env mdacc.env --out DIR [--dry-run] [--threads N]
 #
 # Writes DIR/ (flat, ready to upload as one Zenodo record):
 #   HPLRv2.0.annotated.gtf.gz, HPLRv2.0.annotated.PANTRY.gtf.gz, HPLRv2_classification.annotated.txt.gz
@@ -10,7 +10,7 @@
 #   placenta_music_reference.rds
 #   1kGP_hg38_pca_panel.{pgen,pvar.zst,psam}, 1kg_superpop.tsv
 #   rediportal_hg38.bed.gz                (only with INCLUDE_REDIPORTAL=yes)
-#   atlas_genome_contigs.tsv              (name, length, MD5 of the atlas genome FASTA)
+#   mdacc_genome_contigs.tsv              (name, length, MD5 of the MDACC genome FASTA)
 #   files.tsv, SHA256SUMS, README.md, build_log.txt
 # Then: upload everything in DIR to Zenodo (public), publish, and pin the record with
 #   scripts/pin_reference_record.py --record <id> --files DIR/files.tsv
@@ -39,20 +39,20 @@ size() { if [ -e "$1" ]; then du -sh "$1" 2>/dev/null | cut -f1; else echo MISSI
 
 # ---- inputs ---------------------------------------------------------------------------
 declare -a inputs=(
-  "ATLAS_HPLR_GTF|$ATLAS_HPLR_GTF"
-  "ATLAS_NORMALIZED_GTF|$ATLAS_NORMALIZED_GTF"
-  "ATLAS_CLASSIFICATION|$ATLAS_CLASSIFICATION"
-  "ATLAS_MUSIC_RDS|$ATLAS_MUSIC_RDS"
-  "ATLAS_GENOME_FASTA|$ATLAS_GENOME_FASTA"
+  "MDACC_HPLR_GTF|$MDACC_HPLR_GTF"
+  "MDACC_NORMALIZED_GTF|$MDACC_NORMALIZED_GTF"
+  "MDACC_CLASSIFICATION|$MDACC_CLASSIFICATION"
+  "MDACC_MUSIC_RDS|$MDACC_MUSIC_RDS"
+  "MDACC_GENOME_FASTA|$MDACC_GENOME_FASTA"
   "KGP_PFILE.pgen|$KGP_PFILE.pgen"
   "KGP_PFILE.pvar|$KGP_PFILE.pvar"
   "KGP_PFILE.psam|$KGP_PFILE.psam"
   "KGP_SUPERPOP|$KGP_SUPERPOP"
 )
 for g in grp_1 grp_2; do for p in upstream contained downstream; do
-  inputs+=("txrevise.$g.$p|$ATLAS_TXREVISE_DIR/txrevise.$g.$p.gff3")
+  inputs+=("txrevise.$g.$p|$MDACC_TXREVISE_DIR/txrevise.$g.$p.gff3")
 done; done
-[ "$INCLUDE_REDIPORTAL" = yes ] && inputs+=("ATLAS_REDIPORTAL_BED|$ATLAS_REDIPORTAL_BED")
+[ "$INCLUDE_REDIPORTAL" = yes ] && inputs+=("MDACC_REDIPORTAL_BED|$MDACC_REDIPORTAL_BED")
 
 missing=0
 log "inputs:"
@@ -70,7 +70,7 @@ done
 if [ "$dry" -eq 1 ]; then
   log "dry run: would write to $out"
   log "outputs: HPLRv2 GTFs + classification (gz), 6 txrevise GFF3 (gz), MuSiC .rds, 1kGP panel"
-  log "         (pgen/pvar.zst/psam + labels), atlas_genome_contigs.tsv$([ "$INCLUDE_REDIPORTAL" = yes ] && echo ', rediportal_hg38.bed.gz'),"
+  log "         (pgen/pvar.zst/psam + labels), mdacc_genome_contigs.tsv$([ "$INCLUDE_REDIPORTAL" = yes ] && echo ', rediportal_hg38.bed.gz'),"
   log "         files.tsv, SHA256SUMS, README.md, build_log.txt"
   [ "$missing" -eq 0 ] && [ "$tools_ok" -eq 1 ] && log "dry run: READY" || log "dry run: NOT READY ($missing missing input(s), tools ok=$tools_ok)"
   exit 0
@@ -84,14 +84,14 @@ exec > >(tee "$out/build_log.txt") 2>&1
 log "started; pipeline commit $(git -C "$here" rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
 gz() { gzip -n -9 -c "$1" > "$2"; log "wrote $(basename "$2")"; }
-gz "$ATLAS_HPLR_GTF" "$out/HPLRv2.0.annotated.gtf.gz"
-gz "$ATLAS_NORMALIZED_GTF" "$out/HPLRv2.0.annotated.PANTRY.gtf.gz"
-gz "$ATLAS_CLASSIFICATION" "$out/HPLRv2_classification.annotated.txt.gz"
+gz "$MDACC_HPLR_GTF" "$out/HPLRv2.0.annotated.gtf.gz"
+gz "$MDACC_NORMALIZED_GTF" "$out/HPLRv2.0.annotated.PANTRY.gtf.gz"
+gz "$MDACC_CLASSIFICATION" "$out/HPLRv2_classification.annotated.txt.gz"
 for g in grp_1 grp_2; do for p in upstream contained downstream; do
-  gz "$ATLAS_TXREVISE_DIR/txrevise.$g.$p.gff3" "$out/txrevise.$g.$p.gff3.gz"
+  gz "$MDACC_TXREVISE_DIR/txrevise.$g.$p.gff3" "$out/txrevise.$g.$p.gff3.gz"
 done; done
-cp "$ATLAS_MUSIC_RDS" "$out/placenta_music_reference.rds"; log "wrote placenta_music_reference.rds"
-if [ "$INCLUDE_REDIPORTAL" = yes ]; then gz "$ATLAS_REDIPORTAL_BED" "$out/rediportal_hg38.bed.gz"; fi
+cp "$MDACC_MUSIC_RDS" "$out/placenta_music_reference.rds"; log "wrote placenta_music_reference.rds"
+if [ "$INCLUDE_REDIPORTAL" = yes ]; then gz "$MDACC_REDIPORTAL_BED" "$out/rediportal_hg38.bed.gz"; fi
 
 # ---- 1kGP PCA panel ---------------------------------------------------------------------
 # keep the labelled samples (one-column #IID file, matched against the psam IIDs)
@@ -112,11 +112,11 @@ cp "$KGP_SUPERPOP" "$out/1kg_superpop.tsv"
 log "PCA panel: $(zstd -dc "$out/1kGP_hg38_pca_panel.pvar.zst" 2>/dev/null | grep -vc '^#' || echo '?') variants"
 
 # ---- genome provenance ------------------------------------------------------------------
-samtools dict "$ATLAS_GENOME_FASTA" \
+samtools dict "$MDACC_GENOME_FASTA" \
   | awk -F'\t' 'BEGIN { print "name\tlength\tmd5" }
                 $1 == "@SQ" { for (i = 2; i <= NF; i++) { split($i, a, ":"); v[a[1]] = substr($i, 4) }
-                              print v["SN"] "\t" v["LN"] "\t" v["M5"] }' > "$out/atlas_genome_contigs.tsv"
-log "atlas genome: $(($(wc -l < "$out/atlas_genome_contigs.tsv") - 1)) contigs"
+                              print v["SN"] "\t" v["LN"] "\t" v["M5"] }' > "$out/mdacc_genome_contigs.tsv"
+log "MDACC genome: $(($(wc -l < "$out/mdacc_genome_contigs.tsv") - 1)) contigs"
 
 # ---- checksums and record description ----------------------------------------------------
 ( cd "$out"
@@ -131,8 +131,7 @@ log "atlas genome: $(($(wc -l < "$out/atlas_genome_contigs.tsv") - 1)) contigs"
 cat > "$out/README.md" <<EOF
 # Public reference data for placenta-xqtl-federated
 
-Reference files derived from the placental xQTL atlas (MD Anderson Cancer Center,
-Bhattacharya Lab) and embedded in the placenta-xqtl-federated image. No individual-level data.
+Reference files prepared by MD Anderson Cancer Center (Bhattacharya Lab) and embedded in the placenta-xqtl-federated image. No individual-level data.
 
 - HPLRv2 long-read placental transcriptome: SQANTI3-annotated GTF, normalized GTF, classification table
 - txrevise event annotations (6 GFF3) built from HPLRv2
@@ -140,7 +139,7 @@ Bhattacharya Lab) and embedded in the placenta-xqtl-federated image. No individu
 - 1000 Genomes high-coverage (hg38) PCA panel: biallelic autosomal SNPs, MAF >= $PANEL_MAF,
   LD-pruned (--indep-pairwise $PANEL_PRUNE), with superpopulation labels
 $( [ "$INCLUDE_REDIPORTAL" = yes ] && echo "- REDIportal v3 hg38 A-to-I editing sites (BED6)" )
-- atlas_genome_contigs.tsv: contig names, lengths and MD5s of the genome FASTA used by the atlas
+- mdacc_genome_contigs.tsv: contig names, lengths and MD5s of the genome FASTA used for the MDACC signal list
 
 Checksums: SHA256SUMS. Provenance and licenses: docs/REFERENCES.md in
 https://github.com/sbresnahan/placenta-xqtl-federated

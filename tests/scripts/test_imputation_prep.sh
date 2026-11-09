@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# M6 acceptance test for --mode imputation_prep (tests/fixtures/imputation_prep):
+# End-to-end test of --mode imputation_prep (tests/fixtures/imputation_prep):
 #   1. GRCh37 VCF (1000 Genomes phase 3, chr22 slice, 40 samples) -> liftover -> chr22.vcf.gz whose
 #      variants sit at the GRCh38 positions and alleles of the same samples' GRCh38 genotypes
 #      (tests/fixtures/site/genotypes), plus the report, liftover summary and TOPMed checklist;

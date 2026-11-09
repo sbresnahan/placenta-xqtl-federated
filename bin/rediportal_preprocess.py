@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# Vendored unchanged from the atlas 03_phenotyping/rediportal_preprocess.py.
 """
 Convert a REDIportal hg38 table into the BED6 format expected by PANTRY's
 query_editing_level.py.
@@ -11,7 +10,7 @@ where strand (column 6) determines which mismatch counts as an edit:
     '-' strand -> C mismatches (T->I on reverse strand reads as T->C)
 
 REDIportal v3.0 download:
-    https://rediportal.cloud.ba.infn.it/atlas/search.html
+    https://rediportal.cloud.ba.infn.it/ (search / download page)
     Select hg38, download the full table (TSV/CSV).
 
 REDIportal v3.0 TABLE1_hg38 columns:
@@ -22,7 +21,7 @@ to positional defaults if detection fails.
 Chromosome naming:
     REDIportal v3 ships chr-prefixed names (chr1, chr2, ...). By default this
     script KEEPS the chr prefix so the output matches chr-prefixed references
-    (HPLRv2 GTF, hg38 FASTA used on seadragon). If your reference uses bare
+    (HPLRv2 GTF, GRCh38 FASTA). If your reference uses bare
     numbers (1, 2, ...), pass --strip-chr.
 
 Usage:

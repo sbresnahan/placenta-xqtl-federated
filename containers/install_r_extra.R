@@ -8,9 +8,9 @@ options(repos = c(CRAN = "https://cloud.r-project.org"), Ncpus = max(1L, paralle
 if (!requireNamespace("GenomeInfoDbData", quietly = TRUE))
   stop("GenomeInfoDbData is missing: the bioconda post-link download failed; rebuild the environment")
 pins <- list(
-  # HCP hidden covariates (atlas 19/25 steps)
+  # HCP hidden covariates
   Rhcpp = "mvaniterson/Rhcpp@a285e2baf379ef4ca21d14dc64733dd8dfc4f0d8",
-  # MuSiC deconvolution (atlas 18 steps)
+  # MuSiC deconvolution
   MuSiC = "xuranw/MuSiC@f21fe67f5670d5e9fca0ad7550abaae3423eb59c"
 )
 for (p in names(pins)) {

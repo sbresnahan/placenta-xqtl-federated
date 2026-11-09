@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """xqtl_assemble_bed.py -- assemble per-sample quantifications into phenotype BED files.
 
-Port of the atlas 03_phenotyping/assemble_bed.py (itself PANTRY's assemble_bed.py, MIT,
-github.com/PejLab/Pantry, with Salmon in place of kallisto). Changes for the federated pipeline:
+Modified from Pantry's assemble_bed.py (github.com/PejLab/Pantry, MIT licence):
+  * Salmon quant.sf input in place of kallisto;
   * GTF parsing uses bin/xqtl_gtf.py (no gtfparse dependency);
   * splicing clusters are keyed by the full cluster token, so frozen clusters (clu_N_strand, from
     the restricted file) and site-local novel clusters (nclu_N_strand) never collide;
-  * intron retention reads IRFinder-S per-sample tables (the atlas used MAJIQ; see
-    docs/PHENOTYPING.md); the LaDDR 'latent' subcommand is not used and was removed.
-Everything else (TSS coordinates, phenotype IDs, filters) is unchanged from the atlas.
+  * intron retention reads IRFinder-S per-sample tables (see docs/PHENOTYPING.md);
+  * no LaDDR 'latent' subcommand.
 """
 
 import argparse
@@ -85,7 +84,7 @@ def map_introns_to_genes(introns: list, exons: pd.DataFrame) -> pd.DataFrame:
     return clust_genes
 
 # =============================================================================
-# MODIFIED: load_salmon() replaces load_kallisto()
+# Salmon reader (Pantry's original reads kallisto abundance.tsv)
 # =============================================================================
 # Original kallisto version read abundance.tsv with:
 #   pd.read_csv(fname, sep='\t', index_col='target_id')
@@ -109,7 +108,6 @@ def load_salmon(sample_ids: list, salmon_dir: Path, units: str) -> pd.DataFrame:
     """Assemble Salmon TPM or NumReads outputs into a table.
 
     Reads quant.sf from each sample's output directory.
-    Replaces the original load_kallisto() function.
 
     Args:
         sample_ids: List of sample IDs.
@@ -143,8 +141,6 @@ def load_salmon(sample_ids: list, salmon_dir: Path, units: str) -> pd.DataFrame:
         counts.append(d)
     return pd.concat(counts, axis=1)
 
-# Keep a backward-compatible alias in case any code references the old name
-load_kallisto = load_salmon
 
 def assemble_alt_TSS_polyA(sample_ids: list, group1_dir: Path, group2_dir: Path, units: str, ref_anno: Path, bed: Path, min_frac: float = 0.05, max_frac: float = 0.95, skip_feature_filter: bool = False):
     """Assemble txrevise-based Salmon outputs into BED file

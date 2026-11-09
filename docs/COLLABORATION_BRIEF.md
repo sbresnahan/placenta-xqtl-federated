@@ -1,6 +1,6 @@
 # Collaboration brief: proposed analyses and summary files requested from participating cohorts
 
-**Project:** Multi-ancestry placental xQTL atlas
+**Project:** Multi-ancestry placental xQTL meta-analysis
 
 **Prepared for:** Participating placental cohort investigators, including PACEplacenta collaborators
 

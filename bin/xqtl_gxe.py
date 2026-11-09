@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""xqtl_gxe.py -- SNP x exposure (G x E) interaction scans at the site (atlas 07_gxe_mapping port).
+"""xqtl_gxe.py -- SNP x exposure (G x E) interaction scans at the site .
 
   xqtl_gxe.py exposures   --metadata M --config gxe.json --samples EUR=EUR.samples.tsv ... [--out-dir .]
   xqtl_gxe.py scan        --tier 1|2 --anc EUR --modality expression --exposure GA --chrom chr22
@@ -11,20 +11,20 @@
   xqtl_gxe.py sensitivity --anc EUR --modality expression --exposure GA --tier1 T1.parquet --bed --cov
                           --pfile --exposures --metadata --samples --config gxe.json --out EUR_expression_GA
 
-exposures (atlas 50 build_exposures): per enabled exposure in cohort.yml gxe.exposures, the metadata
+exposures: per enabled exposure in cohort.yml gxe.exposures, the metadata
   column is averaged over technical replicates to genotype IDs, range-filtered on the raw scale
   (min/max), transformed (none | log | inverse_normal), then continuous exposures are z-scored across
-  all samples of the mapped strata (atlas pools ancestries, so per-stratum b_GxE share one scale).
+  all samples of the mapped strata, so per-stratum b_GxE share one scale.
   Binary exposures (0/1) are not scaled. Writes gxe_exposures.tsv (per individual; never exported)
   and <ANC>.gxe_exposures.tsv per stratum: n, raw-unit mean/SD, the pooled scale used for z, cases,
   controls, prevalence, and status (available | exposure_unavailable | insufficient_n |
   insufficient_cases), plus a 'pooled' row.
 
-scan (atlas 52 cis-perm / nominal, gxe_core math, mirrors tensorQTL calculate_interaction_nominal):
+scan (cis permutation / nominal, gxe_core math, mirrors tensorQTL calculate_interaction_nominal):
   Y = G + E + G x E + covariates over the +-window cis window, one chromosome per call.
   Y: the stratum's normalized phenotype, autosomes only, z-scored within the stratum; rows with SD
   < 1e-8 dropped. Covariates: the modality's final mapping covariates; a row named like the exposure
-  is dropped. Genotypes: hard calls by default (atlas), --dosages for dosages; missing values are
+  is dropped. Genotypes: hard calls by default, --dosages for dosages; missing values are
   mean-imputed; variants need MAF >= --maf in the analysed samples and MAF >= --maf-interaction in
   both halves of the stable-sorted exposure.
   Tier 1: every phenotype; adaptive phenotype permutations (--blocks, stop when running p > --stop-p),
@@ -35,7 +35,7 @@ scan (atlas 52 cis-perm / nominal, gxe_core math, mirrors tensorQTL calculate_in
 merge: tier 1 -> Storey q on pval_beta within stratum x modality x exposure (BH fallback recorded);
   tier 2 -> per-phenotype top variant and BH q within the stratum (summary only; the cross-ancestry
   and cross-study IVW runs centrally). Each merge writes a status row.
-sensitivity (atlas 55): tier-1 hits with q <= --fdr are refitted with Y ~ G + E + G:E + sum_j G:C_j +
+sensitivity: tier-1 hits with q <= --fdr are refitted with Y ~ G + E + G:E + sum_j G:C_j +
   covariates, C_j = enabled gxe.sensitivity covariates (new columns also as main effects; ancestry_pcs
   uses the PC rows of the covariate table as interactions only). Status OFF (none enabled) |
   BLOCKED (metadata columns missing) | DONE.
@@ -169,7 +169,7 @@ def cmd_exposures(a):
 
 # ------------------------------------------------------------------------------------------ inputs
 def interaction_maf_mask(G, interaction, maf_threshold_interaction=0.05):
-    """Atlas 52 / tensorqtl.core.filter_maf_interaction for one interaction term."""
+    """tensorqtl.core.filter_maf_interaction for one interaction term."""
     if not (0.0 <= maf_threshold_interaction <= 0.5):
         raise ValueError(f"maf_threshold_interaction must be between 0 and 0.5; got {maf_threshold_interaction}")
     if maf_threshold_interaction <= 0:
@@ -298,7 +298,7 @@ def cmd_scan(a):
     n = len(samples)
     if n < a.min_n:
         return write_scan(a, [], cols, status_row(a, comp, "SKIPPED", "insufficient_n", n=n), t2_untested("insufficient_n"))
-    # phenotypes z-scored within the stratum (atlas 50), then aligned to the analysis samples
+    # phenotypes z-scored within the stratum, then aligned to the analysis samples
     vals = zscore_rows(onchr[bed_samples].to_numpy(dtype=np.float64))
     zdf = pd.DataFrame(vals, index=onchr["phenotype_id"].values, columns=bed_samples)
     good = np.isfinite(vals).all(1)
@@ -468,7 +468,7 @@ def cmd_merge(a):
 
 # ------------------------------------------------------------------------------------------ sensitivity
 def ols_b_se(y, X, idx):
-    """Atlas 55 ols_b_se: OLS via lstsq; (b, se, p) for column idx."""
+    """OLS via lstsq; (b, se, p) for column idx."""
     from scipy import stats
     beta, _, rank, _ = np.linalg.lstsq(X, y, rcond=None)
     resid = y - X @ beta

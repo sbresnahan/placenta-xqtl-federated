@@ -4,7 +4,7 @@
 #   xqtl_hcp.R --bed EUR_expression.bed.gz --qc-metrics qc_metrics.tsv --samples EUR.samples.tsv \
 #              --k 10 --out EUR_expression.hcp_k10.tsv [--max-phenotypes 20000 --seed 20261029]
 #
-# Atlas hcp_from_matrix.R: QC metrics (keyed by rnaseq_id, column 'sample') are averaged over
+# QC metrics (keyed by rnaseq_id, column 'sample') are averaged over
 # technical replicates per genotype_id, median-imputed, zero-variance metrics dropped and
 # metrics with |r| > 0.9 pruned iteratively (most partners first); phenotypes with variance
 # < 1e-10 are dropped and at most --max-phenotypes are sampled (seeded). Both matrices are

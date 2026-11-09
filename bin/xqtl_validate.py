@@ -194,7 +194,7 @@ def check_metadata(path, params, rep, sample_ids):
         rep.err("metadata.sex", f"sex must be M/F (or male/female); bad rows e.g. {bad_sex[:5]}")
     n_missing_sex = sum(1 for r in rows if not r["sex"])
     if n_missing_sex:
-        rep.warn("metadata.sex_missing", f"{n_missing_sex} sample(s) with missing sex are imputed with the mode, as in the atlas")
+        rep.warn("metadata.sex_missing", f"{n_missing_sex} sample(s) with missing sex are imputed with the mode")
     bad_ga = [r["rnaseq_id"] for r in rows if as_float(r["GA"]) is None or not (20 <= as_float(r["GA"]) <= 45)]
     if bad_ga:
         rep.err("metadata.GA", f"GA (weeks at delivery) must be numeric in [20, 45]; bad rows e.g. {bad_ga[:5]}")
@@ -427,7 +427,7 @@ def main(argv=None):
     ap.add_argument("--mode", required=True, choices=sorted(MODE_REQUIRES))
     ap.add_argument("--out-json", required=True)
     ap.add_argument("--out-report", required=True)
-    ap.add_argument("--no-file-check", action="store_true", help="skip FASTQ existence checks (tests)")
+    ap.add_argument("--no-file-check", action="store_true", help="skip FASTQ existence checks")
     a = ap.parse_args(argv)
 
     with open(a.params) as fh:

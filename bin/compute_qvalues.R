@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
-# Ported verbatim from Placenta_xQTL_atlas/05_qtl_mapping/compute_qvalues.R (commit 22be872).
-# Only change: the hard-coded seadragon lab library is replaced by the optional
-# XQTL_R_LIBS env var (colon-separated), prepended to .libPaths() when set.
+# Storey q-values (R qvalue) for a tensorQTL permutation table.
+# Optional XQTL_R_LIBS (colon-separated) is prepended to .libPaths() when set.
 local({ x <- Sys.getenv("XQTL_R_LIBS"); if (nzchar(x)) .libPaths(c(strsplit(x, ":")[[1]], .libPaths())) })
 # =============================================================================
 # compute_qvalues.R — Storey q-values via the R qvalue package (GTEx convention)

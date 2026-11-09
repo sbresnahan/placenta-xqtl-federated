@@ -2,7 +2,7 @@
 # xqtl_ancestry.R -- PC-AiR on the merged cohort + 1000 Genomes panel and ancestry assignment.
 # Called by xqtl_ancestry.sh; see that script for the overall logic.
 #
-# Assignment: nearest superpopulation centroid (panel samples) on PCs 1-10 (atlas PC_AiR.R).
+# Assignment: nearest superpopulation centroid (panel samples) on PCs 1-10.
 # Confidence: posterior probability of the assigned label from a QDA classifier fitted to the
 # panel PCs 1-10 (equal priors); samples below --prob-min are "unassigned". Ancestry groups with >= --min-n unique genotyped
 # individuals become mapping strata.

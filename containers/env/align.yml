@@ -1,4 +1,4 @@
-# Alignment / quantification tools at the atlas pins (cannot co-solve with R 4.3.1,
+# Alignment / quantification tools at pinned versions (cannot co-solve with R 4.3.1,
 # so they are a separate environment; the image puts this env's bin first on PATH).
 name: xqtl-align
 channels:

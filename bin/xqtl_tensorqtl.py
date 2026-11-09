@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""xqtl_tensorqtl.py -- tensorQTL cis mapping for one stratum x modality arm (atlas 27_run_tensorqtl.py).
+"""xqtl_tensorqtl.py -- tensorQTL cis mapping for one stratum x modality arm.
 
 Subcommands (common: --bed --geno PREFIX --cov COVARIATES.tsv [--groups FILE] --window --maf --seed):
   cis          permutation scan (map_cis, nperm), Storey q on pval_beta via compute_qvalues.R

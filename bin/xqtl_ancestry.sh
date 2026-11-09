@@ -5,11 +5,11 @@
 #                    --superpop REFS/ancestry/1kg_superpop.tsv --metadata metadata.tsv \
 #                    --min-n 50 --prob-min 0.8 --groups AFR,AMR,EAS,EUR,SAS --out cohort [--threads N]
 #
-# Atlas logic (01_genotype_imputation/PC_AiR.R): cohort and panel are intersected on
+# Method: cohort and panel are intersected on
 # chr:pos:ref:alt, merged, filtered (MAF 0.05, missingness 0.05) and LD-pruned
 # (--indep-pairwise 1000 100 0.1); KING-robust kinship and PC-AiR (1000 Genomes samples as the
 # unrelated set) give the PCs; each sample is assigned to the nearest superpopulation centroid
-# on PCs 1-10. Added for the federated pipeline: an assignment confidence (posterior of the
+# on PCs 1-10, with an assignment confidence (posterior of the
 # assigned label from a QDA classifier on the panel PCs); samples below --prob-min are "unassigned".
 # Outputs (prefix OUT): _ancestry.tsv, _strata.tsv, _pca.png, _pcair_pcs.tsv,
 # stratum_<ANC>.samples.tsv for every ancestry group with n >= --min-n.

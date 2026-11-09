@@ -1,7 +1,7 @@
 # placenta-xqtl-federated main software environment (Python 3.11 + R 4.3.1 / Bioconductor 3.18).
 #
-# Single source of truth for the image (containers/Dockerfile) AND for the local test
-# environment (scripts/dev_env.sh). Tools whose atlas pins cannot co-solve with R 4.3.1
+# Single source of truth for the image (containers/Dockerfile) AND for the local development
+# environment (scripts/dev_env.sh). Tools whose pinned versions cannot co-solve with R 4.3.1
 # live in env/align.yml (STAR 2.7.4a, Salmon 1.10.2, samtools 1.16.1, ...); the image
 # puts both environments on PATH (align first). Python packages not on conda
 # (torch, tensorQTL) are in requirements-pip.txt; R packages from GitHub/CRAN only

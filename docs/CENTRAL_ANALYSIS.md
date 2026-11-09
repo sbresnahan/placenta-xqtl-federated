@@ -101,7 +101,7 @@ For every modality and chromosome in file A, each variant–feature pair is meta
 - random effects: DerSimonian–Laird τ², weights 1/(SEᵢ² + τ²);
 - heterogeneity: Cochran's Q with its p-value, and I² = max(0, (Q − df)/Q).
 
-The meta EAF and N are N-weighted means and sums. Unit tests check these against a hand calculation. Splicing features in site-specific novel clusters (`nclu_`, `novel` = true in file E) are excluded, because their IDs differ between sites ([Phenotyping](PHENOTYPING.md#splicing-frozen-and-novel-clusters)).
+The meta EAF and N are N-weighted means and sums. Splicing features in site-specific novel clusters (`nclu_`, `novel` = true in file E) are excluded, because their IDs differ between sites ([Phenotyping](PHENOTYPING.md#splicing-frozen-and-novel-clusters)).
 
 Output: `meta/<modality>_<chrom>.parquet` with `scope, modality, chrom, phenotype_id, variant_id, tss_distance, n, eaf, k, beta_fe, se_fe, z_fe, p_fe, beta_re, se_re, p_re, tau2, q_het, p_het, i2, n_freq_outlier, contrib_mask`.
 
@@ -150,7 +150,7 @@ Treat SuSiE-coloc and ColocBoost as two readouts of the same data, not independe
 
 **G×C** (file G). For every lead pair × cell type, the interaction coefficients are harmonized and meta-analysed by IVW within each ancestry and across all contributions when at least `central.gxc_min_contributions` contributed (`method` = `ivw`); otherwise the single p-value is kept (`method` = `single`). BH q-values are computed per scope and modality. The central **primary cell type** of a pair is its cell type with the smallest q, if q ≤ `central.fdr`; otherwise `unassigned`. The maternal-contamination refits are meta-analysed the same way (`maternal_*` columns). Outputs: `interactions/gxc_meta.tsv.gz` and `gxc_annotation.tsv.gz`.
 
-**GxE tier 1** (atlas script 54). Per modality × exposure × phenotype, the contributions' adaptive-permutation p-values are combined by ACAT (`p_feature_acat`), with BH q-values over all phenotypes of the modality × exposure (`q_feature_acat`). The **scope label** describes agreement between contributions:
+**GxE tier 1.** Per modality × exposure × phenotype, the contributions' adaptive-permutation p-values are combined by ACAT (`p_feature_acat`), with BH q-values over all phenotypes of the modality × exposure (`q_feature_acat`). The **scope label** describes agreement between contributions:
 
 | Scope | Meaning |
 |---|---|
@@ -158,7 +158,7 @@ Treat SuSiE-coloc and ColocBoost as two readouts of the same data, not independe
 | `shared_concordant_lead` | several contributions, all with the same lead interaction variant; that variant's interaction effect is meta-analysed by IVW (`beta_meta`, `p_meta`, `i2`) |
 | `shared_discordant_lead` | several contributions with different lead variants; only the ACAT p-value is given |
 
-`significant_any` and `significant_all` show whether the site q ≤ `central.fdr` in any or all contributions. Output: `interactions/gxe_tier1_meta.tsv.gz`. The atlas computed this BH over features shared by several contributions only; here it covers all features, including `single_study` ones.
+`significant_any` and `significant_all` show whether the site q ≤ `central.fdr` in any or all contributions. Output: `interactions/gxe_tier1_meta.tsv.gz`. The BH correction covers all features, including `single_study` ones.
 
 **GxE tier 2.** Sites estimate interaction effects per SD of the exposure in their own stratum. For continuous, untransformed exposures these are rescaled to a common unit, the pooled SD over all contributions (`gxe_exposure_scales.tsv`), using the raw-unit SDs in file H. Variant-level effects are then meta-analysed by IVW per modality × exposure. The top variant per phenotype is flagged and BH-adjusted across phenotypes (`q_top_bh`, descriptive only, as at the sites). Outputs: `interactions/tier2/gxe_tier2_meta_<modality>_<exposure>.parquet` and `gxe_tier2_top.tsv.gz`.
 
@@ -202,10 +202,6 @@ The files A–J are designed for the analyses above. Some analyses need data tha
 | Ancestry reassignment, local-ancestry or admixture-aware mapping | No | Individual genotypes | Site analysis, or data-transfer agreement |
 | Sample-level QC review (sample swaps, outliers, relatedness) | No | Individual data | Site only |
 | varQTLs, maternal eQTLs, eQTMs and other site-directed analyses | No | Individual data | Site only (no files to share) |
-
-## Test fixture
-
-`tests/fixtures/central/make_gwas.py` writes a synthetic GWAS from one export's LD window: one causal variant shared with a planted cis effect (colocalizing) and one nearby independent causal variant (a distinct signal, H3). `tests/scripts/test_central.sh` runs `--mode site` for two independent test cohorts, then `--mode central`. Cohort 1 is the site fixture (`tests/fixtures/site`, parquet export). Cohort 2 (`tests/fixtures/site2`, built by `tests/fixtures/make_central_fixture.sh`) has 120 other 1000 Genomes samples (60 EUR, 60 EAS), the same planted effects with other random seeds, and is exported as `tsv.gz`. Splitting one fixture into two cohorts was not possible: each ancestry stratum needs at least `ancestry.min_n` = 50 samples, and that floor is a privacy safeguard. The test adds a BED of the planted variants (±1 kb) as an enrichment annotation and gives study 2 as a path relative to `studies.tsv`. `tests/scripts/check_central.py` checks ingest, the planted signals at meta, feature, fine-mapping, colocalization, G×C and GxE level, the tier-1 scope labels, the TWAS input files and the summary. `tests/scripts/check_central_ivw.R` recomputes the fixed- and random-effects IVW (Q, I², τ²) in R from the raw file A rows of both exports and loads every FUSION weight file. The test runs in CI once the development image contains the SuShiE environment.
 
 ## References
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # extract_snuh_chr22.sh -- MDACC-side helper (run once on seadragon) that cuts the chr22 read
-# pairs out of the atlas SNUH (cohort3, PRJNA820329) STAR BAMs and archives them as FASTQ for the
+# pairs out of MDACC STAR alignments of the public SNUH runs (PRJNA820329) and archives them as FASTQ for the
 # phenotyping test fixture (tests/fixtures/fastq; see tests/fixtures/make_fastq_fixture.sh).
 #
 # What is kept: primary alignments (-F 0x900) of pairs whose two mates both align to chr22.
 # Pairs with a mate elsewhere or unaligned are dropped (STAR writes no unmapped reads by default).
-# The BAMs hold the atlas's Trim Galore-trimmed reads, so read lengths vary (<= 101 bp).
+# The BAMs hold Trim Galore-trimmed reads, so read lengths vary (<= 101 bp).
 # samtools fastq restores reverse-strand reads to their sequenced orientation.
 # The BAMs are only read: their index is written to the scratch directory, not next to the BAM.
 #
@@ -19,7 +19,7 @@
 #         <ACC>_R2.fastq.gz, manifest.tsv and versions.txt. Upload the .tar.
 set -euo pipefail
 
-BAM_DIR=/rsrch9/home/epi/bhattacharya_lab/data/Placenta_QTL/PANTRY/cohort3/intermediate/star_out
+BAM_DIR=${BAM_DIR:-.}
 OUT_DIR=${PWD}
 THREADS=4
 REGION=chr22
@@ -60,7 +60,7 @@ for acc in "${ACCS[@]}"; do
         continue
     fi
     echo "[$(date +%T)] $acc"
-    # index into scratch (read-only use of the atlas BAM)
+    # index into scratch (read-only use of the BAM)
     samtools index -@ "$THREADS" -o "$TMP/${acc}.bai" "$bam"
     if [ "$(samtools view -H "$bam" | awk -v c="SN:${REGION}" '$1 == "@SQ" && $2 == c { n++ } END { print n + 0 }')" -ne 1 ]; then
         echo "ERROR: contig $REGION not in $bam header" >&2

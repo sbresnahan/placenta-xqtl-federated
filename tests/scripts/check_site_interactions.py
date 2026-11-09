@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""check_site_interactions.py EXPORT_COHORT_DIR ANC...  -- M5 acceptance checks (G x C and G x E, files G/H).
+"""check_site_interactions.py EXPORT_COHORT_DIR ANC...  -- interaction checks (G x C and G x E, files G/H).
 
 Per stratum, against the plants in tests/fixtures/make_site_fixture.py and the restricted test signals:
   G  * ENSGFIX0000011 (planted G x Cytotrophoblast) has primary cell type Cytotrophoblast, q <= 0.05;
@@ -9,7 +9,7 @@ Per stratum, against the plants in tests/fixtures/make_site_fixture.py and the r
   H  * tier 1: ENSGFIX0000021 x GA (planted, expression) q <= 0.05 with b_gi > 0;
      * tier 2: the planted variant chr22:20290948:A:G is the top variant of ENSGFIX0000021;
      * the splicing plant (clu_31 intron 1) is tested in tier 1 (main-effect / flag target only:
-       the atlas normalization attenuates a splicing interaction below detection at n = 60);
+       splicing normalization attenuates a splicing interaction below detection at n = 60);
      * H_status: tier1, tier2 and sensitivity DONE for expression x GA;
      * H_sensitivity: maternal_age refit of ENSGFIX0000021 present and stable.
 Only these pairs are asserted: other assignments at q <= 0.05 can occur by chance in 60 samples.

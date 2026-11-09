@@ -2,7 +2,7 @@
 # Build tests/fixtures/phenotyping/xqtl-restricted-phenotyping-test.tar.gz, the restricted file used
 # by -profile test_phenotyping.
 #
-# The real restricted file holds the atlas leafCutter clusters, which cannot be published. For the
+# The real restricted file holds the MDACC frozen leafCutter clusters, which cannot be published. For the
 # test we cluster the 8 fixture samples' junctions with the pipeline's own leafCutter settings and
 # "freeze" every other cluster (renumbered clu_<1000+k>_<strand> so frozen and local IDs differ).
 # A phenotyping run then sees half its clusters matched to the frozen set and half flagged novel,

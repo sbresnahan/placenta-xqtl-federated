@@ -2,9 +2,6 @@
 """
 xqtl_gxe_core.py -- torch core for SNP x exposure (GxE) cis-interaction scans.
 
-Ported from the placenta xQTL atlas, 07_gxe_mapping/gxe_core.py, without changes to the
-statistics. Not ported: transmitted_dosage (atlas script 56, transmitted / non-transmitted
-alleles, is not part of the federated pipeline).
 
 Statistical model (Objective 2.1):
     Y = b_g * G + b_e * E + b_gi * (G x E) + Z_cov * gamma + eps
@@ -21,8 +18,8 @@ The regression math mirrors tensorQTL 1.0.10
 
 rss is evaluated in closed form, rss = p0'p0 - b'(X'X)b = p0'p0 - b'w with
 w = X'p0 (algebraically identical to the explicit residual sum of squares;
-float32 relative error ~1e-6, verified against tensorQTL in the
-atlas test_gxe_scan.py). The closed form is what makes the permutation scan cheap.
+float32 relative error ~1e-6, verified against tensorQTL
+calculate_interaction_nominal). The closed form is what makes the permutation scan cheap.
 
 Permutation scheme (tier 1): PHENOTYPE permutation, the GTEx/tensorQTL
 convention. Each permutation reorders the RAW phenotype (breaking its

@@ -102,7 +102,7 @@ Any previous `export/` folder is removed first.
 
 ## Site-side processing behind the export
 
-| Step | Method (atlas-compatible) |
+| Step | Method |
 |---|---|
 | Genotype QC | TOPMed R² ≥ `qc.rsq_min`, biallelic. Dosages are kept and hard calls are the nearest genotype. Per-stratum MAF, MAC, HWE and missingness filters, then PC outliers (6 SD on PC1–5) are removed |
 | Ancestry | PC-AiR on KING-robust kinship against the 1000 Genomes panel. Each sample gets the nearest superpopulation centroid on PCs 1–10. Samples are "unassigned" if the QDA posterior for that label is below `ancestry.assign_prob_min`. Strata below `ancestry.min_n` are counted but not mapped |

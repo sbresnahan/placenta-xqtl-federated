@@ -1,7 +1,7 @@
-"""Unit tests for bin/xqtl_gxe_core.py and bin/xqtl_gxe.py (G x E, atlas 07_gxe_mapping port).
+"""Unit tests for bin/xqtl_gxe_core.py and bin/xqtl_gxe.py (G x E).
 
 The interaction math is checked against tensorQTL itself (calculate_interaction_nominal,
-filter_maf_interaction), as in the atlas test_gxe_scan.py; those tests need torch + tensorQTL
+filter_maf_interaction); those tests need torch + tensorQTL
 (present in the image) and are skipped where they are not installed (CI unit job).
 """
 import json

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""check_site_truth.py EXPORT_COHORT_DIR TRUTH.tsv ANC... [--feature-q-warn]  -- M3 acceptance checks on a test export.
+"""check_site_truth.py EXPORT_COHORT_DIR TRUTH.tsv ANC... [--feature-q-warn]  -- planted-signal checks on a test export.
 
 For every planted effect in TRUTH.tsv and every listed stratum:
   * the phenotype is significant (qval <= 0.05) in the permutation table B of its arm

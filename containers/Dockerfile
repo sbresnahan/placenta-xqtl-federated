@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # =============================================================================
 # placenta-xqtl-federated: one self-contained, offline image
-#   software (atlas pins) + public references + Java runtime + Nextflow + pipeline code
+#   pinned software + public references + Java runtime + Nextflow + pipeline code
 #
 # Build from the repository root (containers/build_image.sh does all of this):
 #   scripts/fetch_references.sh download --cache /path/refs_cache   # public refs, sha256-verified

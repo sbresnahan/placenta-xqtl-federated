@@ -1,4 +1,4 @@
-"""Unit tests for bin/xqtl_signals.py (signal test sets) and bin/xqtl_gxc.py (G x C, atlas 49 port)."""
+"""Unit tests for bin/xqtl_signals.py (signal test sets) and bin/xqtl_gxc.py (G x C)."""
 import os
 import shutil
 import subprocess

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# M3/M5 acceptance test: --mode site on the chr22 1000 Genomes fixture, end to end.
+# End-to-end test: --mode site on the chr22 1000 Genomes fixture, end to end.
 #   1. -profile test,<engine> --mode site runs genotype QC -> ancestry -> mapping -> LD ->
 #      G x C / G x E -> export;
 #   2. the planted cis effects in tests/fixtures/site/TRUTH.tsv are recovered in EUR and EAS

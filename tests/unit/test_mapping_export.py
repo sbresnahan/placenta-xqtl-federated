@@ -1,4 +1,4 @@
-"""Unit tests for the M3 helpers: leak scanner, export finalize, covariate pruning, k selection,
+"""Unit tests for the mapping and export helpers: leak scanner, export finalize, covariate pruning, k selection,
 modality combination and parquet merging (no tensorQTL / R needed)."""
 import gzip
 import json

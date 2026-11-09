@@ -1,9 +1,8 @@
 /*
  * --mode smoke : validate a new site before any real data are touched.
  *
- * Runs the Phase 0 checks (seadragon GO, 2026-10-29) against the single pipeline
- * image: container start on compute nodes, embedded tools and references, the
- * restricted file, CPU/memory enforcement, retry on memory kill, fan-out, job
+ * Checks, against the single pipeline image: container start on compute nodes,
+ * embedded tools and references, the restricted file, CPU/memory enforcement, retry on memory kill, fan-out, job
  * arrays, bind mounts, tensorQTL (CPU, optional GPU) and the q-value bridge.
  * Every check writes "test_id <TAB> status <TAB> detail"; SMOKE_SUMMARY writes
  * smoke_summary.tsv with a GO / NO-GO verdict. No real data are used: genotype and
@@ -229,7 +228,7 @@ process SMOKE_TENSORQTL {
     """
 }
 
-// Storey q-values through the atlas file bridge (tensorQTL -> TSV -> R qvalue); no rpy2.
+// Storey q-values through a file bridge (tensorQTL -> TSV -> R qvalue); no rpy2.
 process SMOKE_QVALUE {
     label 'process_single'
     errorStrategy 'ignore'

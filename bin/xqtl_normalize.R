@@ -5,9 +5,7 @@
 #       --modality expression --samples EUR.samples.tsv [--exclude EUR_expression.outliers.tsv] \
 #       --out EUR_expression
 #
-# Ported from the atlas (05_qtl_mapping/normalize_expression_hcp.R, vst mode, and
-# normalize_modalities.R). At a single site the stratum is one cohort, so "within-cohort INT"
-# is INT over the stratum.
+# Per-stratum phenotype normalization; INT is applied over the stratum.
 #   expression          TPM > 0.1 in > 25% of samples, drop no-variance genes; TMM -> VST on
 #                       counts (terminal, no INT); connectivity outliers (signed bicor adjacency,
 #                       z < -3) are removed and written to OUT.outliers.tsv
@@ -17,7 +15,7 @@
 #   then (non-VST)      drop no-variance / < 2 observed features; median impute; quantile
 #                       normalization (ties averaged); rank-based inverse normal transform
 # Technical replicates: columns are renamed rnaseq_id -> genotype_id and replicate columns are
-# averaged after normalization (atlas order). Without --counts, expression falls back to
+# averaged after normalization. Without --counts, expression falls back to
 # QN + INT (reported in OUT.norm_summary.tsv).
 #
 # Outputs: OUT.bed.gz (columns = genotype IDs), OUT.phenotype_groups.txt (if phenotype IDs are
@@ -40,7 +38,7 @@ for (k in c("bed", "modality", "samples", "out")) if (is.null(opt[[k]])) stop("x
 mod <- opt$modality
 TPM_MODALITIES <- c("expression", "isoform_usage", "isoform_expression")
 
-# ---- helpers (atlas) --------------------------------------------------------------------
+# ---- helpers -------------------------------------------------------------------------
 quantile_normalize_rows <- function(mat) {           # samples x features
   t_mat <- t(mat)
   mean_dist <- rowMeans(apply(t_mat, 2, sort))
@@ -67,7 +65,7 @@ tmm_vst <- function(counts_mat) {                    # samples x features
   dds <- DESeq2::DESeqDataSetFromMatrix(round(g), colData = data.frame(row.names = colnames(g)), design = ~ 1)
   DESeq2::sizeFactors(dds) <- eff / exp(mean(log(eff)))
   # vst() fits the dispersion trend on nsub = 1000 features with mean normalized count > 5. Small
-  # feature sets (test fixtures, single chromosomes) have fewer; then fit on all features instead
+  # feature sets (e.g. a single chromosome) have fewer; then fit on all features instead
   # (varianceStabilizingTransformation is what vst() calls on the subset).
   n_ok <- sum(rowMeans(DESeq2::counts(dds, normalized = TRUE)) > 5)
   vs <- if (n_ok >= 1000L) DESeq2::vst(dds, blind = TRUE, nsub = 1000L) else

@@ -10,9 +10,8 @@ they only check that tensorQTL, torch, and the requested device work.
 Usage: tensorqtl_smoke.py --device cpu|cuda --threads N --out result.tsv
 Also writes cis_perm.tsv (phenotype_id, pval_beta) for the q-value bridge test (T9q).
 
-The tensorQTL import warning "'rfunc' cannot be imported" is expected: like the
-atlas, we never use tensorQTL's rpy2 path (calculate_qvalues / logp=True); Storey
-q-values come from R qvalue through compute_qvalues.R instead.
+The tensorQTL import warning "'rfunc' cannot be imported" is expected: the
+pipeline never uses tensorQTL's rpy2 path (calculate_qvalues / logp=True); Storey q-values come from R qvalue through compute_qvalues.R instead.
 """
 import argparse
 import os
@@ -82,7 +81,6 @@ def main():
         return 0
     dt = time.time() - t0
     # pval_beta table for the Storey q-value bridge (T9q, compute_qvalues.R in the R image),
-    # exactly as 27_run_tensorqtl.py hands it over in the atlas
     res[["pval_beta"]].rename_axis("phenotype_id").to_csv("cis_perm.tsv", sep="\t")
     top_p = float(res.loc["feat0", "pval_beta"])
     ok = top_p < 1e-3

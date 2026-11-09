@@ -1,6 +1,5 @@
 #!/usr/bin/env Rscript
-# Ported from the atlas 03_phenotyping/tximport_counts.R (Placenta_xQTL_atlas, GPL-3.0); site library paths replaced
-# by the optional XQTL_R_LIBS variable. Logic unchanged.
+# Optional XQTL_R_LIBS (colon-separated) is prepended to the R library path.
 # =============================================================================
 # tximport_counts.R
 # -----------------------------------------------------------------------------

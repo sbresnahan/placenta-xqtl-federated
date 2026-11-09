@@ -1,7 +1,7 @@
 /*
- * Interaction processes (M5): signal test sets, G x C at lead signals (atlas 49), G x E exposures,
- * tier-1 / tier-2 scans sharded by chromosome, merges and the SNP x covariate sensitivity
- * (atlas 07_gxe_mapping 50/52/54/55). Outputs are published to ${outdir}/site/<ANC>/ with the
+ * Interaction processes: signal test sets, G x C at lead signals, G x E exposures,
+ * tier-1 / tier-2 scans sharded by chromosome, merges and the SNP x covariate sensitivity.
+ * Outputs are published to ${outdir}/site/<ANC>/ with the
  * <ANC>_ prefix that EXPORT_STRATUM and --mode export read; the per-individual exposure table and
  * the extracted MDACC signal list stay in the work directory.
  */

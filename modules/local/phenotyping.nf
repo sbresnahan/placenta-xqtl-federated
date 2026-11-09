@@ -1,7 +1,7 @@
 /*
- * Phenotyping processes (atlas 03_phenotyping, PANTRY-based): per-sample alignment and
+ * Phenotyping processes (Pantry-based): per-sample alignment and
  * quantification, cohort-level assembly of the nine phenotype BEDs, Picard QC metrics and MuSiC
- * cell-type proportions. Tool flags mirror the atlas; differences are listed in docs/PHENOTYPING.md.
+ * cell-type proportions. Tool settings are listed in docs/PHENOTYPING.md.
  * Per-sample intermediates stay in the work directory; finished tables are published by
  * PHENO_FINALIZE to ${outdir}/phenotypes/.
  */
@@ -300,7 +300,7 @@ process AGG_EDITING {
     path 'rna_editing.site_to_phenotype.tsv', emit: site_map
 
     script:
-    // atlas: coverage >= 20 reads in at least min(max(10, ceil(0.1 n)), n) samples; sites not clustered
+    // editing sites: coverage >= 20 reads in at least min(max(10, ceil(0.1 n)), n) samples; sites not clustered
     """
     n=\$(grep -c . ${samples})
     min_s=\$(awk -v n="\$n" 'BEGIN{m=int(0.1*n); if (m < 0.1*n) m++; if (m < 10) m=10; if (m > n) m=n; print m}')

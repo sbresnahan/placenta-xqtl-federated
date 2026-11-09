@@ -186,7 +186,7 @@ With `--use_gpu`, tasks labelled `process_gpu_capable` go to `--gpu_queue`, requ
 
 - **Apptainer ≥ 1.0** is recommended (`-profile <scheduler>,apptainer`).
 - On sites where Apptainer is installed under the name `singularity`, or where only SingularityCE ≥ 3.8 is available, use `-profile <scheduler>,singularity`. Seadragon is in this group (Apptainer 1.5 invoked as `singularity`).
-- Docker is used only for CI (`-profile test,docker`).
+- Docker (`-profile <scheduler>,docker`) suits workstations; most clusters do not allow it.
 
 The image is a local file. `run_xqtl.sh` passes its path as `--sif`, so nothing is pulled at run time and no image cache is needed (`NXF_APPTAINER_CACHEDIR` and `NXF_SINGULARITY_CACHEDIR` are unused).
 
@@ -218,7 +218,7 @@ Compute nodes at most sites have no internet access, and the pipeline never need
 
 ## Running the head inside a batch job
 
-Running Nextflow on a login node is fine for short runs, but many sites kill long login-node processes. For full runs, submit the head as an ordinary batch job; it then submits tasks as further jobs. Phase 0 confirmed this works on seadragon (head job on the `medium` queue).
+Running Nextflow on a login node is fine for short runs, but many sites kill long login-node processes. For full runs, submit the head as an ordinary batch job; it then submits tasks as further jobs. This was confirmed on seadragon (head job on the `medium` queue).
 
 Templates are in `assets/head_job/` (`lsf.sh`, `slurm.sh`, `pbs.sh`, `sge.sh`). The essential settings are:
 
@@ -298,7 +298,7 @@ WARN and SKIP lines do not block a GO, but they tell you which defaults to adjus
 
 ## Worked example: seadragon (MD Anderson)
 
-Seadragon runs IBM LSF with Apptainer 1.5.1, invoked as `singularity`. The built-in profile `conf/sites/seadragon.config` encodes the Phase 0 results (appendix *Seadragon validation*):
+Seadragon runs IBM LSF with Apptainer 1.5.1, invoked as `singularity`. The built-in profile `conf/sites/seadragon.config` encodes the results of the cluster checks run there ([Testing and validation](TESTING.md#cluster-checks-on-seadragon)):
 
 ```groovy
 includeConfig '../executors/lsf.config'
@@ -319,12 +319,12 @@ executor { perJobMemLimit = true }
 Why each value:
 
 - **Queues.** Seadragon's submission filter (esub) rejects walltimes outside each queue's range: `short` ≤ 3 h, `medium` more than 3 h and under 24 h, `long` 24–120 h. The rule `medium:23h59m` keeps 24-hour tasks out of `medium`.
-- **Memory.** `LSF_UNIT_FOR_LIMITS=GB` and `LSB_MEMLIMIT_ENFORCE=y`: memory is per job, in GB, and enforced. Phase 0 saw the over-limit task killed with exit 130 and retried successfully with 4 GB.
-- **CPUs.** `LSB_RESOURCE_ENFORCE="cpu gpu"` confines each job to its requested cores (Phase 0: `nproc=4` for a 4-core request).
+- **Memory.** `LSF_UNIT_FOR_LIMITS=GB` and `LSB_MEMLIMIT_ENFORCE=y`: memory is per job, in GB, and enforced. In the cluster checks, the over-limit task was killed with exit 130 and retried successfully with 4 GB.
+- **CPUs.** `LSB_RESOURCE_ENFORCE="cpu gpu"` confines each job to its requested cores (`nproc=4` for a 4-core request).
 - **Bind paths.** Project data live on `/rsrch5` and `/rsrch9`.
 - **Network.** Compute nodes have no internet. Of the container registries, `ghcr.io` and `quay.io` were reachable from login nodes at about 0.6 MB/s; Docker Hub, `gcr.io` and Amazon ECR were blocked or unreliable. Download the SIF once (about 3–4 h at that speed) or copy it by Globus.
 - **Building images.** `apptainer build --fakeroot` with package installation fails on seadragon (apt exit 100). Never build images there; use the published SIF.
-- **Head.** Both a login-node head and a head inside an LSF job (`medium` queue, 1 core, 4 GB) passed Phase 0.
+- **Head.** Both a login-node head and a head inside an LSF job (`medium` queue, 1 core, 4 GB) passed the cluster checks.
 
 ## Tuning table
 

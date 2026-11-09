@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# M4 acceptance test: FASTQ -> phenotype BEDs on the chr22 SNUH fixture (8 public placenta samples,
-# PRJNA820329, reads cut to chr22; docs/PHENOTYPING.md#test-fixture).
+# End-to-end test: FASTQ -> phenotype BEDs on the chr22 SNUH fixture (8 public placenta samples,
+# PRJNA820329, reads cut to chr22; docs/TESTING.md).
 #   1. -profile test_phenotyping,<engine> --mode prepare_references builds the site indices
 #      (STAR, Salmon expression + 4 txrevise sets, IRFinder-S, Picard references) for chr22;
 #   2. --mode phenotyping_only produces every modality BED, the QC table and the normalized

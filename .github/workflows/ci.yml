@@ -1,5 +1,6 @@
 # Continuous integration: unit tests, configuration and syntax checks, linters, and the
-# site validation checks inside the development image (when that image exists).
+# end-to-end tests inside the development image (skipped until that image is published).
+# See docs/TESTING.md.
 name: ci
 
 on:
@@ -130,11 +131,6 @@ jobs:
         env:
           NXF_OPTS_EXTRA: --image ${{ env.DEV_IMAGE }}
         run: |
-          # development images built before the central release lack the SuShiE environment
-          if ! docker run --rm --entrypoint bash "$DEV_IMAGE" -c 'command -v sushie-python' > /dev/null; then
-            echo "::notice::development image lacks SuShiE; central test skipped"
-            exit 0
-          fi
           # the R recalculation runs in the image (data.table); the workspace is mounted at the same path
           # shellcheck disable=SC2016  # $PWD and $@ are expanded when the wrapper runs
           printf '#!/usr/bin/env bash\nexec docker run --rm -v "%s:%s" -w "$PWD" --entrypoint Rscript "%s" "$@"\n' \
@@ -146,11 +142,6 @@ jobs:
         env:
           NXF_OPTS_EXTRA: --image ${{ env.DEV_IMAGE }}
         run: |
-          # development images built before the phenotyping release lack Picard / the IRFinder-S patch
-          if ! docker run --rm --entrypoint bash "$DEV_IMAGE" -c 'command -v picard' > /dev/null; then
-            echo "::notice::development image predates phenotyping support; phenotyping test skipped"
-            exit 0
-          fi
           mkdir -p "$PWD/pheno_test"
           docker run --rm --entrypoint bash "$DEV_IMAGE" -c \
             "gzip -cdf /opt/xqtl/refs/genome/GRCh38_no_alt_analysis_set.fa.gz | awk '/^>/{p = (\$1 == \">chr22\")} p'" \
@@ -161,10 +152,6 @@ jobs:
         env:
           NXF_OPTS_EXTRA: --image ${{ env.DEV_IMAGE }}
         run: |
-          if ! docker run --rm --entrypoint bash "$DEV_IMAGE" -c 'command -v picard' > /dev/null; then
-            echo "::notice::development image lacks Picard; imputation_prep test skipped"
-            exit 0
-          fi
           mkdir -p "$PWD/ip_test"
           if [ -s "$PWD/pheno_test/chr22.fa" ]; then cp "$PWD/pheno_test/chr22.fa" "$PWD/ip_test/chr22.fa"; else
             docker run --rm --entrypoint bash "$DEV_IMAGE" -c \

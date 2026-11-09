@@ -6,7 +6,7 @@
 #                                        [--expected TSV --expected-mode strict|report]
 #   scripts/fetch_references.sh all      --cache DIR --out DIR ...   (download, then build)
 #
-# download  needs curl + sha256sum only (runs on the CI runner or any host). Every file is
+# download  needs curl + sha256sum only (runs on any host). Every file is
 #           checked against the sha256 pinned in assets/refs_sources.tsv; a mismatch is fatal.
 # build     needs bgzip + samtools + python3 (runs inside the image build, so the outputs are
 #           made by the image's pinned tools and are byte-identical between builds). Writes
@@ -127,19 +127,19 @@ do_build() {
   done < <(rows)
   [ "$built" -gt 0 ] || die "nothing was built"
 
-  # Provenance check: does the public genome equal the one the atlas was built on?
-  # (genome/atlas_genome_contigs.tsv is written by make_public_reference_record.sh)
+  # Provenance check: does the public genome equal the one used for the MDACC signal list?
+  # (genome/mdacc_genome_contigs.tsv is written by make_public_reference_record.sh)
   local fa; fa=$(rows | awk -F'\t' '$6 == "bgzip_fasta" && !n++ {print $7}')  # no early exit: SIGPIPE under pipefail
-  if [ -n "$fa" ] && [ -s "$out/genome/atlas_genome_contigs.tsv" ]; then
+  if [ -n "$fa" ] && [ -s "$out/genome/mdacc_genome_contigs.tsv" ]; then
     local tmpd; tmpd=$(mktemp -d)
     samtools dict "$out/$fa" | awk -F'\t' '$1=="@SQ"{for(i=2;i<=NF;i++){split($i,a,":"); v[a[1]]=substr($i,4)} print v["SN"]"\t"v["LN"]"\t"v["M5"]}' \
       | sort > "$tmpd/public_contigs.tsv"
-    grep -v '^#' "$out/genome/atlas_genome_contigs.tsv" | awk -F'\t' 'NR>1' | sort > "$tmpd/atlas_contigs.tsv"
-    if cmp -s "$tmpd/public_contigs.tsv" "$tmpd/atlas_contigs.tsv"; then
-      log "genome: identical to the atlas genome (all contig names, lengths and MD5s match)"
+    grep -v '^#' "$out/genome/mdacc_genome_contigs.tsv" | awk -F'\t' 'NR>1' | sort > "$tmpd/mdacc_contigs.tsv"
+    if cmp -s "$tmpd/public_contigs.tsv" "$tmpd/mdacc_contigs.tsv"; then
+      log "genome: identical to the MDACC genome (all contig names, lengths and MD5s match)"
     else
-      log "WARNING: genome differs from the atlas genome in these contigs (name, length, md5):"
-      diff "$tmpd/atlas_contigs.tsv" "$tmpd/public_contigs.tsv" | grep '^[<>]' | sed -n '1,20p' || true
+      log "WARNING: genome differs from the MDACC genome in these contigs (name, length, md5):"
+      diff "$tmpd/mdacc_contigs.tsv" "$tmpd/public_contigs.tsv" | grep '^[<>]' | sed -n '1,20p' || true
     fi
     rm -rf "$tmpd"
   fi

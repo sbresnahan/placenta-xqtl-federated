@@ -195,7 +195,7 @@ def write_checklist(out_dir, cfg, chroms, tot, rate, lift, warnings, n_samples):
         "3. Settings:",
         "   - Reference panel: **TOPMed (Version R3 on GRCh38)**.",
         "   - Array build: **GRCh38/hg38** (the files are already on GRCh38, whatever the input build was).",
-        "   - rsq filter: **off** (the pipeline applies `qc.rsq_min` itself, as the atlas did).",
+        "   - rsq filter: **off** (the pipeline applies `qc.rsq_min` itself).",
         "   - Phasing: **Eagle v2.4** (the files are unphased; choose *No phasing* only if you phased them yourself).",
         "   - Population: **all** / vs. TOPMed panel.",
         "   - Mode: **Quality Control & Imputation**.",

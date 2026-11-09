@@ -3,7 +3,7 @@
 # samplesheet/metadata (tests/fixtures/phenotyping) from snuh_chr22_fastq.tar.
 #
 # Source: 8 placentas of the SNUH cohort (BioProject PRJNA820329, public). The archive is written by
-# tests/fixtures/extract_snuh_chr22.sh from the atlas STAR BAMs (reads already Trim Galore-trimmed):
+# tests/fixtures/extract_snuh_chr22.sh from STAR BAMs (reads already Trim Galore-trimmed):
 # read pairs with both mates aligned to chr22, about 170k-275k pairs per sample.
 #
 # Reduction for the repository: base qualities are replaced by a constant '?' (Phred 30), which is

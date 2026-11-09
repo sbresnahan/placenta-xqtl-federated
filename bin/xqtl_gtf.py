@@ -1,4 +1,4 @@
-"""xqtl_gtf.py -- minimal GTF reader (replaces gtfparse.read_gtf for the ported atlas/PANTRY scripts).
+"""xqtl_gtf.py -- minimal GTF reader (replaces gtfparse.read_gtf for the Pantry-derived scripts).
 
 read_gtf(path, features=None) returns a pandas DataFrame with the columns gtfparse produces
 (seqname, source, feature, start, end, score, strand, frame) plus one column per attribute

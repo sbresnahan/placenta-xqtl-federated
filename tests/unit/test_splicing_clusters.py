@@ -1,4 +1,4 @@
-"""Unit tests for bin/xqtl_splicing_clusters.py and the atlas splicing-ID conversion."""
+"""Unit tests for bin/xqtl_splicing_clusters.py and the MDACC splicing-ID conversion."""
 import gzip
 import os
 import sys
@@ -9,7 +9,7 @@ from conftest import REPO, load
 
 S = load("xqtl_splicing_clusters")
 sys.path.insert(0, os.path.join(REPO, "scripts", "lib"))
-import atlas_restricted_tables as A  # noqa: E402
+import restricted_tables as A  # noqa: E402
 
 
 def wgz(p, text):
@@ -47,7 +47,7 @@ def test_merge_with_no_local_clusters(tmp_path):
     assert gzip.open(tmp_path / "o.gz", "rt").read().splitlines()[1:] == ["chr1:100:200:clu_7_+ 3 4"]
 
 
-def test_atlas_splicing_ids_rewritten_to_frozen_clusters():
+def test_mdacc_splicing_ids_rewritten_to_frozen_clusters():
     jmap = {("chr22", 100, 200, "+"): "clu_7_+"}
     assert A.canonical_splicing("ENSG1.2__chr22_100_200_clu_33_+", jmap) == "ENSG1.2__chr22_100_200_clu_7_+"
     assert A.canonical_splicing("chr22:100:200:clu_3_+", jmap) == "chr22_100_200_clu_7_+"

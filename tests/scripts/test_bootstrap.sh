@@ -73,7 +73,7 @@ APPTAINER_CONTAINER="$sif" bash "$ep" bootstrap "$dest" --force > /dev/null
 
 # ---- 3. run_xqtl.sh: offline Nextflow with the exported Java only ---------------------------
 devpath=$(command -v python3 | xargs dirname)
-clean_path="$(dirname "$(command -v STAR 2>/dev/null || echo /nonexistent/x)"):$devpath:$(dirname "$(command -v IRFinder 2>/dev/null || echo /nonexistent/x)"):$repo/bin:/usr/bin:/bin"
+clean_path="$(dirname "$(command -v STAR 2>/dev/null || echo /nonexistent/x)"):$devpath:$(dirname "$(command -v picard 2>/dev/null || echo /nonexistent/x)"):$(dirname "$(command -v sushie-python 2>/dev/null || echo /nonexistent/x)"):$(dirname "$(command -v IRFinder 2>/dev/null || echo /nonexistent/x)"):$repo/bin:/usr/bin:/bin"
 if PATH="$clean_path" command -v java > /dev/null 2>&1; then
   echo "NOTE  a java is on the clean PATH ($(PATH="$clean_path" command -v java)); the run still uses JAVA_HOME"
 fi

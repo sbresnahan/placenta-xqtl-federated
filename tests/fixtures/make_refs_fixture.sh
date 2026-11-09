@@ -3,10 +3,10 @@
 #
 # STAND-IN ANNOTATION: the committed fixture uses GENCODE v45 chr22, not HPLRv2 (HPLRv2 is public
 # only through the MDACC reference record). Genes of type protein_coding or lncRNA and their
-# transcripts tagged "basic" are kept and written in the normalized form the atlas uses
-# (prep_PANTRY_gtf.R output: gene lines, gene_biotype / transcript_biotype / gene_name attributes).
-# txrevise events are then built from it exactly as in the atlas reference prep (PANTRY txrevise
-# scripts: extractTranscriptTags.py -> prepareAnnotations.R -> constructEvents.R, one batch -> merge).
+# transcripts tagged "basic" are kept and written in the normalized form of the HPLRv2 PANTRY GTF
+# (gene lines, gene_biotype / transcript_biotype / gene_name attributes).
+# txrevise events are then built from it with the Pantry txrevise
+# scripts (extractTranscriptTags.py -> prepareAnnotations.R -> constructEvents.R, one batch -> merge).
 # PANTRY's preprocess_gtf.py is not needed: the normalized GTF already carries the biotype fields.
 #
 # Requirements (development only, not in the image): python3, R with optparse, dplyr, purrr,
@@ -95,7 +95,7 @@ with open(out, "w") as o:
 EOF
 gzip -9 -n -c "$GTF" > "$OUT/annotation/gencode.v45.chr22.PANTRY.gtf.gz"
 
-# ---- 2. txrevise events (PANTRY scripts, as in atlas 001/002/003_refprep) -----------------
+# ---- 2. txrevise events (PANTRY scripts) -----------------
 TX=${TMP}/txrevise
 mkdir -p "$TX/batch"
 python3 "$PANTRY/phenotyping/scripts/txrevise/extractTranscriptTags.py" \
@@ -103,7 +103,7 @@ python3 "$PANTRY/phenotyping/scripts/txrevise/extractTranscriptTags.py" \
 Rscript "$PANTRY/phenotyping/scripts/txrevise/prepareAnnotations.R" \
     --gtf "$GTF" --tags "$TX/transcript_tags.txt" --out "$TX/txrevise_annotations.rds"
 # constructEvents.R is single-threaded (~2 s per gene): run NBATCH gene batches in parallel, then
-# concatenate them in batch order (as the atlas merge of its batch array does)
+# concatenate them in batch order
 NBATCH=${NBATCH:-$(nproc)}
 seq 1 "$NBATCH" | xargs -P "$NBATCH" -I{} Rscript "$PANTRY/phenotyping/scripts/txrevise/constructEvents.R" \
     --annot "$TX/txrevise_annotations.rds" --batch "{} $NBATCH" --out "$TX/batch" > "$TX/construct.log" 2>&1 \
@@ -121,11 +121,11 @@ done
 # ---- 3. README + checksums ------------------------------------------------------------------
 cat > "$OUT/README.txt" <<'EOF'
 chr22 phenotyping reference fixture (tests only; rebuilt by tests/fixtures/make_refs_fixture.sh).
-annotation/  GENCODE v45 chr22 stand-in for HPLRv2, normalized like the atlas (prep_PANTRY_gtf.R form)
-txrevise/    txrevise events from that annotation (PANTRY txrevise scripts, atlas settings)
+annotation/  GENCODE v45 chr22 stand-in for HPLRv2, in the HPLRv2 PANTRY GTF form
+txrevise/    txrevise events from that annotation (PANTRY txrevise scripts)
 editing/     REDIportal hg38 sites on chr22 (BED6), cut from the MDACC reference record
 music/       mini MuSiC reference: 254 chr22 genes, <= 30 cells per cell type x donor (3,857 cells)
-             editing/ and music/ are made by tests/fixtures/extract_atlas_refs_chr22.sh (seadragon)
+             editing/ and music/ are made by tests/fixtures/extract_refs_chr22.sh
 The genome is not stored here: the tests cut chr22 out of the image's GRCh38 FASTA.
 EOF
 ( cd "$OUT" && find . -type f ! -name MD5SUMS | sort | xargs md5sum > MD5SUMS )

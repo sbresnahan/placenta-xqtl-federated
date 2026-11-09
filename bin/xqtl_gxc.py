@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""xqtl_gxc.py -- genotype x cell-type interaction at lead xQTL signals (atlas 49 port).
+"""xqtl_gxc.py -- genotype x cell-type interaction at lead xQTL signals.
 
   xqtl_gxc.py --anc EUR --modality expression --pairs EUR_expression.gx_pairs.tsv \
       --bed EUR_expression.bed.gz --cov EUR_expression.covariates.tsv --pfile EUR \
       --samples EUR.samples.tsv --cell-props cell_proportions.tsv [--exclude Maternal] \
       [--min-n 20] [--maternal-threshold 0.10] [--fdr 0.05] [--workers 1] --out EUR_expression
 
-Model per pair x target cell type (atlas 06/49 _fit_gxc), OLS with a t-test:
+Model per pair x target cell type, OLS with a t-test:
     Y ~ 1 + g0 + c0 + g0:c0 + Z
   Y   the stratum's normalized phenotype (BED columns = genotype IDs)
   g0  ALT dosage from the stratum pgen, centred over the analysed samples
@@ -17,7 +17,7 @@ Cell proportions are per RNA-seq sample and are averaged over technical replicat
 IDs. Targets: every cell type except --exclude (default Maternal). Maternal sensitivity: the same
 fit after setting Y to missing for samples with maternal fraction > --maternal-threshold.
 Status: ok | no_common_samples | insufficient_n | monomorphic | no_celltype_variation |
-rank_deficient | insufficient_df | invalid_se (atlas). BH q within stratum x modality over ok tests.
+rank_deficient | insufficient_df | invalid_se. BH q within stratum x modality over ok tests.
 
 Writes OUT.gxc.parquet (one row per pair x cell type; untested pairs one row with cell_type empty)
 and OUT.gxc_annotation.tsv.gz (one row per pair: best cell type by (q, p); primary_cell_type is
@@ -51,7 +51,7 @@ def bh(p):
 
 
 def fit_gxc(y, g, cell, cov, min_n=20):
-    """Atlas _fit_gxc: y, g, cell are Series on sample IDs; cov a samples x covariates frame."""
+    """One G x C fit: y, g, cell are Series on sample IDs; cov a samples x covariates frame."""
     from scipy import stats
     common = y.index.intersection(g.index).intersection(cell.index)
     if cov is not None and len(cov.columns):

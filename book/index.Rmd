@@ -17,7 +17,7 @@ Pipeline version: **`r PIPELINE_VERSION`**. These pages are built from the [`doc
 
 - **Cohort investigators:** read the [Collaboration brief](#collaboration-brief) for the aims, the analyses each site runs and the files requested.
 - **Analysts running the pipeline:** start with the quick start below, then the [HPC configuration guide](#hpc).
-- **Results:** the appendix [Seadragon validation](#seadragon-validation) shows what the site smoke test checks on a real cluster.
+- **Maintainers:** the appendix [Testing and validation](#testing) describes the automated tests, the cluster checks on seadragon and the release checks.
 
 ## Quick start
 

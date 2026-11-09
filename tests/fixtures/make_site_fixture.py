@@ -31,12 +31,12 @@ N_GENES = 40
 GENE_FROM, GENE_TO = 19_300_000, 21_200_000
 # planted cis effects: (modality, gene index, effect per ALT allele on the log2 / logit scale)
 PLANTED = [("expression", 5, 1.2), ("expression", 15, -1.0), ("splicing", 25, 1.5)]
-# planted interaction effects (M5), drawn from a separate generator (SEED + 2) after all the M3
-# draws so the cis-only fixture above stays identical. Effect per ALT allele =
+# planted interaction effects, drawn from a separate generator (SEED + 2) after all the cis-effect
+# draws so the cis-only part of the fixture does not depend on them. Effect per ALT allele =
 # main + slope * z, where z is the z-scored modifier across all RNA samples:
 #   gxc: z = arcsinh(Cytotrophoblast proportion); gxe: z = GA.
 # The expression plants are the statistical G x C / G x E targets of test_site.sh. The splicing
-# plant is a main-effect and flag target only: with ~110 fixture features per sample, the atlas
+# plant is a main-effect and flag target only: with ~110 fixture features per sample, the
 # quantile normalization + INT of ratios leaves too little of its slope for n = 60 to detect.
 # (modality, gene index, main effect, interaction label, slope)
 PLANTED_INTERACTION = [("expression", 10, 1.2, "gxc:Cytotrophoblast", 0.6),
@@ -267,7 +267,7 @@ def build(a):
         for i in range(3):
             st, en = s0 + 1000 * i, s0 + 1000 * i + 700 + 300 * i
             pid = f"{g}__chr22:{st}:{en}:clu_{k + 1}_{strand[k]}"
-            # atlas convention: every phenotype BED row carries its gene's TSS (start = TSS - 1)
+            # every phenotype BED row carries its gene's TSS (start = TSS - 1)
             rows.append({"chr": "chr22", "start": int(tss[k]) - 1, "end": int(tss[k]), "phenotype_id": pid,
                          "values": list(map(float, ratio[i]))})
             groups.append((pid, g))

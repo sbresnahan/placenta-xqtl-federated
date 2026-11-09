@@ -12,8 +12,8 @@ def refInput(c, key, rel) {
     return c[key] ?: "${c.refs_dir}/${rel}".toString()
 }
 
-// Only the upstream / downstream event sets feed phenotypes (alternative TSS / polyA), as in the atlas
-// and Pantry; the 'contained' sets are distributed with the references but not indexed.
+// Only the upstream / downstream event sets feed phenotypes (alternative TSS / polyA), as in
+// Pantry; the 'contained' sets are distributed with the references but not indexed.
 def txreviseSets() {
     return ['grp_1', 'grp_2'].collectMany { g -> ['upstream', 'downstream'].collect { p -> "txrevise.${g}.${p}".toString() } }
 }

@@ -1,6 +1,6 @@
 # Phenotyping
 
-This page describes how a site's RNA-seq FASTQs become the nine molecular phenotypes that are mapped by `--mode site`. The steps follow the placenta xQTL atlas (scripts `02_rnaseq_quantification` and `03_phenotyping`), which builds on [Pantry](https://github.com/PejLab/Pantry) (MIT licence, `LICENSES/PANTRY-MIT.txt`). Places where the federated pipeline differs from the atlas are listed at the end.
+This page describes how a site's RNA-seq FASTQs become the nine molecular phenotypes that are mapped by `--mode site`. The steps build on [Pantry](https://github.com/PejLab/Pantry) (MIT licence, `LICENSES/PANTRY-MIT.txt`). Implementation choices are listed at the end.
 
 Phenotyping runs in two modes:
 
@@ -63,14 +63,14 @@ FASTQs are used as delivered: there is no adapter or quality trimming. STAR soft
 | `rna_editing` | editing levels at sites covered ≥ 20 reads in at least max(10, 10 % of samples), collapsing sites that correlate above 0.9 |
 | `stability` | exonic / intronic read ratio per gene |
 
-All BEDs use the gene TSS as coordinates (`start = TSS − 1`, `end = TSS`), and features of grouped modalities are named `GENE__feature`. `qc_metrics.tsv` has the Picard metrics plus `SubjectBias.GC` and `SubjectBias.GENE_LENGTH` (per-sample Pearson correlation of log2(TPM + 1) with gene exonic GC content and length; Mostafavi et al. 2013). As in the atlas, a metric missing for a sample is replaced by the cohort median.
+All BEDs use the gene TSS as coordinates (`start = TSS − 1`, `end = TSS`), and features of grouped modalities are named `GENE__feature`. `qc_metrics.tsv` has the Picard metrics plus `SubjectBias.GC` and `SubjectBias.GENE_LENGTH` (per-sample Pearson correlation of log2(TPM + 1) with gene exonic GC content and length; Mostafavi et al. 2013). A metric missing for a sample is replaced by the cohort median.
 
 ### Splicing: frozen and novel clusters
 
-Splicing phenotypes are only comparable between studies if every site uses the same leafCutter clusters. The restricted file therefore holds the atlas clusters (`splicing/frozen_clusters.tsv.gz`, IDs `clu_<n>_<strand>`). Each site:
+Splicing phenotypes are only comparable between studies if every site uses the same leafCutter clusters. The restricted file therefore holds a frozen cluster set (`splicing/frozen_clusters.tsv.gz`, IDs `clu_<n>_<strand>`). Each site:
 
 1. counts its junction reads in the frozen clusters (leafCutter with the frozen clusters as the refined cluster file);
-2. clusters its junctions locally with the atlas settings (`--maxintronlen 100000 --minclureads 30 --mincluratio 0.001`);
+2. clusters its junctions locally (`--maxintronlen 100000 --minclureads 30 --mincluratio 0.001`);
 3. keeps local clusters that share no junction with the frozen set, renamed `nclu_<n>_<strand>`.
 
 Phenotype IDs are `GENE__chrom_start_end_clu_<n>_<strand>`; novel clusters carry `nclu_`. Novel-cluster junctions are mapped and exported like the others, and the `novel` column of the splicing features file flags them. Only junctions in frozen clusters can be meta-analysed across studies; novel clusters are cohort-specific. `splicing.clusters_summary.tsv` counts the frozen, matched and novel clusters.
@@ -93,49 +93,16 @@ MuSiC estimates cell-type proportions for each RNA-seq sample from gene TPM, usi
 
 `<outdir>/phenotypes/` has the layout `phenotypes_dir` expects, so a later `--mode site` run can map it directly. None of these files leave the site.
 
-## Differences from the atlas
+## Implementation notes
 
-| Area | Atlas | Federated pipeline | Why |
-|---|---|---|---|
-| Intron retention | MAJIQ | IRFinder-S | MAJIQ's licence does not allow redistribution in the image |
-| Splicing clusters | clusters from the pooled atlas cohorts | frozen atlas clusters + site-specific novel clusters | sites cannot pool junctions |
-| BAMs for regtools / featureCounts | shrunk BAMs | full BAMs | one BAM per sample, fewer steps |
-| Salmon expression index | atlas-built index | annotation transcripts from `gffread`, no decoy sequences | rebuilt from public files at each site |
-| Picard | in the main environment | separate Java environment in the image | dependency conflict |
-| IRFinder-S | stock | memory check lowered (`IRFINDER_MIN_RAM_MB`) | the stock check refuses to run below 32 GB even when far less is needed |
-| txrevise sets | upstream / downstream | the same; the `contained` sets are shipped but not indexed | matches the atlas |
-| Cell proportions | technical replicates collapsed | one estimate per RNA-seq sample | consistent with the other phenotypes |
-| Small feature sets | — | VST dispersion fit on all features when fewer than 1,000 have mean count > 5 | only affects tests and single-chromosome runs |
-
-## Test fixture
-
-`tests/scripts/test_phenotyping.sh` runs `prepare_references` and `phenotyping_only` on 8 public SNUH placenta samples (PRJNA820329), with reads cut to chr22 (`tests/fixtures/phenotyping/`, built by `tests/fixtures/make_fastq_fixture.sh`). It uses GENCODE v45 chr22, processed with Pantry's txrevise steps, as a public stand-in for the HPLRv2 annotation (`tests/fixtures/refs_chr22/`, built by `tests/fixtures/make_refs_fixture.sh`). The test's restricted file freezes every other leafCutter cluster of these samples, so both frozen and novel clusters are exercised (`tests/fixtures/make_phenotyping_restricted.sh`). The fixture FASTQs have constant base qualities (they were rebuilt from BAMs). `rna_editing` and MuSiC run on chr22 cuts of the REDIportal sites and of the single-cell reference (`tests/fixtures/refs_chr22/editing/`, `music/`). With only 254 chr22 genes in that reference, the test's cell proportions check that the step runs; they are not realistic estimates.
-
-On the chr22 fixture, IRFinder-S writes an empty `intergenic.ROI.bed`, because it only keeps intergenic regions on chromosome names of up to two characters. This does not affect IR ratios.
-
-## Concordance with the atlas
-
-The 8 fixture samples are also in the atlas (cohort 3), so the pipeline's phenotypes can be compared with the atlas values for the same samples. For this check the pipeline was run on the fixture reads with the HPLRv2 chr22 annotation and txrevise events, and with the atlas leafCutter clusters as the frozen set. The script is `tests/scripts/compare_atlas_phenotypes.R`. The atlas phenotype files are not public and are not in the repository; `tests/fixtures/extract_atlas_refs_chr22.sh` collects them on seadragon.
-
-| Modality | Pipeline features | Atlas features | Shared | Median per-feature Spearman ρ (8 samples) | Median per-sample ρ |
-|---|---|---|---|---|---|
-| expression | 327 | 327 | 327 | 0.91 | 0.99 |
-| isoform_expression | 767 | 893 | 765 | 0.88 | 0.96 |
-| isoform_usage | 767 | 893 | 765 | 0.86 | 0.97 |
-| alt_tss | 572 | 737 | 570 | 0.88 | 0.90 |
-| alt_polya | 526 | 654 | 522 | 0.71 | 0.93 |
-| splicing | 520 | 597 | 514 | 0.98 | — |
-| intron_retention | 884 | 247 | 77 (matched by intron overlap) | 0.72 | — |
-| rna_editing | 680 | 1,071 | 679 | 0.83 | — |
-| stability | 104 | 136 | 104 | 1.00 | 0.999 |
-
-Every pipeline sample matched its own atlas sample better than any other sample, in every modality. Per-sample ρ is shown only where values are on a natural scale. The atlas splicing, intron-retention and editing values are rank-normal transformed, which leaves per-feature ranks unchanged. The differences have known causes:
-
-- **Reads and genome.** The fixture reads were cut to chr22 and realigned to chr22 alone, whereas the atlas aligned and quantified against the whole genome. Multi-mapping reads and TPM scaling therefore differ. Expression TPMs are compared after rescaling each sample to its total over the shared features.
-- **Feature filters.** The atlas selected features across its whole cohort. Most atlas-only isoform, TSS, polyA and stability features have zero or missing values in these 8 samples. The atlas editing sites passed coverage filters across the whole cohort, not in these 8 samples.
-- **Intron retention.** The atlas used MAJIQ intron segments and the pipeline uses IRFinder-S whole introns, so only the 77 atlas segments that lie inside a pipeline intron of the same gene can be compared.
-- **Editing.** The fixture FASTQs have constant base qualities, so base-quality filters act differently from the atlas.
-- **Small sample.** With 8 samples, per-feature ρ is noisy. For alt_polya and isoform usage, the median absolute difference between pipeline and atlas ratios is under 0.01.
-
-Cell proportions from the chr22 mini reference are not comparable with the atlas estimates, which used the full reference.
-
+| Area | Choice | Why |
+|---|---|---|
+| Intron retention | IRFinder-S | MAJIQ's licence does not allow redistribution in the image |
+| Splicing clusters | frozen MDACC clusters + site-specific novel clusters | sites cannot pool junctions |
+| BAMs for regtools / featureCounts | full BAMs | one BAM per sample, fewer steps |
+| Salmon expression index | annotation transcripts from `gffread`, no decoy sequences | built from the image's references at each site |
+| Picard | separate Java environment in the image | dependency conflict |
+| IRFinder-S | memory check lowered (`IRFINDER_MIN_RAM_MB`) | the stock check refuses to run below 32 GB even when far less is needed |
+| txrevise sets | upstream / downstream indexed; the `contained` sets are shipped but not indexed | as in Pantry |
+| Cell proportions | one estimate per RNA-seq sample | consistent with the other phenotypes |
+| Small feature sets | VST dispersion fit on all features when fewer than 1,000 have mean count > 5 | only affects single-chromosome runs |

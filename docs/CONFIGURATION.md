@@ -59,7 +59,7 @@ PL002,/data/fastq/PL002_R1.fastq.gz,/data/fastq/PL002_R2.fastq.gz
 |---|---|---|
 | `rnaseq_id` | yes | Matches `sample_id` in the samplesheet |
 | `genotype_id` | yes | Sample ID in the imputed VCFs |
-| `sex` | yes | Fetal sex: `M`/`F` (or `male`/`female`); missing values are imputed with the most common value, as in the atlas |
+| `sex` | yes | Fetal sex: `M`/`F` (or `male`/`female`); missing values are imputed with the most common value |
 | `GA` | yes | Gestational age at delivery, weeks, 20–45 |
 | `ppBMI`, `gdm`, `ogtt` | no | Exposures for GxE (`gdm` coded 0/1) |
 | `maternal_age`, `parity`, `smoking` | no | Sensitivity covariates for GxE |
@@ -95,7 +95,7 @@ Other columns are ignored with a warning. None of these values leave the site.
 
 ### `imputation_prep`
 
-Filters applied before upload to the TOPMed Imputation Server (atlas `filter_vcf_for_imputation`).
+Filters applied before upload to the TOPMed Imputation Server.
 
 | Key | Default | Meaning |
 |---|---|---|
@@ -179,7 +179,7 @@ Filters applied before upload to the TOPMed Imputation Server (atlas `filter_vcf
 | `gxe.min_cases` | 20 | Binary exposures need at least this many cases and controls |
 | `gxe.tier1_permutation_blocks` | `[100, 400, 500, 9000]` | Adaptive permutation blocks (cumulative 100, 500, 1000, 10000); a block runs only while needed |
 | `gxe.tier2` | `all_cis_union` | `all_cis_union`: every cis variant of the tier-2 phenotypes; `pairs`: only the lead variants (smaller, a fallback) |
-| `gxe.dosages` | false | Use imputed dosages instead of hard calls (the atlas used hard calls) |
+| `gxe.dosages` | false | Use imputed dosages instead of hard calls |
 | `gxe.fdr` | 0.05 | q threshold for tier-1 hits |
 | `gxe.seed` | 12345 | Base permutation seed |
 
@@ -240,11 +240,11 @@ These are usually set by `run_xqtl.sh`, a site profile, or once on the command l
 | Parameter | Default | Meaning |
 |---|---|---|
 | `--sif` | set by `run_xqtl.sh` | Path to the image |
-| `--image` | the GHCR image of this version | Container image when `--sif` is not set (Docker, CI) |
+| `--image` | the GHCR image of this version | Container image when `--sif` is not set (Docker) |
 | `--refs_dir` | `/opt/xqtl/refs` | Public references inside the image |
-| `--genome_fasta`, `--liftover_chain`, `--annotation_gtf`, `--txrevise_dir`, `--editing_sites`, `--music_reference` | the file under `refs_dir` | Override one reference file (testing only) |
-| `--star_sa_index_nbases` | 14 | STAR `--genomeSAindexNbases` (tests use 11) |
-| `--normalize_min_samples` | 10 | Fewest samples a modality may be normalized on (tests use fewer) |
+| `--genome_fasta`, `--liftover_chain`, `--annotation_gtf`, `--txrevise_dir`, `--editing_sites`, `--music_reference` | the file under `refs_dir` | Override one reference file (e.g. a single-chromosome genome) |
+| `--star_sa_index_nbases` | 14 | STAR `--genomeSAindexNbases` (lower for small genomes) |
+| `--normalize_min_samples` | 10 | Fewest samples a modality may be normalized on |
 | `--expected_restricted_version` | 1 | Restricted-file version this pipeline version needs |
 | `--validate_only` | false | Validate inputs and stop |
 | `--publish_mode` | `copy` | How outputs are written to `outdir` (`copy`, `link`, `symlink`) |

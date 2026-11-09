@@ -1,4 +1,4 @@
-# Picard (atlas 19a_picard_sharded.sh pin). Separate environment: bioconda picard pulls in
+# Picard (pinned). Separate environment: bioconda picard pulls in
 # OpenJDK and r-base (for chart PDFs), and that R must never shadow the analysis R 4.3.1.
 # Only the `picard` launcher is linked onto PATH (/opt/xqtl/bin/picard).
 name: xqtl-picard

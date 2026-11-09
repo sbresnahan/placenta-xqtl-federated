@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# xqtl_impprep.sh -- --mode imputation_prep steps (atlas 01_genotype_imputation/filter_vcf_for_imputation).
+# xqtl_impprep.sh -- --mode imputation_prep steps.
 #
 #   xqtl_impprep.sh convert KIND RAW BUILD THREADS
 #       KIND vcf (VCF/BCF file RAW) | bed (PLINK 1 prefix RAW) | pgen (PLINK 2 prefix RAW).
@@ -10,7 +10,7 @@
 #   xqtl_impprep.sh filter IN.vcf.gz CHROM GENOME GENO_MISS MAF HWE THREADS
 #       Biallelic SNPs; INFO tags recomputed (+fill-tags); exclude F_MISSING > GENO_MISS,
 #       MAF < MAF, HWE < HWE; REF/ALT swapped to the GRCh38 reference where the ALT allele matches
-#       it (plink2 --ref-from-fa: TOPMed r3 no longer fixes allele order); sites whose REF still
+#       it (plink2 --ref-from-fa: TOPMed r3 does not fix allele order); sites whose REF still
 #       does not match are dropped (bcftools norm --check-ref x); sorted.
 #       Writes CHROM.vcf.gz(+.tbi) and CHROM.counts.tsv (chrom, step, n).
 set -euo pipefail
