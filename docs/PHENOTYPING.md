@@ -109,6 +109,33 @@ MuSiC estimates cell-type proportions for each RNA-seq sample from gene TPM, usi
 
 ## Test fixture
 
-`tests/scripts/test_phenotyping.sh` runs `prepare_references` and `phenotyping_only` on 8 public SNUH placenta samples (PRJNA820329), with reads cut to chr22 (`tests/fixtures/phenotyping/`, built by `tests/fixtures/make_fastq_fixture.sh`). It uses GENCODE v45 chr22, processed with Pantry's txrevise steps, as a public stand-in for the HPLRv2 annotation (`tests/fixtures/refs_chr22/`, built by `tests/fixtures/make_refs_fixture.sh`). The test's restricted file freezes every other leafCutter cluster of these samples, so both frozen and novel clusters are exercised (`tests/fixtures/make_phenotyping_restricted.sh`). The fixture FASTQs have constant base qualities (they were rebuilt from BAMs).
+`tests/scripts/test_phenotyping.sh` runs `prepare_references` and `phenotyping_only` on 8 public SNUH placenta samples (PRJNA820329), with reads cut to chr22 (`tests/fixtures/phenotyping/`, built by `tests/fixtures/make_fastq_fixture.sh`). It uses GENCODE v45 chr22, processed with Pantry's txrevise steps, as a public stand-in for the HPLRv2 annotation (`tests/fixtures/refs_chr22/`, built by `tests/fixtures/make_refs_fixture.sh`). The test's restricted file freezes every other leafCutter cluster of these samples, so both frozen and novel clusters are exercised (`tests/fixtures/make_phenotyping_restricted.sh`). The fixture FASTQs have constant base qualities (they were rebuilt from BAMs). `rna_editing` and MuSiC run on chr22 cuts of the REDIportal sites and of the single-cell reference (`tests/fixtures/refs_chr22/editing/`, `music/`). With only 254 chr22 genes in that reference, the test's cell proportions check that the step runs; they are not realistic estimates.
 
 On the chr22 fixture, IRFinder-S writes an empty `intergenic.ROI.bed`, because it only keeps intergenic regions on chromosome names of up to two characters. This does not affect IR ratios.
+
+## Concordance with the atlas
+
+The 8 fixture samples are also in the atlas (cohort 3), so the pipeline's phenotypes can be compared with the atlas values for the same samples. For this check the pipeline was run on the fixture reads with the HPLRv2 chr22 annotation and txrevise events, and with the atlas leafCutter clusters as the frozen set. The script is `tests/scripts/compare_atlas_phenotypes.R`. The atlas phenotype files are not public and are not in the repository; `tests/fixtures/extract_atlas_refs_chr22.sh` collects them on seadragon.
+
+| Modality | Pipeline features | Atlas features | Shared | Median per-feature Spearman ρ (8 samples) | Median per-sample ρ |
+|---|---|---|---|---|---|
+| expression | 327 | 327 | 327 | 0.91 | 0.99 |
+| isoform_expression | 767 | 893 | 765 | 0.88 | 0.96 |
+| isoform_usage | 767 | 893 | 765 | 0.86 | 0.97 |
+| alt_tss | 572 | 737 | 570 | 0.88 | 0.90 |
+| alt_polya | 526 | 654 | 522 | 0.71 | 0.93 |
+| splicing | 520 | 597 | 514 | 0.98 | — |
+| intron_retention | 884 | 247 | 77 (matched by intron overlap) | 0.72 | — |
+| rna_editing | 680 | 1,071 | 679 | 0.83 | — |
+| stability | 104 | 136 | 104 | 1.00 | 0.999 |
+
+Every pipeline sample matched its own atlas sample better than any other sample, in every modality. Per-sample ρ is shown only where values are on a natural scale. The atlas splicing, intron-retention and editing values are rank-normal transformed, which leaves per-feature ranks unchanged. The differences have known causes:
+
+- **Reads and genome.** The fixture reads were cut to chr22 and realigned to chr22 alone, whereas the atlas aligned and quantified against the whole genome. Multi-mapping reads and TPM scaling therefore differ. Expression TPMs are compared after rescaling each sample to its total over the shared features.
+- **Feature filters.** The atlas selected features across its whole cohort. Most atlas-only isoform, TSS, polyA and stability features have zero or missing values in these 8 samples. The atlas editing sites passed coverage filters across the whole cohort, not in these 8 samples.
+- **Intron retention.** The atlas used MAJIQ intron segments and the pipeline uses IRFinder-S whole introns, so only the 77 atlas segments that lie inside a pipeline intron of the same gene can be compared.
+- **Editing.** The fixture FASTQs have constant base qualities, so base-quality filters act differently from the atlas.
+- **Small sample.** With 8 samples, per-feature ρ is noisy. For alt_polya and isoform usage, the median absolute difference between pipeline and atlas ratios is under 0.01.
+
+Cell proportions from the chr22 mini reference are not comparable with the atlas estimates, which used the full reference.
+

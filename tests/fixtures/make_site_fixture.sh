@@ -9,8 +9,8 @@
 # 1kGP samples (60 EUR, 60 EAS, 10 AFR) written as a TOPMed-style chr22.dose.vcf.gz with
 # synthetic R2 and dosages; the PCA panel is 160 other 1kGP samples (40 each of AFR, EAS, EUR, SAS; AMR
 # is omitted because single-chromosome PCs cannot separate it from EUR).
-# Everything else (phenotypes, QC metrics, cell proportions, sex, GA, ppBMI, gdm) is a
-# SYNTHETIC SOFTWARE FIXTURE with planted cis effects (tests/fixtures/site/TRUTH.tsv).
+# Everything else (phenotypes, QC metrics, cell proportions, sex, GA, ppBMI, gdm, maternal_age) is a
+# SYNTHETIC SOFTWARE FIXTURE with planted cis, G×C and G×E effects (tests/fixtures/site/TRUTH.tsv).
 # Needs: bcftools, bgzip, tabix, plink2, python3 with numpy + pandas.
 set -euo pipefail
 vcf=${1:?usage: make_site_fixture.sh KGP_CHR22_VCF PED}

@@ -21,7 +21,8 @@
 #   conda activate samtools-1.16.1          # for bgzip/tabix
 #   bash extract_atlas_refs_chr22.sh [-o OUT_DIR] [ACC ...]
 # Default accessions: the 8 runs in snuh_chr22_fastq.tar. R runs in the atlas RStudio 4.3.1
-# container (override with RSCRIPT="..."). Missing inputs are reported and skipped.
+# container (override with RSCRIPT="..."; R libraries with R_LIB_DIRS="dir1:dir2").
+# Missing inputs are reported and skipped.
 set -euo pipefail
 
 BASE=${BASE:-/rsrch9/home/epi/bhattacharya_lab/data/Placenta_QTL/PANTRY}
@@ -30,14 +31,17 @@ COHORT_OUT=${BASE}/cohort3/output
 DECONV=${BASE}/deconvolution
 REDI_RAW=${REDI_RAW:-/rsrch5/home/epi/bhattacharya_lab/data/REDIportal/TABLE1_hg38_v3.txt.gz}
 RSCRIPT=${RSCRIPT:-singularity exec --bind /rsrch5 --bind /rsrch9 /risapps/singularity/repo/RStudio/4.3.1/rstudio_4.3.1.sif Rscript}
-export R_LIBS_USER=${R_LIBS_USER:-/rsrch5/home/epi/bhattacharya_lab/software/R_package_library/ubuntu/4.3.1}
+# R libraries holding SingleCellExperiment / Matrix, searched in this order (colon-separated). Set
+# explicitly inside R with .libPaths(), as the atlas scripts do: R_LIBS_USER does not reliably reach
+# R inside the RStudio container.
+R_LIB_DIRS=${R_LIB_DIRS:-/rsrch5/home/epi/bhattacharya_lab/software/R_package_library/ubuntu/4.3.1:/home/${USER}/R/ubuntu/4.3.1}
 OUT_DIR=${PWD}
 DEFAULT_ACCS=(SRR18553497 SRR18553498 SRR18553501 SRR18553511 SRR18553512 SRR18553513 SRR18553520 SRR18553521)
 
 while getopts "o:h" opt; do
     case $opt in
         o) OUT_DIR=$OPTARG ;;
-        h) sed -n '2,27p' "$0"; exit 0 ;;
+        h) sed -n '2,28p' "$0"; exit 0 ;;
         *) exit 2 ;;
     esac
 done
@@ -92,21 +96,31 @@ echo "[$(date +%T)] mini MuSiC reference"
 if have "${DECONV}/placenta_music_reference.rds" && [ -s "$STAGE/refs/HPLRv2.0.annotated.PANTRY.chr22.gtf.gz" ]; then
     zcat "$STAGE/refs/HPLRv2.0.annotated.PANTRY.chr22.gtf.gz" \
         | awk -F'\t' '$3 == "gene"' | grep -o 'gene_name "[^"]*"' | cut -d'"' -f2 | sort -u > "$STAGE/refs/chr22_gene_names.txt"
-    $RSCRIPT - "${DECONV}/placenta_music_reference.rds" "$STAGE/refs/chr22_gene_names.txt" \
-        "$STAGE/refs/placenta_music_reference.mini.rds" <<'EOF'
-suppressPackageStartupMessages({ library(SingleCellExperiment); library(Matrix) })
+    # non-fatal: without the mini reference the remaining files are still collected
+    if ! $RSCRIPT - "${DECONV}/placenta_music_reference.rds" "$STAGE/refs/chr22_gene_names.txt" \
+        "$STAGE/refs/placenta_music_reference.mini.rds" "$R_LIB_DIRS" <<'EOF'
 a <- commandArgs(trailingOnly = TRUE)
+libs <- strsplit(a[4], ":", fixed = TRUE)[[1]]
+.libPaths(c(libs[dir.exists(libs)], .libPaths()))
+if (!requireNamespace("SingleCellExperiment", quietly = TRUE))
+  stop("SingleCellExperiment not found in: ", paste(.libPaths(), collapse = " "),
+       "\nSet R_LIB_DIRS to the library that has it (colon-separated).")
+suppressPackageStartupMessages({ library(SingleCellExperiment); library(Matrix) })
 sce <- readRDS(a[1])
 genes <- readLines(a[2])
 set.seed(42)
 grp <- paste(sce$cell.type, sce$subject, sep = "|")
 idx <- unlist(lapply(split(seq_len(ncol(sce)), grp), function(i) if (length(i) > 30) sample(i, 30) else i))
 mini <- sce[rownames(sce) %in% genes, sort(idx)]
-mini$cell.type <- droplevels(mini$cell.type)
-mini$subject <- droplevels(mini$subject)
+for (v in c("cell.type", "subject")) if (is.factor(mini[[v]])) mini[[v]] <- droplevels(mini[[v]])
 saveRDS(mini, a[3], compress = "xz")
-cat("mini MuSiC reference:", nrow(mini), "genes x", ncol(mini), "cells,", nlevels(mini$cell.type), "cell types\n")
+cat("mini MuSiC reference:", nrow(mini), "genes x", ncol(mini), "cells,",
+    length(unique(mini$cell.type)), "cell types\n")
 EOF
+    then
+        echo "WARNING: mini MuSiC reference not built (see the R error above) -- continuing" >&2
+        MISSING+=("placenta_music_reference.mini.rds")
+    fi
 fi
 
 echo "[$(date +%T)] atlas cohort3 chr22 phenotypes for: ${ACCS[*]}"

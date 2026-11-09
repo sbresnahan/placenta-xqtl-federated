@@ -14,7 +14,7 @@ MDACC then meta-analyses the exports across cohorts and ancestries (`--mode cent
 
 **Documentation:** <https://sbresnahan.github.io/placenta-xqtl-federated/> (also included inside the image for offline reading). The same pages are in [`docs/`](docs/).
 
-> **Status: 1.0.0-dev.** Site validation (`--mode smoke`) and input validation work; the analysis modes are being added milestone by milestone (see [CHANGELOG.md](CHANGELOG.md)).
+> **Status: 1.0.0-dev.** All run modes are implemented and tested on synthetic and public fixtures (see [CHANGELOG.md](CHANGELOG.md)). The first release (1.0.0) follows validation on MDACC's cluster.
 
 ## Quick start
 
@@ -32,12 +32,17 @@ apptainer run xqtl-federated_<version>.sif bootstrap ./xqtl
 # 3. Check that your cluster works with the pipeline (about 10 minutes)
 ./xqtl/run_xqtl.sh -profile seadragon,smoke          # or: -profile slurm,apptainer,smoke -c mysite.config
 
-# 4. Build the alignment indices from the references inside the image (once)
+# 4. Prepare genotypes for the TOPMed Imputation Server (upload is manual)
+./xqtl/run_xqtl.sh -profile seadragon -params-file cohort.yml --mode imputation_prep
+
+# 5. Build the alignment indices from the references inside the image (once)
 ./xqtl/run_xqtl.sh -profile seadragon -params-file cohort.yml --mode prepare_references
 
-# 5. Run the site analysis
+# 6. Run the site analysis; review export/<cohort_id>/ before sharing it
 ./xqtl/run_xqtl.sh -profile seadragon -params-file cohort.yml --mode site
 ```
+
+The [walkthrough](docs/WALKTHROUGH.md) covers every step, including the TOPMed upload and the export review.
 
 > **Restricted file.** Site runs also need `xqtl-restricted-<version>.tar.gz`, a small file that holds the shared splicing clusters and the MDACC signal list. MDACC sends it by email after the data-sharing agreement is approved. If your site has not received it, request it from the scientific contact, **Sean T. Bresnahan (stbresnahan@mdanderson.org)**, stating your cohort, the pipeline version and the approved agreement. Set its path as `restricted:` in `cohort.yml`.
 
@@ -48,11 +53,16 @@ apptainer run xqtl-federated_<version>.sif bootstrap ./xqtl
 | [Collaboration brief](docs/COLLABORATION_BRIEF.md) | Cohort investigators: aims, analyses and the files requested |
 | [Setup](docs/SETUP.md) | Getting and verifying the image, `bootstrap`, the launcher, the smoke test |
 | [HPC configuration](docs/HPC.md) | Running on your cluster: profiles, queues, memory, GPUs, the smoke test |
+| [Configuration](docs/CONFIGURATION.md) | `cohort.yml`, input tables and every setting |
+| [Walkthrough](docs/WALKTHROUGH.md) | From raw data to the shared export, step by step |
+| [Phenotyping](docs/PHENOTYPING.md) | The nine RNA modalities and cell-type proportions |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Validation messages and common problems |
+| [Interaction analyses](docs/INTERACTIONS.md) | G×C and GxE tests at the sites |
+| [Export specification](docs/EXPORT_SPEC.md) | Files A–J, the leak scan, rebuilding the export |
+| [Central analysis](docs/CENTRAL_ANALYSIS.md) | MDACC: meta-analysis, fine-mapping, colocalization, TWAS inputs; limits of the shared files |
 | [Reference data and software](docs/REFERENCES.md) | Provenance, checksums and licences of everything in the image; MDACC release procedure |
 | [Seadragon validation](docs/SEADRAGON_VALIDATION.md) | Phase 0 results on MDACC's cluster |
 | [Changelog](CHANGELOG.md) | Release history |
-
-Configuration, walkthrough, export specification, central analysis and troubleshooting pages are added with their milestones.
 
 ## Repository layout
 

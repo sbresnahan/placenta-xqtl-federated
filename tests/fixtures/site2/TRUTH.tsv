@@ -1,0 +1,7 @@
+modality	phenotype_id	gene_id	variant_id	effect_per_alt	interaction	interaction_effect
+expression	ENSGFIX0000006	ENSGFIX0000006	chr22:19504472:T:A	1.2	none	0.0
+expression	ENSGFIX0000016	ENSGFIX0000016	chr22:20146624:A:G	-1.0	none	0.0
+splicing	ENSGFIX0000026__chr22:20508948:20509648:clu_26_-	ENSGFIX0000026	chr22:20467587:A:T	1.5	none	0.0
+expression	ENSGFIX0000011	ENSGFIX0000011	chr22:19730097:A:G	1.2	gxc:Cytotrophoblast	0.6
+expression	ENSGFIX0000021	ENSGFIX0000021	chr22:20290948:A:G	1.6	gxe:GA	0.6
+splicing	ENSGFIX0000031__chr22:20762038:20762738:clu_31_+	ENSGFIX0000031	chr22:20636375:C:T	1.3	gxe:GA	0.6

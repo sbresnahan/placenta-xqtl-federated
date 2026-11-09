@@ -1,5 +1,5 @@
 /*
- * Export processes: assemble files A-F and I per stratum, then I_strata, MANIFEST (J) and the
+ * Export processes: assemble files A-I per stratum, then I_strata, MANIFEST (J) and the
  * data dictionary for the cohort, followed by the mandatory leak scan. Only ${outdir}/export/
  * is meant to leave the site.
  */
@@ -65,6 +65,7 @@ process EXPORT_FINALIZE {
     """
     xqtl_export.py finalize --cohort ${ex.cohort_id} --strata ${strata} --ids ${ids} \\
         --image-sha256 ${ex.image_sha256} --restricted-version ${ex.restricted_version} \\
-        --pipeline-version ${ex.pipeline_version} --leak-report leak_report.tsv --out export ${strata_dirs}
+        --pipeline-version ${ex.pipeline_version} --gxc ${ex.gxc_state ?: ''} --gxe ${ex.gxe_state ?: ''} \\
+        --leak-report leak_report.tsv --out export ${strata_dirs}
     """
 }

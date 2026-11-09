@@ -72,6 +72,14 @@ RUN micromamba create -y -p /opt/conda/envs/picard -f /build/env/picard.yml \
  && mkdir -p /opt/xqtl/bin \
  && ln -s /opt/conda/envs/picard/bin/picard /opt/xqtl/bin/picard
 
+# SuShiE (central fine-mapping; mancusolab/sushie). Own environment because it needs numpy 2 and
+# jax; only the `sushie-python` launcher is put on PATH (bin/xqtl_finemap.py uses it as interpreter).
+COPY containers/requirements-sushie.txt /build/requirements-sushie.txt
+RUN micromamba create -y -p /opt/conda/envs/sushie -c conda-forge python=3.12 pip \
+ && /opt/conda/envs/sushie/bin/python -m pip install --no-cache-dir -r /build/requirements-sushie.txt \
+ && micromamba clean -a -y \
+ && ln -s /opt/conda/envs/sushie/bin/python /opt/xqtl/bin/sushie-python
+
 # tensorQTL stack (Phase-0 validated pins). TORCH_INDEX selects CPU or CUDA torch wheels.
 ARG TORCH_INDEX=https://download.pytorch.org/whl/cpu
 COPY containers/requirements-pip.txt /build/requirements-pip.txt
@@ -90,6 +98,7 @@ RUN mkdir -p /opt/xqtl/env_lock \
  && micromamba env export -p /opt/conda/envs/xqtl --explicit > /opt/xqtl/env_lock/xqtl.conda-explicit.txt \
  && micromamba env export -p /opt/conda/envs/align --explicit > /opt/xqtl/env_lock/align.conda-explicit.txt \
  && /opt/conda/envs/xqtl/bin/python -m pip freeze --all > /opt/xqtl/env_lock/xqtl.pip-freeze.txt \
+ && /opt/conda/envs/sushie/bin/python -m pip freeze --all > /opt/xqtl/env_lock/sushie.pip-freeze.txt \
  && /opt/conda/envs/xqtl/bin/Rscript -e 'ip <- installed.packages(fields = "RemoteSha"); write.table(ip[, c("Package", "Version", "RemoteSha")], sep = "\t", quote = FALSE, row.names = FALSE)' \
         > /opt/xqtl/env_lock/xqtl.R-packages.tsv
 

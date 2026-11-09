@@ -161,6 +161,18 @@ def test_user_exposure_extends_default_map(tmp_path):
     assert rc == 0, rows
 
 
+def test_sensitivity_default_off_and_missing_column_fails(tmp_path):
+    rc, resolved, rows = run(tmp_path, base_params(tmp_path))
+    sens = resolved["gxe"]["sensitivity"]
+    assert not any(v["enabled"] for v in sens.values())
+    assert rc == 0, rows
+    p = base_params(tmp_path, gxe={"sensitivity": {"smoking": {"enabled": True}}})
+    rc, resolved, rows = run(tmp_path, p)
+    assert resolved["gxe"]["sensitivity"]["maternal_age"]["enabled"] is False   # defaults kept
+    assert rc == 1
+    assert any(r["check"] == "gxe.sensitivity.smoking" and r["status"] == "FAIL" for r in rows)
+
+
 def _site_refs(tmp_path, read_length="101"):
     d = tmp_path / "refs"
     for f in V.SITE_REFS_FILES:
@@ -189,3 +201,40 @@ def test_site_refs_missing_or_incomplete_fails(tmp_path):
     rep = V.Report()
     V.check_site_refs({"site_refs": d}, rep)
     assert rep.failed and "star/SA" in rep.rows[-1][2]
+
+
+def _ip_params(tmp_path, raw, build="GRCh38", **over):
+    fa = tmp_path / "g.fa"
+    fa.write_text(">chr22\nACGT\n")
+    p = {"cohort_id": "TC", "mode": "imputation_prep", "genome_fasta": str(fa),
+         "genotypes": {"raw": raw, "raw_build": build}}
+    p.update(over)
+    return p
+
+
+def test_imputation_prep_plink_prefix_valid(tmp_path):
+    raw = os.path.join(FIX, "imputation_prep", "kgp38_chr22")
+    rc, resolved, rows = run(tmp_path, _ip_params(tmp_path, raw), mode="imputation_prep")
+    assert rc == 0, rows
+    assert resolved["imputation_prep"]["ref_match_min"] == 0.95
+    assert any(r["check"] == "imputation_prep.raw" and r["status"] == "PASS" for r in rows)
+
+
+def test_imputation_prep_grch37_needs_chain(tmp_path):
+    raw = os.path.join(FIX, "imputation_prep", "kgp37_chr22.vcf.gz")
+    p = _ip_params(tmp_path, raw, build="GRCh37", refs_dir=str(tmp_path / "norefs"))
+    rc, _, rows = run(tmp_path, p, mode="imputation_prep")
+    assert rc == 1
+    assert any(r["check"] == "imputation_prep.liftover_chain" and r["status"] == "FAIL" for r in rows)
+    p["liftover_chain"] = os.path.join(FIX, "imputation_prep", "hg19ToHg38.chr22.over.chain.gz")
+    rc, _, rows = run(tmp_path, p, mode="imputation_prep")
+    assert rc == 0, rows
+
+
+def test_imputation_prep_bad_raw_and_wes_warning(tmp_path):
+    p = _ip_params(tmp_path, str(tmp_path / "nothing"))
+    p["genotypes"]["source"] = "wes"
+    rc, _, rows = run(tmp_path, p, mode="imputation_prep")
+    assert rc == 1
+    assert any(r["check"] == "imputation_prep.raw" and r["status"] == "FAIL" for r in rows)
+    assert any(r["check"] == "imputation_prep.source" and r["status"] == "WARN" for r in rows)

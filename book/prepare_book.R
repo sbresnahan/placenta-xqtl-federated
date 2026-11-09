@@ -21,13 +21,13 @@ chapters <- data.frame(
             "docs/SETUP.md", "docs/HPC.md", "docs/CONFIGURATION.md", "docs/WALKTHROUGH.md",
             "docs/PHENOTYPING.md",
             "docs/TROUBLESHOOTING.md",
-            "docs/EXPORT_SPEC.md", "docs/CENTRAL_ANALYSIS.md",
+            "docs/INTERACTIONS.md", "docs/EXPORT_SPEC.md", "docs/CENTRAL_ANALYSIS.md",
             "docs/REFERENCES.md", "docs/SEADRAGON_VALIDATION.md", "CHANGELOG.md"),
   part  = c("Part I: For cohort investigators",
             rep("Part II: Running the pipeline", 6),
-            rep("Part III: Outputs and analysis", 2),
+            rep("Part III: Outputs and analysis", 3),
             rep("APPENDIX", 3)),
-  title = c("Collaboration brief", rep(NA, 11)),
+  title = c("Collaboration brief", rep(NA, 12)),
   stringsAsFactors = FALSE
 )
 

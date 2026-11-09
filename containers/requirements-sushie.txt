@@ -1,0 +1,25 @@
+# SuShiE summary-statistics fine-mapping for --mode central (own environment: jax/numpy 2 must not
+# disturb the tensorQTL stack). Pins from a working install; python 3.12.
+brent-search==2.0.2
+cffi==1.17.1
+equinox==0.13.8
+genoio==0.2.0
+glimix-core==3.1.14
+jax==0.10.2
+jaxlib==0.10.2
+jaxtyping==0.3.11
+liknorm==2.0.0
+ml-dtypes==0.6.0
+ndarray-listener==2.0.2
+numpy==2.5.4
+numpy-sugar==1.5.5
+opt-einsum==3.4.0
+optimix==3.0.6
+polars==1.44.2
+polars-runtime-32==1.44.2
+pycparser==3.12
+scipy==1.18.1
+sushie==0.20
+tqdm==4.70.1
+typing-extensions==4.16.0
+wadler-lindig==0.1.8

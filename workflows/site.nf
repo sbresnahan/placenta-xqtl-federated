@@ -1,7 +1,8 @@
 /*
  * --mode site : genotype QC -> ancestry strata -> per-stratum genotype QC -> normalization ->
  * HCP grid and k selection -> tensorQTL (permutation, conditionally independent, nominal) ->
- * combined-modality arm -> LD -> export (files A-F, I, J) with the mandatory leak scan.
+ * combined-modality arm -> LD -> G x C at lead signals and G x E tiers 1/2 + sensitivity ->
+ * export (files A-J) with the mandatory leak scan.
  *
  * Phenotype inputs come from the phenotypes directory (params.phenotypes_dir, or the output of the
  * phenotyping workflow): <modality>.bed.gz per modality (gene-TSS coordinates; grouped modalities
@@ -13,6 +14,8 @@ include { GENO_QC ; GENO_MERGE ; ANCESTRY ; STRATUM_GENO ; LD_MATRICES } from '.
 include { NORMALIZE ; NORMALIZE as NORMALIZE_ISOFORM ; COMBINE_MODALITIES ; HCP_EVAL ; SELECT_K ;
           CIS_PERMUTATION ; CIS_INDEPENDENT ; MERGE_INDEPENDENT ; CIS_NOMINAL } from '../modules/local/mapping.nf'
 include { VERIFY_RESTRICTED ; EXPORT_STRATUM ; EXPORT_FINALIZE } from '../modules/local/export.nf'
+include { RESTRICTED_SIGNALS ; GX_SIGNALS ; GXC ; GXE_EXPOSURES ; GXE_SCAN ; GXE_MERGE ;
+          GXE_SENSITIVITY } from '../modules/local/interactions.nf'
 
 // HCP grid: cohort.yml mapping.hcp_grid, else 0..60 by 10 (n < 350) or 0..100 by 10 (atlas rule).
 // k values that leave fewer than 10 residual degrees of freedom are dropped.
@@ -34,6 +37,16 @@ def phenoFile(d, name) {
 
 def isIsoform(m) {
     return m in ['isoform_expression', 'isoform_usage']
+}
+
+def enabledExposures(c) {
+    return c.gxe.exposures.findAll { _k, v -> v.enabled }.collect { k, _v -> k.toString() }.sort()
+}
+
+// run state of the interaction analyses for mapped strata (cohort I_strata table)
+def interactionStates(c, hasCellProps) {
+    def gxc = !c.gxc.enabled ? 'disabled' : (hasCellProps ? 'tested' : 'no_cell_proportions')
+    return [gxc_state: gxc, gxe_state: c.gxe.enabled && enabledExposures(c) ? 'tested' : 'disabled']
 }
 
 workflow SITE {
@@ -151,6 +164,58 @@ workflow SITE {
     CIS_NOMINAL(unit_cov.filter { t -> t[1] != 'combined' }
         .map { anc, m, bed, _g, cov -> tuple(anc, m, bed, cov) }.combine(geno, by: 0), mcfg)
 
+    // ---------------- interactions: signal sets, G x C, G x E ----------------
+    has_ct = pheno.map { d -> phenoFile(d, 'cell_proportions.tsv').exists() }
+    RESTRICTED_SIGNALS(cfg.filter { c -> c.gxc.enabled || c.gxe.enabled }.map { c -> file(c.restricted, checkIfExists: true) },
+        cfg.map { c -> c.expected_restricted_version })
+    // lead table per modality: the feature-level (ungrouped) permutation arm; expression is ungrouped
+    lead_cis = CIS_PERMUTATION.out.cis
+        .join(arms.map { anc, arm, _bed, g, _cov, _pg, _pv, _ps -> tuple(anc, arm, g ? true : false) }, by: [0, 1])
+        .filter { _anc, arm, _cis, _summ, grouped -> !grouped && arm != 'combined' }
+        .map { anc, arm, cis, _summ, _g -> tuple(anc, arm.replaceAll(/_ungrouped$/, ''), cis) }
+    mod_bed = norm_bed.map { anc, m, bed, _g -> tuple(anc, m, bed) }
+    GX_SIGNALS(mod_bed.join(lead_cis, by: [0, 1]).combine(geno, by: 0), RESTRICTED_SIGNALS.out.signals, mcfg)
+    sets = GX_SIGNALS.out.sets
+
+    gxc_in = sets.map { anc, m, pairs, _ph -> tuple(anc, m, pairs) }
+        .join(mod_bed, by: [0, 1]).join(cov_sel, by: [0, 1])
+        .combine(STRATUM_GENO.out.samples, by: 0).combine(geno, by: 0)
+        .map { anc, m, pairs, bed, cov, smp, pgen, pvar, psam -> tuple(anc, m, bed, pairs, cov, smp, pgen, pvar, psam) }
+        .combine(cfg).combine(has_ct)
+        .filter { t -> t[9].gxc.enabled && t[10] }
+        .map { t -> t.take(9) }
+    GXC(gxc_in, cell_props, cfg.map { c -> c.gxc })
+
+    gxe_cfg = cfg.map { c -> c.gxe + [tier2: c.gxe.tier2 ?: 'all_cis_union'] }
+    gxe_strata = STRATUM_GENO.out.samples.combine(cfg)
+        .filter { t -> t[2].gxe.enabled && enabledExposures(t[2]) }
+        .map { anc, smp, _c -> tuple(anc, smp) }
+        .toSortedList { x, y -> x[0] <=> y[0] }
+        .filter { l -> l.size() > 0 }
+        .map { l -> tuple(l.collect { t -> t[0] }, l.collect { t -> t[1] }) }
+    GXE_EXPOSURES(metadata, gxe_strata, gxe_cfg)
+    exp_summary = GXE_EXPOSURES.out.summary.flatten().map { f -> tuple(f.name.tokenize('.')[0], f) }
+    gxe_base = mod_bed.join(cov_sel, by: [0, 1])
+        .join(sets.map { anc, m, _pairs, ph -> tuple(anc, m, ph) }, by: [0, 1])
+        .combine(geno, by: 0).combine(exp_summary, by: 0)
+    scan_in = gxe_base.combine(cfg).combine(chroms.map { l -> [chroms: l] })
+        .flatMap { anc, m, bed, cov, ph, pgen, pvar, psam, summ, c, cm ->
+            enabledExposures(c).collectMany { e ->
+                [1, 2].collectMany { tier ->
+                    cm.chroms.collect { ch -> tuple(anc, m, e, tier, ch, bed, cov, pgen, pvar, psam, summ, tier == 2 ? ph : []) }
+                }
+            }
+        }
+    GXE_SCAN(scan_in, GXE_EXPOSURES.out.table, gxe_cfg)
+    merge_in = GXE_SCAN.out.shard.groupTuple(by: [0, 1, 2, 3])
+        .combine(sets.map { anc, m, _pairs, ph -> tuple(anc, m, ph) }, by: [0, 1])
+        .map { anc, m, e, tier, pq, un, st, ph -> tuple(anc, m, e, tier, pq, un, st, tier == 2 ? ph : []) }
+    GXE_MERGE(merge_in, gxe_cfg)
+    sens_in = GXE_MERGE.out.merged.filter { t -> t[3] == 1 }
+        .map { anc, m, e, _tier, pq -> tuple(anc, m, e, pq) }
+        .combine(mod_bed.join(cov_sel, by: [0, 1]).combine(STRATUM_GENO.out.samples, by: 0).combine(geno, by: 0), by: [0, 1])
+    GXE_SENSITIVITY(sens_in, GXE_EXPOSURES.out.table, metadata, gxe_cfg)
+
     // ---------------- export ----------------
     VERIFY_RESTRICTED(cfg.map { c -> file(c.restricted, checkIfExists: true) }, cfg.map { c -> c.expected_restricted_version })
     staging = STRATUM_GENO.out.staging.map { anc, a, b, s -> tuple(anc, [a, b, s]) }
@@ -161,11 +226,15 @@ workflow SITE {
         .mix(MERGE_INDEPENDENT.out.independent.map { anc, _arm, ind -> tuple(anc, [ind]) })
         .mix(CIS_NOMINAL.out.nominal.map { anc, _m, d -> tuple(anc, [d]) })
         .mix(LD_MATRICES.out.ld.map { anc, d -> tuple(anc, [d]) })
+        .mix(GXC.out.gxc.map { anc, _m, g, a -> tuple(anc, [g, a]) })
+        .mix(exp_summary.map { anc, f -> tuple(anc, [f]) })
+        .mix(GXE_MERGE.out.files.map { anc, fs -> tuple(anc, [fs].flatten()) })
+        .mix(GXE_SENSITIVITY.out.files.map { anc, a, b -> tuple(anc, [a, b]) })
         .transpose()
         .groupTuple()
-    ex = cfg.combine(VERIFY_RESTRICTED.out.version).map { c, v ->
+    ex = cfg.combine(VERIFY_RESTRICTED.out.version).combine(has_ct).map { c, v, ct ->
         c.export + [cohort_id: c.cohort_id, image_sha256: c.image_sha256 ?: 'unknown',
-                    restricted_version: v.text.trim(), pipeline_version: workflow.manifest.version]
+                    restricted_version: v.text.trim(), pipeline_version: workflow.manifest.version] + interactionStates(c, ct)
     }
         .first()
     EXPORT_STRATUM(staging, qc_metrics, cell_props, ex)

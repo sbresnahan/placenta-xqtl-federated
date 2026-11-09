@@ -7,8 +7,8 @@
 #      matrices; check_phenotypes.py checks shapes, TSS positions, groups and the frozen /
 #      novel splicing clusters;
 #   3. the validator refuses phenotyping without site_refs.
-# rna_editing is checked only when tests/fixtures/refs_chr22/editing/rediportal_hg38.bed.gz exists,
-# and cell proportions only when tests/fixtures/refs_chr22/music/placenta_music_reference.rds exists.
+# rna_editing is checked when tests/fixtures/refs_chr22/editing/rediportal_hg38.bed.gz exists, and cell
+# proportions when tests/fixtures/refs_chr22/music/placenta_music_reference.rds exists (both are committed).
 #
 #   tests/scripts/test_phenotyping.sh [WORKDIR] [ENGINE]     ENGINE: dev (default; tools on PATH) | docker
 # The chr22 genome is cut from XQTL_GENOME (default: the image's GRCh38 FASTA) unless XQTL_CHR22_FA

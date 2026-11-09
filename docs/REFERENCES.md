@@ -41,7 +41,7 @@ STAR, Salmon and IRFinder-S indices are tens of gigabytes and depend on the alig
 
 ### Test fixtures
 
-The phenotyping test (`tests/fixtures/refs_chr22/`) uses GENCODE v45 chr22 (comprehensive gene annotation `gencode.v45.annotation.gtf.gz`, sha256-pinned in `tests/fixtures/make_refs_fixture.sh`) as a public stand-in for HPLRv2, processed with Pantry's txrevise steps. Its reads come from 8 public placenta RNA-seq runs of BioProject PRJNA820329 (Seoul National University Hospital), cut to chr22 read pairs. The fixture is for testing only; real runs use the HPLRv2 annotation in the image.
+The phenotyping test (`tests/fixtures/refs_chr22/`) uses GENCODE v45 chr22 (comprehensive gene annotation `gencode.v45.annotation.gtf.gz`, sha256-pinned in `tests/fixtures/make_refs_fixture.sh`) as a public stand-in for HPLRv2, processed with Pantry's txrevise steps. Its reads come from 8 public placenta RNA-seq runs of BioProject PRJNA820329 (Seoul National University Hospital), cut to chr22 read pairs. The fixture is for testing only; real runs use the HPLRv2 annotation in the image. The REDIportal sites (`editing/`) and the MuSiC reference (`music/`) are chr22 cuts of the MDACC reference-record files, made by `tests/fixtures/extract_atlas_refs_chr22.sh`: 413,357 REDIportal sites on chr22, and a mini single-cell reference of 254 chr22 genes and 3,857 cells (at most 30 cells per cell type and donor; 29 cell types, 5 donors).
 
 ### Not public: the restricted file
 
@@ -101,6 +101,17 @@ containers/build_image.sh --release             # every row pinned; references m
 1. Pin the public reference record (above) and push to `main`. The `image` workflow builds `ghcr.io/sbresnahan/placenta-xqtl-federated:dev` and uploads `refs_MANIFEST.tsv` as an artifact.
 2. Commit that file as `assets/refs_manifest.tsv` (first release, or whenever a reference changes).
 3. Set `manifest.version` in `nextflow.config`, update the changelog, and push the tag `v<version>`. The workflow then builds the CPU and `-cuda` images in strict mode, pushes them, builds the `.sif`, pushes it to `ghcr.io/sbresnahan/xqtl-federated-sif:<version>` (pulled with `apptainer pull oras://...`), archives it on Zenodo, and attaches the `.sif` checksum, reference manifest and version list to the GitHub release.
+
+Release checklist (in order):
+
+1. All CI checks pass on `main` (unit tests, profile resolution, `nextflow lint`, shellcheck, hadolint, actionlint, the fixture acceptance tests).
+2. The public reference record is pinned in `assets/refs_sources.tsv` (no unpinned rows) and `assets/refs_manifest.tsv` matches the `refs_MANIFEST.tsv` artifact of the last `:dev` build.
+3. The restricted file for this version is built, its version equals `expected_restricted_version` in `nextflow.config`, and its sha256 is recorded with the MDACC records.
+4. The `:dev` image passes the smoke test on seadragon (`-profile seadragon,smoke`, `VERDICT GO`) and a full `--mode site` run on a real cohort subset.
+5. `manifest.version` in `nextflow.config` and `params.image` carry the new version; the changelog section is dated; the export-format or restricted-file version change, if any, is a major version change.
+6. The documentation book renders with no broken links (`Rscript book/render_book.R`).
+7. Push the tag `v<version>`; after the workflow finishes, check the GitHub release assets, the GHCR packages, the Zenodo deposition (publish it if `ZENODO_PUBLISH` is not set) and `apptainer pull oras://ghcr.io/sbresnahan/xqtl-federated-sif:<version>` from a site-like machine.
+8. Email the restricted file to approved sites and announce the release with the SIF checksum.
 
 One-time repository settings:
 

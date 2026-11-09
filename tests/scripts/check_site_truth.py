@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""check_site_truth.py EXPORT_COHORT_DIR TRUTH.tsv ANC...  -- M3 acceptance checks on a test export.
+"""check_site_truth.py EXPORT_COHORT_DIR TRUTH.tsv ANC... [--feature-q-warn]  -- M3 acceptance checks on a test export.
 
 For every planted effect in TRUTH.tsv and every listed stratum:
   * the phenotype is significant (qval <= 0.05) in the permutation table B of its arm
@@ -7,6 +7,8 @@ For every planted effect in TRUTH.tsv and every listed stratum:
   * at the planted variant, the nominal table A has p <= 1e-3 and beta with the planted sign;
   * the B lead variant is reported (it may be a variant in LD with the planted one).
 Also: no stratum outside ANC... is exported, and MANIFEST.tsv lists every file with its sha256.
+--feature-q-warn reports a feature with q > 0.05 as WARN instead of FAIL (used for the second central-test
+cohort, whose per-stratum feature significance at n = 60 is not part of the central acceptance criteria).
 Exit 1 on any failure.
 """
 import glob
@@ -27,7 +29,9 @@ def read(path_noext):
 
 
 def main():
-    root, truth_path, ancs = sys.argv[1], sys.argv[2], sys.argv[3:]
+    args = [x for x in sys.argv[1:] if x != "--feature-q-warn"]
+    q_warn = "--feature-q-warn" in sys.argv[1:]
+    root, truth_path, ancs = args[0], args[1], args[2:]
     cohort = os.path.basename(root.rstrip("/"))
     truth = pd.read_csv(truth_path, sep="\t")
     fails = 0
@@ -47,7 +51,11 @@ def main():
             sig = len(row) == 1 and float(row["qval"].iloc[0]) <= 0.05
             lead = row["variant_id"].iloc[0] if len(row) else "NA"
             q = float(row["qval"].iloc[0]) if len(row) else float("nan")
-            check(sig, f"{anc} {arm} {t.phenotype_id}: q={q:.2e} lead={lead} (planted {t.variant_id})")
+            msg = f"{anc} {arm} {t.phenotype_id}: q={q:.2e} lead={lead} (planted {t.variant_id})"
+            if q_warn and not sig:
+                print("WARN  " + msg)
+            else:
+                check(sig, msg)
             chrom = t.variant_id.split(":")[0]
             a = read(os.path.join(root, anc, "A_nominal", f"{cohort}_{anc}_A_nominal_{t.modality}_{chrom}"))
             hit = a[(a["phenotype_id"] == t.phenotype_id) & (a["variant_id"] == t.variant_id)]

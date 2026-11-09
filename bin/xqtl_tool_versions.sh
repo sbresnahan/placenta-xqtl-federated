@@ -28,6 +28,7 @@ v plink2        "plink2 --version"
 v CrossMap      "CrossMap --version 2>&1 | grep -i crossmap"
 v IRFinder-S    "IRFinder --version 2>&1 | grep -i 'irfinder\|version'"
 v picard        "picard MarkDuplicates --version 2>&1 | grep -i version"
+v sushie        "sushie-python -c 'import importlib.metadata as m; print(m.version(\"sushie\"))'"
 v python        "python3 --version"
 for d in numpy pandas scipy pyarrow torch tensorqtl pandas-plink pgenlib pysam jsonschema PyYAML; do
     v "py:$d" "python3 -W ignore -c 'import importlib.metadata as m; print(m.version(\"$d\"))'"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""xqtl_export.py -- assemble the shareable summary files (A-F, I per stratum; J per cohort) and scan for leaks.
+"""xqtl_export.py -- assemble the shareable summary files (A-I per stratum; J per cohort) and scan for leaks.
 
   xqtl_export.py stratum  --anc EUR --cohort BiSC --in STAGING --qc-metrics qc.tsv [--cell-props ct.tsv]
                           [--format parquet|tsv.gz] [--round-digits N] [--min-mac 0] --out EUR
@@ -12,7 +12,11 @@ STAGING holds the stratum's pipeline outputs (names as written by the site workf
   {ANC}_{mod}.features.tsv  {ANC}_{mod}.norm_summary.tsv  {ANC}_{mod}.nominal/
   {ANC}_{arm}.cis.parquet  {ANC}_{arm}.independent.parquet  {ANC}_{arm}.settings.json
   {ANC}_{arm}.covariates.tsv (only the covariate NAMES are exported)
-Files A-F and I are summary statistics; nothing per sample is written. The finalize step copies
+  {ANC}_{mod}.gxc.parquet  {ANC}_{mod}.gxc_annotation.tsv.gz                          (-> G)
+  {ANC}.gxe_exposures.tsv  {ANC}_{mod}_{exp}.gxe_tier1.parquet / .gxe_tier2.parquet /
+  .gxe_tier2_untested.tsv / .gxe_sensitivity.tsv / .gxe_tier{1,2}.status.tsv /
+  .gxe_sensitivity.status.tsv                                                       (-> H)
+Files A-I are summary statistics; nothing per sample is written. The finalize step copies
 the stratum folders into OUT/, writes I_strata.tsv, MANIFEST.tsv (J) and DATA_DICTIONARY.md, then
 runs the leak scan, which cannot be disabled: any sample identifier (RNA-seq, genotype or VCF
 sample ID) in a file name, column name or string value, any npz other than one square matrix
@@ -41,6 +45,9 @@ DESCRIPTIONS = {
     "D": "per-variant QC summary in the stratum",
     "E": "phenotype features: coordinates, group, detection fraction, filter status",
     "F": "model settings: normalization, HCP grid and selected k, covariate names (no values)",
+    "G": "G x C interaction tests of lead pairs (per pair x cell type) and per-pair primary cell-type annotation",
+    "H": "G x E: exposure summaries, tier-1 lead-pair permutation scan, tier-2 all-cis nominal scan, "
+         "SNP x covariate sensitivity, run status",
     "I": "aggregate counts, sequencing-metric quantiles, cell-type proportion summaries",
     "J": "manifest and data dictionary",
 }
@@ -96,6 +103,12 @@ def stratum(a):
         os.makedirs(cdir, exist_ok=True)
         for f in sorted(os.listdir(ld)):
             dst = f.replace(f"{anc}_ld", f"{a.cohort}_{anc}_C_ld", 1)
+            if f.endswith(".windows.tsv"):   # the file column names the exported .npz files
+                w = pd.read_csv(os.path.join(ld, f), sep="\t")
+                if "file" in w.columns:
+                    w["file"] = w["file"].astype(str).str.replace(f"{anc}_ld", f"{a.cohort}_{anc}_C_ld", n=1, regex=False)
+                w.to_csv(os.path.join(cdir, dst), sep="\t", index=False)
+                continue
             shutil.copyfile(os.path.join(ld, f), os.path.join(cdir, dst))
 
     # E + F + A + B per modality / arm
@@ -166,6 +179,8 @@ def stratum(a):
                               "beta": x["slope"].values, "se": x["slope_se"].values, "pval": x["pval_nominal"].values})
             write_table(o, os.path.join(adir, f"{a.cohort}_{anc}_A_nominal_{m}_{chrom}"), a.format, a.round_digits)
 
+    interactions(a, S, anc, out, pre)
+
     # I: aggregate counts and distributions
     rows = []
     gq = os.path.join(S, f"{anc}.geno_qc_counts.tsv")
@@ -195,6 +210,97 @@ def stratum(a):
         quant(ct[ct["sample"].isin(smp.rnaseq_id)].drop(columns="sample"), "cell_type_proportions")
     write_table(pd.DataFrame(rows, columns=["table", "item", "statistic", "value"]), pre + "_I_summary", a.format)
     print(f"{out}: stratum export written")
+
+
+def _mod_exp(stem, exposures):
+    """'{mod}_{exp}' -> (mod, exp) using the configured exposure names (modalities may contain '_')."""
+    for e in sorted(exposures, key=len, reverse=True):
+        if stem.endswith("_" + e) and len(stem) > len(e) + 1:
+            return stem[:-len(e) - 1], e
+    m, _, e = stem.rpartition("_")
+    return m, e
+
+
+def _concat_tsv(paths, extra):
+    frames = []
+    for p in paths:
+        d = pd.read_csv(p, sep="\t")
+        for i, (k, fn) in enumerate(extra):
+            if k not in d.columns:
+                d.insert(i, k, fn(p))
+        frames.append(d)
+    return pd.concat(frames, ignore_index=True) if frames else None
+
+
+def interactions(a, S, anc, out, pre):
+    """G (G x C) and H (G x E) files from the interaction outputs in STAGING, if any."""
+    # G: one table over modalities + the per-pair annotation
+    gx = sorted(glob.glob(os.path.join(S, f"{anc}_*.gxc.parquet")))
+    if gx:
+        g = pd.concat([pd.read_parquet(p) for p in gx], ignore_index=True)
+        write_table(g, pre + "_G_gxc", a.format, a.round_digits)
+        ann = [pd.read_csv(p[:-len(".parquet")] + "_annotation.tsv.gz", sep="\t") for p in gx
+               if os.path.exists(p[:-len(".parquet")] + "_annotation.tsv.gz")]
+        if ann:
+            pd.concat(ann, ignore_index=True).to_csv(pre + "_G_gxc_annotation.tsv.gz", sep="\t", index=False,
+                                                     float_format="%.6g", compression="gzip")
+
+    # H: G x E
+    ef = os.path.join(S, f"{anc}.gxe_exposures.tsv")
+    if not os.path.exists(ef):
+        return
+    expo = pd.read_csv(ef, sep="\t")
+    expo.to_csv(pre + "_H_exposures.tsv", sep="\t", index=False, float_format="%.6g")
+    names = set(expo["exposure"].astype(str))
+
+    def stem(p, suffix):
+        return _mod_exp(os.path.basename(p)[len(anc) + 1:-len(suffix)], names)
+
+    t1 = []
+    for p in sorted(glob.glob(os.path.join(S, f"{anc}_*.gxe_tier1.parquet"))):
+        m, e = stem(p, ".gxe_tier1.parquet")
+        d = pd.read_parquet(p)
+        if len(d):
+            d.insert(0, "exposure", e)
+            d.insert(0, "modality", m)
+            d.insert(0, "ancestry", anc)
+            t1.append(d)
+    if t1:
+        write_table(pd.concat(t1, ignore_index=True), pre + "_H_gxe_tier1", a.format, a.round_digits)
+
+    t2 = sorted(glob.glob(os.path.join(S, f"{anc}_*.gxe_tier2.parquet")))
+    if t2:
+        hdir = os.path.join(out, "H_gxe_tier2")
+        os.makedirs(hdir, exist_ok=True)
+        for p in t2:
+            m, e = stem(p, ".gxe_tier2.parquet")
+            d = pd.read_parquet(p)
+            if not len(d):
+                continue
+            for c in ("af", "b_gi", "b_gi_se", "tstat_gi"):
+                if c in d.columns:
+                    d[c] = d[c].astype(np.float32)
+            write_table(d, os.path.join(hdir, f"{a.cohort}_{anc}_H_gxe_tier2_{m}_{e}"), a.format)
+
+    def me_cols(suffix):
+        return [("ancestry", lambda p: anc), ("modality", lambda p: stem(p, suffix)[0]),
+                ("exposure", lambda p: stem(p, suffix)[1])]
+
+    un = _concat_tsv(sorted(glob.glob(os.path.join(S, f"{anc}_*.gxe_tier2_untested.tsv"))),
+                     me_cols(".gxe_tier2_untested.tsv"))
+    if un is not None and len(un):
+        un.to_csv(pre + "_H_gxe_tier2_untested.tsv.gz", sep="\t", index=False, compression="gzip")
+    se = _concat_tsv(sorted(glob.glob(os.path.join(S, f"{anc}_*.gxe_sensitivity.tsv"))),
+                     me_cols(".gxe_sensitivity.tsv"))
+    if se is not None:
+        se.to_csv(pre + "_H_sensitivity.tsv", sep="\t", index=False, float_format="%.6g")
+    st = [p for p in sorted(glob.glob(os.path.join(S, f"{anc}_*.status.tsv"))) if ".gxe_" in os.path.basename(p)]
+    if st:
+        frames = []
+        for p in st:
+            suffix = "." + os.path.basename(p).split(".", 1)[1]
+            frames.append(_concat_tsv([p], me_cols(suffix)))
+        pd.concat(frames, ignore_index=True).to_csv(pre + "_H_status.tsv", sep="\t", index=False)
 
 
 # --------------------------------------------------------------------------------------------
@@ -336,6 +442,11 @@ def finalize(a):
         shutil.copytree(d, os.path.join(root, os.path.basename(d.rstrip("/"))), symlinks=False)
     st = pd.read_csv(a.strata, sep="\t")
     st.insert(0, "cohort", a.cohort)
+    for k in ("gxc", "gxe"):
+        state = getattr(a, k, "")
+        if state:
+            st[k] = np.where(st["status"] == "mapped", state,
+                             np.where(st["status"] == "below_min_n", "stratum_below_min_n", ""))
     st.to_csv(os.path.join(root, f"{a.cohort}_cohort_I_strata.tsv"), sep="\t", index=False)
 
     lines = [f"# Data dictionary: {a.cohort} xQTL summary export", "",
@@ -346,7 +457,13 @@ def finalize(a):
     for k, cols in COLUMNS.items():
         lines += ["", f"## {k} columns", "", "| column | meaning |", "|---|---|"] + [f"| {c} | {d} |" for c, d in cols]
     lines += ["", "B tables are tensorQTL map_cis / map_independent output (plus arm, qval, qvalue_method).",
-              "C: one .npz (key R) per window with a matching .variants.tsv.gz giving the row order."]
+              "C: one .npz (key R) per window with a matching .variants.tsv.gz giving the row order.",
+              "G: one row per tested pair x cell type (status / untested_reason for pairs that could not be tested); "
+              "q_GxC is BH within stratum x modality; the annotation table gives the primary cell type per pair.",
+              "H: tier 1 = lead pairs, adaptive permutation per phenotype (qval); tier 2 = every cis variant of the "
+              "union phenotypes, nominal statistics; q_top_bh (tier 2) is BH over per-phenotype top-variant nominal "
+              "p-values, not corrected for the number of variants per window (descriptive only). H_status gives "
+              "DONE / SKIPPED / BLOCKED per stratum x modality x exposure x component."]
     with open(os.path.join(root, "DATA_DICTIONARY.md"), "w") as fh:
         fh.write("\n".join(lines) + "\n")
 
@@ -393,6 +510,8 @@ def main(argv=None):
     f.add_argument("--restricted-version", default="unknown")
     f.add_argument("--pipeline-version", default="unknown")
     f.add_argument("--leak-report", default="leak_report.tsv")
+    f.add_argument("--gxc", default="", help="G x C run state for mapped strata: tested | disabled | no_cell_proportions")
+    f.add_argument("--gxe", default="", help="G x E run state for mapped strata: tested | disabled")
     f.add_argument("--out", required=True)
     f.add_argument("strata_dirs", nargs="*")
     c = sub.add_parser("scan")

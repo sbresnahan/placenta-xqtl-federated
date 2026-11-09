@@ -15,6 +15,8 @@ include { SITE } from './workflows/site.nf'
 include { EXPORT_ONLY } from './workflows/export.nf'
 include { PREPARE_REFERENCES } from './workflows/prepare_references.nf'
 include { PHENOTYPING ; PHENOTYPING_ONLY } from './workflows/phenotyping.nf'
+include { IMPUTATION_PREP } from './workflows/imputation_prep.nf'
+include { CENTRAL } from './workflows/central.nf'
 
 def modes() {
     return ['prepare_references', 'imputation_prep', 'site', 'phenotyping_only', 'export', 'central', 'smoke']
@@ -109,6 +111,10 @@ workflow {
             PREPARE_REFERENCES(cfg)
             PREPARE_REFERENCES.out.manifest.view { _m -> "Site indices written to ${params.site_refs} (pass --site_refs ${params.site_refs} to --mode site)" }
         }
+        else if (params.mode == 'imputation_prep') {
+            IMPUTATION_PREP(cfg)
+            IMPUTATION_PREP.out.checklist.view { _f -> "TOPMed-ready VCFs and TOPMED_CHECKLIST.md written to ${params.outdir}/imputation_prep (upload manually)" }
+        }
         else if (params.mode == 'phenotyping_only') {
             PHENOTYPING_ONLY(cfg)
             PHENOTYPING_ONLY.out.normalized.view { _n -> "Phenotype BEDs: ${params.outdir}/phenotypes; normalized matrices: ${params.outdir}/normalized" }
@@ -129,6 +135,10 @@ workflow {
             file("${params.outdir}/export").deleteDir()
             EXPORT_ONLY(cfg)
             EXPORT_ONLY.out.export.view { _d -> "Export rebuilt and leak-scanned: ${params.outdir}/export (share only this folder)" }
+        }
+        else if (params.mode == 'central') {
+            CENTRAL(cfg, VALIDATE.out.resolved)
+            CENTRAL.out.summary.view { _d -> "Central meta-analysis written to ${params.outdir}/central (summary: central/summary/central_summary.tsv)" }
         }
         else {
             notYet(params.mode)

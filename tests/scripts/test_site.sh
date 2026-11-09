@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# M3 acceptance test: --mode site on the chr22 1000 Genomes fixture, end to end.
-#   1. -profile test,<engine> --mode site runs genotype QC -> ancestry -> mapping -> LD -> export;
+# M3/M5 acceptance test: --mode site on the chr22 1000 Genomes fixture, end to end.
+#   1. -profile test,<engine> --mode site runs genotype QC -> ancestry -> mapping -> LD ->
+#      G x C / G x E -> export;
 #   2. the planted cis effects in tests/fixtures/site/TRUTH.tsv are recovered in EUR and EAS
 #      (q <= 0.05 in B; correct sign and p <= 1e-3 at the planted variant in A);
+#   2b. the planted G x C / G x E effects and the test-set flags are in G/H (check_site_interactions.py);
 #   3. AFR (n = 10 < ancestry.min_n) is reported in I_strata but not mapped or exported;
 #   4. a sample ID planted in a site output makes --mode export fail and leaves no export behind;
 #   5. after removing it, --mode export rebuilds the same export.
@@ -34,12 +36,21 @@ else
 fi
 cat truth.log
 
+# ---- 2b. interactions (G, H) ---------------------------------------------------------------
+if python3 "$repo/tests/scripts/check_site_interactions.py" "$exp" EUR EAS > interactions.log; then
+  ok "planted G x C / G x E effects and test-set flags recovered in EUR and EAS"
+else
+  bad "interaction checks"
+fi
+cat interactions.log
+
 # ---- 3. AFR below min_n -----------------------------------------------------------------------
-if grep -qP '^TESTCOHORT\tAFR\t10\t10\tbelow_min_n$' "$exp/TESTCOHORT_cohort_I_strata.tsv" && [ ! -e "$exp/AFR" ] && [ ! -e "$out/site/AFR" ]; then
+if grep -qP '^TESTCOHORT\tAFR\t10\t10\tbelow_min_n\tstratum_below_min_n\tstratum_below_min_n$' "$exp/TESTCOHORT_cohort_I_strata.tsv" && [ ! -e "$exp/AFR" ] && [ ! -e "$out/site/AFR" ]; then
   ok "AFR (n=10) listed as below_min_n and not mapped"
 else
   bad "AFR stratum handling"
 fi
+if grep -qP '^TESTCOHORT\tEUR\t.*\tmapped\ttested\ttested$' "$exp/TESTCOHORT_cohort_I_strata.tsv"; then ok "I_strata records gxc/gxe tested for EUR"; else bad "I_strata gxc/gxe columns"; fi
 if grep -q 'no_genotypes' "$exp/TESTCOHORT_cohort_I_strata.tsv"; then ok "sample without genotypes counted as no_genotypes"; else bad "no_genotypes row"; fi
 
 # ---- 4. leak injection ------------------------------------------------------------------------
@@ -60,6 +71,12 @@ cp features.bak "$f"
 # ---- 5. clean rebuild -----------------------------------------------------------------------
 if nxf --mode export > export.log 2>&1 && [ -s "$exp/MANIFEST.tsv" ]; then
   ok "--mode export rebuilds the export ($(($(wc -l < "$exp/MANIFEST.tsv") - 1)) files)"
+  if grep -q '_G_gxc' "$exp/MANIFEST.tsv" && grep -q 'H_gxe_tier2/' "$exp/MANIFEST.tsv" \
+     && grep -qP '^TESTCOHORT\tEAS\t.*\tmapped\ttested\ttested$' "$exp/TESTCOHORT_cohort_I_strata.tsv"; then
+    ok "rebuilt export contains G and H and the gxc/gxe states"
+  else
+    bad "rebuilt export lacks G/H files or gxc/gxe states"
+  fi
 else
   bad "--mode export rebuild (see export.log)"
 fi

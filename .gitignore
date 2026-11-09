@@ -19,3 +19,4 @@ xqtl-restricted-*.tar.gz
 *.sif
 refs_cache/
 refs/
+.DS_Store

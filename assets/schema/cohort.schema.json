@@ -125,6 +125,48 @@
         }
       }
     },
+    "imputation_prep": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "--mode imputation_prep filters (atlas filter_vcf_for_imputation).",
+      "properties": {
+        "geno_missing_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.05,
+          "description": "Exclude variants with F_MISSING above this."
+        },
+        "maf_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "default": 0.01,
+          "description": "Exclude variants with MAF below this."
+        },
+        "hwe_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1e-06,
+          "description": "Exclude variants with HWE exact-test p below this."
+        },
+        "sample_missing_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.05,
+          "description": "Flag samples with autosomal missingness above this (not removed)."
+        },
+        "ref_match_min": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.95,
+          "description": "Stop when fewer SNPs than this match GRCh38 (wrong build or strand)."
+        }
+      }
+    },
     "rnaseq": {
       "type": "object",
       "additionalProperties": false,
@@ -371,7 +413,28 @@
           },
           "default": [
             "Maternal"
-          ]
+          ],
+          "description": "Cell types never used as G x C targets (atlas: the maternal decidual fraction)."
+        },
+        "fdr": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "default": 0.05,
+          "description": "BH q threshold for a primary cell type (per stratum x modality)."
+        },
+        "min_n": {
+          "type": "integer",
+          "minimum": 10,
+          "default": 20,
+          "description": "Minimum complete samples for one pair x cell-type fit (atlas 49)."
+        },
+        "maternal_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.1,
+          "description": "Maternal-contamination sensitivity refit drops samples above this maternal proportion."
         }
       }
     },
@@ -483,13 +546,84 @@
           }
         },
         "sensitivity": {
-          "type": "boolean",
-          "default": true
+          "type": "object",
+          "description": "SNP x covariate sensitivity of tier-1 hits (atlas 55). Off unless a covariate is enabled; ancestry_pcs uses the PC rows of the mapping covariates.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "default": false
+              },
+              "column": {
+                "type": "string",
+                "description": "Metadata column; defaults to the covariate name (not used by ancestry_pcs)."
+              }
+            }
+          },
+          "default": {
+            "maternal_age": {
+              "enabled": false,
+              "column": "maternal_age"
+            },
+            "parity": {
+              "enabled": false,
+              "column": "parity"
+            },
+            "smoking": {
+              "enabled": false,
+              "column": "smoking"
+            },
+            "GA": {
+              "enabled": false,
+              "column": "GA"
+            },
+            "ancestry_pcs": {
+              "enabled": false
+            }
+          }
         },
-        "transmitted": {
+        "tier1_permutation_blocks": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 1,
+          "default": [
+            100,
+            400,
+            500,
+            9000
+          ],
+          "description": "Adaptive phenotype-permutation blocks for tier 1 (cumulative 100/500/1000/10000); a block runs only while the running empirical p <= 0.10."
+        },
+        "dosages": {
           "type": "boolean",
           "default": false,
-          "description": "Transmitted/non-transmitted follow-up; needs maternal genotypes (not part of round 1 inputs)."
+          "description": "Use imputed dosages instead of hard calls (the atlas used hard calls)."
+        },
+        "tier2": {
+          "type": "string",
+          "enum": [
+            "all_cis_union",
+            "pairs"
+          ],
+          "default": "all_cis_union",
+          "description": "all_cis_union: every cis variant of every tier-2 phenotype; pairs: only the site-lead and MDACC-lead variants (smaller export)."
+        },
+        "seed": {
+          "type": "integer",
+          "default": 12345,
+          "description": "Base permutation seed; phenotype i uses seed + its row index."
+        },
+        "fdr": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "default": 0.05,
+          "description": "q threshold for tier-1 hits (sensitivity refits and counts)."
         }
       }
     },
@@ -522,6 +656,193 @@
             "null"
           ],
           "default": null
+        }
+      }
+    },
+    "central": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "--mode central (MDACC): meta-analysis of site exports. See docs/CENTRAL_ANALYSIS.md.",
+      "properties": {
+        "studies": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "TSV with columns study_id, export_dir (one received export folder per study, the folder holding MANIFEST.tsv). Required for --mode central."
+        },
+        "gwas_catalog": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Optional TSV with columns trait_id, path, ancestry, n, trait_type (quantitative|cc), prop_cases. Enables colocalization."
+        },
+        "annotations": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Optional TSV with columns name, bed: annotation BED files for PIP enrichment."
+        },
+        "fdr": {
+          "type": "number",
+          "default": 0.05,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Feature-level (Storey q) and interaction (BH) significance threshold."
+        },
+        "palindromic_maf_max": {
+          "type": "number",
+          "default": 0.4,
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "A/T and C/G variants whose orientation differs between contributions are dropped when MAF exceeds this in any contribution."
+        },
+        "freq_diff_max": {
+          "type": "number",
+          "default": 0.2,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Flag a contribution's variant as a frequency outlier when |EAF - N-weighted mean EAF of the other contributions of the same ancestry| exceeds this (flag only)."
+        },
+        "verify_checksums": {
+          "type": "boolean",
+          "default": true,
+          "description": "Verify every exported file against MANIFEST.tsv sha256."
+        },
+        "gxc_min_contributions": {
+          "type": "integer",
+          "default": 2,
+          "minimum": 1,
+          "description": "G x C pairs with at least this many contributions are meta-analysed by IVW; otherwise the single p-value is carried."
+        },
+        "pip_threshold": {
+          "type": "number",
+          "default": 0.9,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "PIP threshold for high-confidence variants in summaries and enrichment."
+        },
+        "finemap": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Multi-ancestry fine-mapping (SuShiE, summary-statistics mode).",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "L": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Maximum number of single effects per locus."
+            },
+            "min_variants": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 2,
+              "description": "Minimum shared variants (with LD in every kept ancestry) per locus."
+            },
+            "ld_ridge": {
+              "type": "number",
+              "default": 0.001,
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Minimum diagonal shrinkage added to the N-weighted LD matrix."
+            },
+            "purity": {
+              "type": "number",
+              "default": 0.5,
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Minimum absolute correlation within a credible set."
+            },
+            "max_loci": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "default": null,
+              "description": "Fine-map at most this many loci (smallest feature p first); null = all significant."
+            },
+            "shard_size": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "description": "Loci per fine-mapping task."
+            }
+          }
+        },
+        "coloc": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "xQTL x GWAS colocalization (needs gwas_catalog).",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "pp_h4": {
+              "type": "number",
+              "default": 0.7,
+              "minimum": 0,
+              "maximum": 1,
+              "description": "PP.H4 threshold for calling colocalization."
+            },
+            "L": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 50,
+              "description": "SuSiE single effects per trait."
+            },
+            "min_variants": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 2,
+              "description": "Minimum variants shared by the locus and the GWAS."
+            },
+            "colocboost": {
+              "type": "boolean",
+              "default": true,
+              "description": "Also run ColocBoost."
+            },
+            "M": {
+              "type": "integer",
+              "default": 500,
+              "minimum": 10,
+              "description": "ColocBoost boosting iterations."
+            },
+            "shard_size": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "description": "Colocalization tasks per job."
+            }
+          }
+        },
+        "twas": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "TWAS input contract (OTTERS / mvOTTERS, FUSION weights).",
+          "properties": {
+            "features": {
+              "type": "string",
+              "enum": [
+                "significant",
+                "all"
+              ],
+              "default": "significant",
+              "description": "Features written to the OTTERS summary-statistics files."
+            }
+          }
         }
       }
     }

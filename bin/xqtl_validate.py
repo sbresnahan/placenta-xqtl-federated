@@ -7,7 +7,8 @@ Checks, in order, and reports every problem found (not just the first):
   3. samplesheet (sample_id,fastq_1,fastq_2): columns, unique IDs, files exist, layout;
   4. metadata TSV: required columns, sex coding, GA range, optional exposures;
   5. links between samplesheet and metadata;
-  6. enabled GxE exposures have a column and enough non-missing values.
+  6. enabled GxE exposures have a column and enough non-missing values; enabled sensitivity
+     covariates have a numeric column.
 
 Writes the resolved parameters (defaults filled) as JSON and a TSV report.
 Exit status 0 = valid, 1 = invalid (messages on stderr), 2 = usage error.
@@ -40,7 +41,7 @@ MODE_REQUIRES = {
     "site": ["samplesheet", "metadata", "restricted", "site_refs", "genotypes.imputed_dir"],
     "phenotyping_only": ["samplesheet", "metadata", "restricted", "site_refs"],
     "export": ["samplesheet", "metadata"],
-    "central": [],
+    "central": ["central.studies"],
     "smoke": [],
 }
 
@@ -228,6 +229,16 @@ def check_metadata(path, params, rep, sample_ids):
                 rep.warn(f"gxe.{name}", f"only {n} non-missing values; the exposure will be skipped in groups below gxe.min_n")
             else:
                 rep.ok(f"gxe.{name}", f"{n} non-missing values")
+        for name, spec in (gxe.get("sensitivity") or {}).items():
+            if not spec.get("enabled") or name == "ancestry_pcs":
+                continue
+            col = spec.get("column") or name
+            if col not in header:
+                rep.err(f"gxe.sensitivity.{name}", f"sensitivity covariate '{name}' is enabled but column '{col}' is not in metadata")
+            elif any(as_float(r[col]) is None for r in rows if r[col] not in ("", "NA", "na", "NaN")):
+                rep.err(f"gxe.sensitivity.{name}", f"column '{col}' has non-numeric values")
+            else:
+                rep.ok(f"gxe.sensitivity.{name}", f"column '{col}' present")
     if not any(s == "FAIL" and c.startswith("metadata") for c, s, _ in rep.rows):
         rep.ok("metadata", f"{len(rows)} rows")
 
@@ -291,6 +302,124 @@ def check_site_refs(params, rep):
     rep.ok("site_refs", d)
 
 
+def _raw_files(raw: str):
+    """Files making up genotypes.raw (VCF/BCF file or PLINK 1/2 prefix); None if not recognised."""
+    if raw.endswith((".vcf", ".vcf.gz", ".vcf.bgz", ".bcf")):
+        return [raw]
+    if os.path.exists(raw + ".bed") or os.path.exists(raw + ".bim"):
+        return [raw + e for e in (".bed", ".bim", ".fam")]
+    if os.path.exists(raw + ".pgen"):
+        pvar = raw + ".pvar" if os.path.exists(raw + ".pvar") else raw + ".pvar.zst"
+        return [raw + ".pgen", pvar, raw + ".psam"]
+    return None
+
+
+def check_imputation_prep(params, rep):
+    """--mode imputation_prep: raw genotype files, GRCh38 FASTA and (GRCh37 input) liftover chain."""
+    g = params.get("genotypes") or {}
+    raw = g.get("raw")
+    if raw:
+        files = _raw_files(str(raw))
+        if files is None:
+            rep.err("imputation_prep.raw", f"{raw} is neither a VCF/BCF file nor a PLINK prefix "
+                    "(.bed/.bim/.fam or .pgen/.pvar/.psam)")
+        else:
+            missing = [f for f in files if not os.path.exists(f)]
+            if missing:
+                rep.err("imputation_prep.raw", f"missing file(s): {missing}")
+            else:
+                rep.ok("imputation_prep.raw", ", ".join(os.path.basename(f) for f in files))
+    refs = params.get("refs_dir") or "/opt/xqtl/refs"
+    fa = params.get("genome_fasta") or os.path.join(refs, "genome", "GRCh38_no_alt_analysis_set.fa.gz")
+    if os.path.exists(fa):
+        rep.ok("imputation_prep.genome_fasta", fa)
+    else:
+        rep.err("imputation_prep.genome_fasta", f"GRCh38 FASTA not found: {fa} (set --genome_fasta or refs_dir)")
+    if g.get("raw_build", "GRCh38") == "GRCh37":
+        chain = params.get("liftover_chain") or os.path.join(refs, "liftover", "hg19ToHg38.over.chain.gz")
+        if os.path.exists(chain):
+            rep.ok("imputation_prep.liftover_chain", chain)
+        else:
+            rep.err("imputation_prep.liftover_chain", f"hg19ToHg38 chain not found: {chain} "
+                    "(GRCh37 input is lifted to GRCh38; set --liftover_chain or refs_dir)")
+    if g.get("source") == "wes":
+        rep.warn("imputation_prep.source", "WES genotypes cover few off-target sites; TOPMed imputation "
+                 "accuracy will be low outside exons. Array or WGS genotypes are preferred")
+
+
+def check_central(params, rep):
+    """--mode central: studies table (export folders with MANIFEST.tsv and I_strata), optional GWAS catalog
+    and annotation tables. Staged files are matched by basename, so basenames must be unique."""
+    c = params.get("central") or {}
+    sp = c.get("studies")
+    if sp and os.path.exists(sp):
+        cols, rows = read_table(sp, "\t")
+        if not {"study_id", "export_dir"} <= set(cols):
+            rep.err("central.studies", f"{sp} needs columns study_id, export_dir (found {cols})")
+        else:
+            ids = [r["study_id"] for r in rows]
+            dup = sorted({i for i in ids if ids.count(i) > 1})
+            if dup:
+                rep.err("central.studies", f"duplicate study_id: {dup}")
+            if len(rows) < 1:
+                rep.err("central.studies", "no studies listed")
+            for r in rows:
+                d = resolve(r["export_dir"], os.path.dirname(os.path.abspath(sp)))
+                if not os.path.isdir(d):
+                    rep.err(f"central.studies.{r['study_id']}", f"export_dir not found: {d}")
+                elif not os.path.exists(os.path.join(d, "MANIFEST.tsv")):
+                    rep.err(f"central.studies.{r['study_id']}", f"no MANIFEST.tsv in {d} (give the export folder "
+                            "that holds MANIFEST.tsv)")
+                elif not any(f.endswith("_cohort_I_strata.tsv") for f in os.listdir(d)):
+                    rep.err(f"central.studies.{r['study_id']}", f"no *_cohort_I_strata.tsv in {d}")
+                else:
+                    rep.ok(f"central.studies.{r['study_id']}", d)
+            if len(rows) == 1:
+                rep.warn("central.studies", "only one study: the meta-analysis reduces to within-study "
+                         "pooling across ancestries")
+    elif sp:
+        rep.err("central.studies", f"file not found: {sp}")
+    for key, need in (("gwas_catalog", ["trait_id", "path", "ancestry", "n", "trait_type"]),
+                      ("annotations", ["name", "bed"])):
+        tp = c.get(key)
+        if not tp:
+            continue
+        if not os.path.exists(tp):
+            rep.err(f"central.{key}", f"file not found: {tp}")
+            continue
+        cols, rows = read_table(tp, "\t")
+        miss = [x for x in need if x not in cols]
+        if miss:
+            rep.err(f"central.{key}", f"{tp} is missing column(s) {miss}")
+            continue
+        pcol = "path" if key == "gwas_catalog" else "bed"
+        paths = [resolve(r[pcol], os.path.dirname(os.path.abspath(tp))) for r in rows]
+        bases = [os.path.basename(x) for x in paths]
+        dup = sorted({b for b in bases if bases.count(b) > 1})
+        if dup:
+            rep.err(f"central.{key}", f"file basenames must be unique (files are staged by name): {dup}")
+        missing = [x for x in paths if not os.path.exists(x)]
+        if missing:
+            rep.err(f"central.{key}", f"missing file(s): {missing[:5]}")
+        if key == "gwas_catalog":
+            bad = [r["trait_type"] for r in rows if r["trait_type"] not in ("quantitative", "cc")]
+            if bad:
+                rep.err("central.gwas_catalog", f"trait_type must be quantitative or cc (got {sorted(set(bad))})")
+            for r in rows:
+                if r["trait_type"] == "cc":
+                    try:
+                        ok = 0 < float(r.get("prop_cases") or "nan") < 1
+                    except ValueError:
+                        ok = False
+                    if not ok:
+                        rep.err("central.gwas_catalog", f"{r['trait_id']}: trait_type cc needs prop_cases in (0, 1)")
+            ids = [r["trait_id"] for r in rows]
+            if len(set(ids)) != len(ids):
+                rep.err("central.gwas_catalog", "duplicate trait_id")
+        if not rep.failed:
+            rep.ok(f"central.{key}", f"{len(rows)} entries")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--params", required=True, help="JSON dump of Nextflow params")
@@ -322,6 +451,10 @@ def main(argv=None):
         check_phenotypes_dir(params, rep)
     elif a.mode in ("site", "phenotyping_only") and not a.no_file_check:
         check_site_refs(params, rep)
+    if a.mode == "imputation_prep":
+        check_imputation_prep(params, rep)
+    if a.mode == "central":
+        check_central(params, rep)
     mods = (params.get("mapping") or {}).get("modalities") or []
     if any(m in mods for m in ISOFORM_MODALITIES) and "expression" not in mods:
         rep.err("mapping.modalities", "isoform_expression / isoform_usage need 'expression' in mapping.modalities "

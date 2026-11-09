@@ -125,6 +125,22 @@ jobs:
         run: |
           python3 -m pip install --quiet -r tests/requirements-ci.txt
           tests/scripts/test_site.sh "$PWD/site_test" docker
+      - name: Central run end to end (two cohorts -> meta, fine-mapping, coloc, G x C / GxE, TWAS inputs)
+        if: steps.pull.outputs.available == 'true'
+        env:
+          NXF_OPTS_EXTRA: --image ${{ env.DEV_IMAGE }}
+        run: |
+          # development images built before the central release lack the SuShiE environment
+          if ! docker run --rm --entrypoint bash "$DEV_IMAGE" -c 'command -v sushie-python' > /dev/null; then
+            echo "::notice::development image lacks SuShiE; central test skipped"
+            exit 0
+          fi
+          # the R recalculation runs in the image (data.table); the workspace is mounted at the same path
+          # shellcheck disable=SC2016  # $PWD and $@ are expanded when the wrapper runs
+          printf '#!/usr/bin/env bash\nexec docker run --rm -v "%s:%s" -w "$PWD" --entrypoint Rscript "%s" "$@"\n' \
+            "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE" "$DEV_IMAGE" > "$RUNNER_TEMP/rscript"
+          chmod +x "$RUNNER_TEMP/rscript"
+          RSCRIPT="$RUNNER_TEMP/rscript" tests/scripts/test_central.sh "$PWD/central_test" docker "$PWD/site_test"
       - name: Phenotyping end to end (chr22 SNUH FASTQs -> site indices -> phenotype BEDs)
         if: steps.pull.outputs.available == 'true'
         env:
@@ -140,6 +156,22 @@ jobs:
             "gzip -cdf /opt/xqtl/refs/genome/GRCh38_no_alt_analysis_set.fa.gz | awk '/^>/{p = (\$1 == \">chr22\")} p'" \
             > "$PWD/pheno_test/chr22.fa"
           XQTL_CHR22_FA="$PWD/pheno_test/chr22.fa" tests/scripts/test_phenotyping.sh "$PWD/pheno_test" docker
+      - name: Imputation prep end to end (GRCh37 VCF liftover, GRCh38 PLINK allele swap, wrong-build stop)
+        if: steps.pull.outputs.available == 'true'
+        env:
+          NXF_OPTS_EXTRA: --image ${{ env.DEV_IMAGE }}
+        run: |
+          if ! docker run --rm --entrypoint bash "$DEV_IMAGE" -c 'command -v picard' > /dev/null; then
+            echo "::notice::development image lacks Picard; imputation_prep test skipped"
+            exit 0
+          fi
+          mkdir -p "$PWD/ip_test"
+          if [ -s "$PWD/pheno_test/chr22.fa" ]; then cp "$PWD/pheno_test/chr22.fa" "$PWD/ip_test/chr22.fa"; else
+            docker run --rm --entrypoint bash "$DEV_IMAGE" -c \
+              "gzip -cdf /opt/xqtl/refs/genome/GRCh38_no_alt_analysis_set.fa.gz | awk '/^>/{p = (\$1 == \">chr22\")} p'" \
+              > "$PWD/ip_test/chr22.fa"
+          fi
+          XQTL_CHR22_FA="$PWD/ip_test/chr22.fa" tests/scripts/test_imputation_prep.sh "$PWD/ip_test" docker
       - name: Upload test outputs
         if: always() && steps.pull.outputs.available == 'true'
         uses: actions/upload-artifact@v4
@@ -151,4 +183,8 @@ jobs:
             site_test/*.log
             site_test/results_test/pipeline_info/
             site_test/.nextflow.log
+            central_test/*/*.log
+            central_test/*/.nextflow.log
+            central_test/central/ivw_check/
+            central_test/central/results_central/central/summary/
           retention-days: 7

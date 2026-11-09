@@ -2,7 +2,7 @@
 
 This page describes the folder a site shares with MDACC after `--mode site` (or `--mode export`). It is written to `<outdir>/export/` and holds only summary statistics. Everything else under `<outdir>/` stays at the site, including `site/`, `pipeline_info/` and the work directory.
 
-Files A–F, I and J are produced from pipeline version 1.0.0 onwards. Files G (cell-type interaction, G×C) and H (exposure interaction, GxE) are added by later milestones. The export format is versioned with the pipeline (see the [changelog](../CHANGELOG.md)).
+Files A–J are produced from pipeline version 1.0.0 onwards. G (cell-type interaction, G×C) and H (exposure interaction, GxE) are described in [Interaction analyses](INTERACTIONS.md). The export format is versioned with the pipeline (see the [changelog](../CHANGELOG.md)).
 
 ## Layout
 
@@ -10,7 +10,7 @@ Files A–F, I and J are produced from pipeline version 1.0.0 onwards. Files G (
 export/<cohort_id>/
   MANIFEST.tsv                         J  every file: path, sha256, bytes, rows, class, versions
   DATA_DICTIONARY.md                   J  column definitions
-  <cohort_id>_cohort_I_strata.tsv      I  ancestry strata: n individuals, n RNA-seq samples, status
+  <cohort_id>_cohort_I_strata.tsv      I  ancestry strata: n individuals, n RNA-seq samples, status, gxc / gxe state
   <ANC>/                                  one folder per mapped ancestry stratum (n >= ancestry.min_n)
     A_nominal/<cohort>_<ANC>_A_nominal_<modality>_<chrom>.parquet
     B_mapping/<cohort>_<ANC>_B_permutation_<arm>.parquet
@@ -19,6 +19,13 @@ export/<cohort_id>/
     <cohort>_<ANC>_D_variant_qc.parquet
     <cohort>_<ANC>_E_features.parquet
     <cohort>_<ANC>_F_model_settings.json
+    <cohort>_<ANC>_G_gxc.parquet                 (+ _G_gxc_annotation.tsv.gz)
+    <cohort>_<ANC>_H_exposures.tsv
+    <cohort>_<ANC>_H_gxe_tier1.parquet
+    H_gxe_tier2/<cohort>_<ANC>_H_gxe_tier2_<modality>_<exposure>.parquet
+    <cohort>_<ANC>_H_gxe_tier2_untested.tsv.gz
+    <cohort>_<ANC>_H_sensitivity.tsv
+    <cohort>_<ANC>_H_status.tsv
     <cohort>_<ANC>_I_summary.parquet
 ```
 
@@ -41,13 +48,15 @@ Modalities without groups have one arm. The `combined` arm maps all modalities o
 | D | per-variant QC in the stratum | variant_id, eaf, maf, n, hwe_p, rsq, typed |
 | E | phenotype features: coordinates (gene TSS), group, detection fraction, filter status. `novel` is true for splicing junctions in site-specific clusters (`nclu_`), which cannot be meta-analysed across studies ([Phenotyping](PHENOTYPING.md#splicing-frozen-and-novel-clusters)) | modality, phenotype_id, chr, start, end, detection_fraction, status, group_id, novel |
 | F | model settings: normalization, HCP grid with eGene counts, selected k, covariate **names** (no values), permutations, window, MAF threshold, seed | JSON |
+| G | G×C at lead pairs (site leads + MDACC rank-1 pairs): one row per pair × cell type with the interaction fit, the maternal-contamination refit and BH q within stratum × modality; untested pairs with a reason. The annotation table gives one row per pair with the best and primary cell type | ancestry, modality, phenotype_id, variant_id, source, mdacc_ancestry, untested_reason, cell_type, status, n, beta_GxC, se_GxC, p_GxC, q_GxC, beta_GxC_iqr, maternal_sensitivity_*; annotation: primary_cell_type, best_cell_type, primary_q_GxC |
+| H | GxE: exposure summaries (n, raw-unit mean / SD, pooled scale, cases / controls); tier 1, lead interaction variant per phenotype with adaptive-permutation pval_beta and q-values; tier 2, nominal interaction statistics for every cis variant of the test-set phenotypes with lead flags (`q_top_bh` is descriptive only); untested tier-2 phenotypes and variants; SNP × covariate sensitivity refits; run status per component | tier 1: ancestry, modality, exposure, phenotype_id, variant_id, af, n, b_g, b_e, b_gi, b_gi_se, tstat_gi, pval_nominal, dof, nperm, pval_beta, qval; tier 2: phenotype_id, variant_id, tss_distance, af, n, b_gi, b_gi_se, tstat_gi, pval_nominal, dof, site_lead_variant, mdacc_lead_variant, top_variant, q_top_bh |
 | I | aggregate counts (genotype QC steps, normalization), and 5/25/50/75/95 % quantiles, mean and SD of sequencing metrics and cell-type proportions (computed only when n ≥ 10) | table, item, statistic, value |
 | J | manifest with sha256 and the image sha256, restricted-file version and pipeline version; data dictionary | |
 
 ## What is never exported
 
 - Sample, RNA-seq or genotype identifiers.
-- Per-sample values of any kind: genotypes, dosages, phenotypes, covariates, genotype or HCP PCs, ancestry assignments, outlier lists.
+- Per-sample values of any kind: genotypes, dosages, phenotypes, covariates, exposures, cell-type proportions, genotype or HCP PCs, ancestry assignments, outlier lists.
 - Minimum or maximum values.
 
 The site keeps these under `<outdir>/site/` for its own records.
@@ -101,3 +110,4 @@ Any previous `export/` folder is removed first.
 | Covariates | Sex, genotype PCs 1–5, cell-type proportions (dominant type dropped, `gxc.exclude_cell_types` removed, arcsinh) and HCP factors. Pruned at \|r\| > 0.9, keeping the higher-priority covariate |
 | k selection | The HCP grid is `mapping.hcp_grid`, or by default 0–60 by 10 (n < 350) or 0–100 by 10. Values of k that leave fewer than 20 residual degrees of freedom are skipped. k* gives the most eGenes on `mapping.eval_chrom`, or genome-wide if that chromosome has fewer than `mapping.eval_min_phenotypes` phenotypes. Ties go to the smaller k. The grouped and ungrouped arms share k* |
 | Mapping | tensorQTL `map_cis` (`mapping.nperm` permutations, Storey q-values with a BH fallback recorded in `qvalue_method`), `map_independent` in chunks of `mapping.independent_chunk_size`, and `map_nominal` |
+| Interactions | G×C and GxE at the stratum level on the mapping phenotypes and covariates; see [Interaction analyses](INTERACTIONS.md) |

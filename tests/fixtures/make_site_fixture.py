@@ -4,6 +4,11 @@
   select  --ped PED --tmp DIR          choose cohort and panel samples from 1kGP
   build   --tmp DIR --out DIR          write the TOPMed-style VCF, metadata, samplesheet,
                                        synthetic phenotypes (planted cis effects) and TRUTH.tsv
+
+  --second (with select and build; make_central_fixture.sh): a second, independent cohort for the
+  central acceptance test. select takes 60 EUR + 60 EAS founders that are neither in the first
+  cohort nor in the PCA panel; build uses other seeds, RNA IDs T001..., and plants the effects of
+  the first cohort's TRUTH.tsv (--truth) at the same variants, genes and features.
 """
 import argparse
 import gzip
@@ -14,6 +19,7 @@ import pandas as pd
 
 SEED = 20261029
 COHORT = {"EUR": 60, "EAS": 60, "AFR": 10}
+COHORT2 = {"EUR": 60, "EAS": 60}
 PANEL_PER_GROUP = 40
 # AMR is left out of the fixture panel: on ~1000 chr22 SNPs the admixed AMR samples overlap the
 # EUR cluster completely, so no European cohort sample would pass the posterior threshold. The
@@ -25,6 +31,17 @@ N_GENES = 40
 GENE_FROM, GENE_TO = 19_300_000, 21_200_000
 # planted cis effects: (modality, gene index, effect per ALT allele on the log2 / logit scale)
 PLANTED = [("expression", 5, 1.2), ("expression", 15, -1.0), ("splicing", 25, 1.5)]
+# planted interaction effects (M5), drawn from a separate generator (SEED + 2) after all the M3
+# draws so the cis-only fixture above stays identical. Effect per ALT allele =
+# main + slope * z, where z is the z-scored modifier across all RNA samples:
+#   gxc: z = arcsinh(Cytotrophoblast proportion); gxe: z = GA.
+# The expression plants are the statistical G x C / G x E targets of test_site.sh. The splicing
+# plant is a main-effect and flag target only: with ~110 fixture features per sample, the atlas
+# quantile normalization + INT of ratios leaves too little of its slope for n = 60 to detect.
+# (modality, gene index, main effect, interaction label, slope)
+PLANTED_INTERACTION = [("expression", 10, 1.2, "gxc:Cytotrophoblast", 0.6),
+                       ("expression", 20, 1.6, "gxe:GA", 0.6),
+                       ("splicing", 30, 1.3, "gxe:GA", 0.6)]
 
 
 def select(a):
@@ -36,6 +53,11 @@ def select(a):
         ids = sorted(founders.loc[founders.Superpopulation == sp, "SampleID"])
         ids = list(rng.permutation(ids))
         k = COHORT.get(sp, 0)
+        if a.second:
+            # after the first cohort and the panel in the same seeded order: disjoint from both
+            k2 = k + (PANEL_PER_GROUP if sp in PANEL_GROUPS else 0)
+            cohort += ids[k2:k2 + COHORT2.get(sp, 0)]
+            continue
         cohort += ids[:k]
         if sp in PANEL_GROUPS:
             panel += ids[k:k + PANEL_PER_GROUP]
@@ -64,7 +86,9 @@ def write_bed(df, samples, path):
 
 
 def build(a):
-    rng = np.random.default_rng(SEED + 1)
+    second = bool(a.second)
+    pre = "T" if second else "S"
+    rng = np.random.default_rng(SEED + (11 if second else 1))
     tmp, out = a.tmp, a.out
     info = pd.read_csv(os.path.join(tmp, "cohort_info.tsv"), sep="\t")
     cohort = list(info["sample"])
@@ -86,6 +110,11 @@ def build(a):
     r2 = np.where(rng.random(nv) < 0.08, rng.uniform(0.05, 0.39, nv), rng.uniform(0.6, 1.0, nv))
     typed = rng.random(nv) < 0.1
     r2[typed] = 1.0
+    if second:
+        # the first cohort chose its planted variants among R2 >= 0.8 (the LD export filter); keep them
+        # above it here too, without drawing from rng (the rest of the fixture is unchanged)
+        planted = gt["id"].isin(set(pd.read_csv(a.truth, sep="\t")["variant_id"])).to_numpy()
+        r2[planted & (r2 < 0.8)] = 0.95
     noise = rng.normal(0, 1, G.shape) * (0.4 * (1 - r2))[:, None]
     DS = np.clip(G + noise, 0, 2).round(3)
     # TOPMed-style VCF
@@ -110,12 +139,13 @@ def build(a):
 
     # ---- samples: RNA IDs, one technical replicate, one RNA sample without genotypes -----
     order = rng.permutation(len(cohort))
-    rna_ids = [f"S{k + 1:03d}" for k in range(len(cohort))]
+    rna_ids = [f"{pre}{k + 1:03d}" for k in range(len(cohort))]
     rna_of = {cohort[order[k]]: rna_ids[k] for k in range(len(cohort))}
     meta = pd.DataFrame({"rnaseq_id": [rna_of[s] for s in cohort], "genotype_id": cohort})
     meta = meta.sort_values("rnaseq_id").reset_index(drop=True)
     eur = info.loc[info.superpop == "EUR", "sample"].iloc[0]
-    meta = pd.concat([meta, pd.DataFrame({"rnaseq_id": ["S131", "S132"],
+    extra = [f"{pre}{len(cohort) + 1:03d}", f"{pre}{len(cohort) + 2:03d}"]   # S131, S132 in cohort 1
+    meta = pd.concat([meta, pd.DataFrame({"rnaseq_id": extra,
                                           "genotype_id": [eur, "NOGENO01"]})], ignore_index=True)
     sexmap = dict(zip(info["sample"], info["sex"].map({1: "M", 2: "F"})))
     meta["sex"] = [sexmap.get(g, "F") for g in meta.genotype_id]
@@ -123,7 +153,6 @@ def build(a):
     meta["GA"] = np.clip(rng.normal(39, 1.2, n), 34, 42).round(1)
     meta["ppBMI"] = np.clip(rng.normal(26, 5, n), 16, 50).round(1)
     meta["gdm"] = (rng.random(n) < 0.15).astype(int)
-    meta.to_csv(os.path.join(out, "metadata.tsv"), sep="\t", index=False)
     with open(os.path.join(out, "samplesheet.csv"), "w") as f:
         f.write("sample_id,fastq_1,fastq_2\n")
         for s in meta.rnaseq_id:
@@ -147,11 +176,56 @@ def build(a):
     ok = dense & (r2 >= 0.8) & (np.minimum(maf_eur, 1 - maf_eur) > 0.2) & (np.minimum(maf_eas, 1 - maf_eas) > 0.2)
     truth = []
     causal = {}
+    fixed = None
+    if second:
+        # same planted variants as the first cohort (TRUTH.tsv), looked up in this cohort's VCF
+        fixed = pd.read_csv(a.truth, sep="\t")
+        vidx = {v: i for i, v in enumerate(gt.id)}
+        missing = sorted(set(fixed["variant_id"]) - set(vidx))
+        if missing:
+            raise SystemExit(f"planted variants not polymorphic in the second cohort: {missing}")
     for mod, gi, eff in PLANTED:
-        cand = np.where(ok & (np.abs(gt.pos.to_numpy() - tss[gi]) < 150_000))[0]
-        v = int(cand[rng.integers(len(cand))])
+        if fixed is not None:
+            row = fixed[(fixed.modality == mod) & (fixed.gene_id == genes[gi]) & (fixed.interaction == "none")].iloc[0]
+            v = vidx[row.variant_id]
+        else:
+            cand = np.where(ok & (np.abs(gt.pos.to_numpy() - tss[gi]) < 150_000))[0]
+            v = int(cand[rng.integers(len(cand))])
         causal[(mod, gi)] = (v, eff)
         truth.append((mod, gi, eff, gt.id[v]))
+
+    # interaction plants: same filters, plus no proxy (r2 >= 0.8 within EUR or EAS, +-1 Mb) so the
+    # site lead is the planted variant itself
+    rng2 = np.random.default_rng(SEED + (12 if second else 2))
+    pos = gt.pos.to_numpy()
+    used = {v for v, _ in causal.values()}
+
+    def no_proxy(v):
+        win = np.where((np.abs(pos - pos[v]) < 1_000_000) & (np.arange(nv) != v))[0]
+        for idx in (eur_idx, eas_idx):
+            x = G[v, idx].astype(float)
+            Y = G[np.ix_(win, idx)].astype(float)
+            xc, Yc = x - x.mean(), Y - Y.mean(1, keepdims=True)
+            den = np.sqrt((xc ** 2).sum() * (Yc ** 2).sum(1))
+            with np.errstate(invalid="ignore", divide="ignore"):
+                r = np.where(den > 0, Yc @ xc / den, 0.0)
+            if np.nanmax(r ** 2) >= 0.8:
+                return False
+        return True
+
+    causal_int = {}
+    for mod, gi, main, lab, slope in PLANTED_INTERACTION:
+        if fixed is not None:
+            row = fixed[(fixed.modality == mod) & (fixed.gene_id == genes[gi]) & (fixed.interaction == lab)].iloc[0]
+            v = vidx[row.variant_id]
+            used.add(v)
+            causal_int[(mod, gi)] = (v, main, lab, slope)
+            continue
+        cand = [int(c) for c in rng2.permutation(np.where(ok & (np.abs(pos - tss[gi]) < 150_000))[0])
+                if int(c) not in used]
+        v = next(c for c in cand if no_proxy(c))
+        used.add(v)
+        causal_int[(mod, gi)] = (v, main, lab, slope)
 
     # ---- expression: counts (negative binomial) and TPM, with 3 hidden factors -------------
     F = rng.normal(0, 1, (3, n))
@@ -167,18 +241,12 @@ def build(a):
     disp = 0.05
     counts = rng.poisson(rng.gamma(1 / disp, lam * disp))
     # one sample with scrambled expression (a connectivity outlier)
-    out_s = samples.index("S017")
+    out_s = samples.index(f"{pre}017")
     counts[:, out_s] = rng.permutation(counts[:, out_s])
     glen = rng.uniform(1, 40, N_GENES)
-    rpk = counts / glen[:, None]
-    tpm = rpk / rpk.sum(0, keepdims=True) * 1e6
     strand = ["+" if k % 2 == 0 else "-" for k in range(N_GENES)]
     gdf = pd.DataFrame({"chr": "chr22", "start": tss - 1, "end": tss, "phenotype_id": genes})
     ph = os.path.join(out, "phenotypes")
-    write_bed(gdf.assign(values=[list(map(float, r)) for r in tpm]), samples,
-              os.path.join(ph, "expression.bed.gz"))
-    write_bed(gdf.assign(values=[list(map(int, r)) for r in counts]), samples,
-              os.path.join(ph, "expression.counts.bed.gz"))
 
     # ---- splicing: one 3-intron cluster per gene, ratios from multinomial counts ----------
     rows, groups = [], []
@@ -206,9 +274,6 @@ def build(a):
             if ("splicing", k) in causal and i == 0:
                 truth = [t if not (t[0] == "splicing" and t[1] == k) else (t[0], t[1], t[2], t[3], pid)
                          for t in truth]
-    write_bed(pd.DataFrame(rows), samples, os.path.join(ph, "splicing.bed.gz"))
-    pd.DataFrame(groups).to_csv(os.path.join(ph, "splicing.phenotype_groups.txt"), sep="\t",
-                                header=False, index=False)
 
     # ---- sequencing QC metrics and cell-type proportions ----------------------------------
     intr = np.clip(25 + 4 * F[0] + rng.normal(0, 1.5, n), 5, 60)
@@ -225,19 +290,72 @@ def build(a):
     cp.insert(0, "sample", samples)
     cp.to_csv(os.path.join(ph, "cell_proportions.tsv"), sep="\t", index=False)
 
+    # ---- interaction plants (rng2): regenerate the affected genes / cluster ----------------
+    def z(x):
+        x = np.asarray(x, float)
+        return (x - x.mean()) / x.std()
+    modifier = {"gxc:Cytotrophoblast": z(np.arcsinh(props[:, CELL_TYPES.index("Cytotrophoblast")])),
+                "gxe:GA": z(meta["GA"].to_numpy())}
+    for (mod, k), (v, main, lab, slope) in causal_int.items():
+        eff = main + slope * modifier[lab]                      # per-sample effect per ALT allele
+        if mod == "expression":
+            # low-noise baseline without the hidden factors, so n = 60 per stratum detects the slope
+            lr = mu[k] + rng2.normal(0, 0.1, n) + eff * np.log(2) * Gs[v]
+            counts[k] = rng2.poisson(rng2.gamma(1 / 0.01, np.exp(lr) * lib * 0.01))
+            truth.append((mod, k, main, gt.id[v], genes[k], lab, slope))
+        else:
+            base = np.array([0.4, 0.35, 0.25])                  # unsaturated intron 1, low noise
+            logit = np.log(base)[:, None] + rng2.normal(0, 0.1, (3, n))
+            logit[0] += eff * Gs[v]
+            p = np.exp(logit) / np.exp(logit).sum(0, keepdims=True)
+            tot = rng2.poisson(120, n)
+            c = np.stack([rng2.multinomial(tot[j], p[:, j]) for j in range(n)], axis=1)
+            with np.errstate(invalid="ignore", divide="ignore"):
+                ratio = np.where(tot[None, :] > 0, c / tot[None, :], np.nan)
+            mine = [i for i, r in enumerate(rows) if r["phenotype_id"].startswith(genes[k] + "__")]
+            for j, i in enumerate(mine):
+                rows[i]["values"] = list(map(float, ratio[j]))
+            truth.append((mod, k, main, gt.id[v], rows[mine[0]]["phenotype_id"], lab, slope))
+    meta["maternal_age"] = np.clip(rng2.normal(31, 5, n), 18, 45).round(0).astype(int)
+    meta.to_csv(os.path.join(out, "metadata.tsv"), sep="\t", index=False)
+
+    rpk = counts / glen[:, None]
+    tpm = rpk / rpk.sum(0, keepdims=True) * 1e6
+    write_bed(gdf.assign(values=[list(map(float, r)) for r in tpm]), samples,
+              os.path.join(ph, "expression.bed.gz"))
+    write_bed(gdf.assign(values=[list(map(int, r)) for r in counts]), samples,
+              os.path.join(ph, "expression.counts.bed.gz"))
+    write_bed(pd.DataFrame(rows), samples, os.path.join(ph, "splicing.bed.gz"))
+    pd.DataFrame(groups).to_csv(os.path.join(ph, "splicing.phenotype_groups.txt"), sep="\t",
+                                header=False, index=False)
+
     tr = []
     for t in truth:
         mod, gi, eff, vid = t[:4]
         pid = t[4] if len(t) > 4 else genes[gi]
+        lab, slope = (t[5], t[6]) if len(t) > 6 else ("none", 0.0)
         tr.append({"modality": mod, "phenotype_id": pid, "gene_id": genes[gi], "variant_id": vid,
-                   "effect_per_alt": eff})
+                   "effect_per_alt": eff, "interaction": lab, "interaction_effect": slope})
     pd.DataFrame(tr).to_csv(os.path.join(out, "TRUTH.tsv"), sep="\t", index=False)
+    if second:
+        with open(os.path.join(out, "README.txt"), "w") as f:
+            f.write("Second test cohort for the central acceptance test, written by\n"
+                    "tests/fixtures/make_central_fixture.sh. Genotypes: 120 unrelated 1000 Genomes\n"
+                    "high-coverage samples (60 EUR, 60 EAS) not in tests/fixtures/site or the PCA panel,\n"
+                    "chr22 variants of the first cohort, with SYNTHETIC imputation R2 and dosage noise.\n"
+                    "Phenotypes, QC metrics, cell proportions and covariates: SYNTHETIC SOFTWARE FIXTURES\n"
+                    "with the planted effects of tests/fixtures/site/TRUTH.tsv (other random seeds).\n"
+                    "Not biological data. T121 is a technical replicate; T122 has no genotypes; T017 has\n"
+                    "scrambled expression.\n")
+        return
     with open(os.path.join(out, "README.txt"), "w") as f:
         f.write("Site-run test fixture written by tests/fixtures/make_site_fixture.sh.\n"
                 "Genotypes: 130 unrelated 1000 Genomes high-coverage samples (60 EUR, 60 EAS, 10 AFR),\n"
                 "chr22 subset, with SYNTHETIC imputation R2 and dosage noise.\n"
                 "Phenotypes, QC metrics, cell proportions and covariates: SYNTHETIC SOFTWARE FIXTURES\n"
-                "with planted cis effects listed in TRUTH.tsv. Not biological data.\n"
+                "with planted cis effects listed in TRUTH.tsv (interaction rows: effect per ALT =\n"
+                "effect_per_alt + interaction_effect * z, z = z-scored arcsinh(Cytotrophoblast) for gxc,\n"
+                "z-scored GA for gxe). maternal_age is synthetic. Not biological data.\n"
                 "S131 is a technical replicate of another sample; S132 has no genotypes; S017 has\n"
                 "scrambled expression (connectivity outlier).\n")
 
@@ -248,6 +366,8 @@ def main():
     ap.add_argument("--ped")
     ap.add_argument("--tmp", required=True)
     ap.add_argument("--out")
+    ap.add_argument("--second", action="store_true", help="second cohort for the central test")
+    ap.add_argument("--truth", help="TRUTH.tsv of the first cohort (with --second)")
     a = ap.parse_args()
     select(a) if a.cmd == "select" else build(a)
 

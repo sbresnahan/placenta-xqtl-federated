@@ -104,6 +104,43 @@ def test_finalize_deletes_export_on_leak(tmp_path):
     assert "HG1" in (tmp_path / "leak.tsv").read_text()
 
 
+def test_mod_exp_and_interaction_export(tmp_path):
+    assert export._mod_exp("intron_retention_GA", {"GA", "gdm"}) == ("intron_retention", "GA")
+    assert export._mod_exp("expression_ogtt_2h", {"ogtt_2h", "GA"}) == ("expression", "ogtt_2h")
+    S = tmp_path / "S"
+    S.mkdir()
+    pd.DataFrame({"ancestry": ["EUR", "pooled"], "exposure": ["GA", "GA"], "n": [60, 120]}).to_csv(
+        S / "EUR.gxe_exposures.tsv", sep="\t", index=False)
+    pd.DataFrame({"phenotype_id": ["G1"], "variant_id": ["chr1:5:A:G"], "b_gi": [0.5], "qval": [0.01]}).to_parquet(
+        S / "EUR_intron_retention_GA.gxe_tier1.parquet", index=False)
+    pd.DataFrame({"phenotype_id": ["G1", "G1"], "variant_id": ["chr1:5:A:G", "chr1:9:C:T"], "af": [0.2, 0.3],
+                  "b_gi": [0.5, 0.1], "pval_nominal": [1e-6, 0.3]}).to_parquet(
+        S / "EUR_intron_retention_GA.gxe_tier2.parquet", index=False)
+    for comp in ("gxe_tier1", "gxe_tier2"):
+        pd.DataFrame({"ancestry": ["EUR"], "modality": ["intron_retention"], "exposure": ["GA"],
+                      "component": [comp[4:]], "status": ["DONE"]}).to_csv(
+            S / f"EUR_intron_retention_GA.{comp}.status.tsv", sep="\t", index=False)
+    pd.DataFrame({"phenotype_id": ["G2"], "variant_id": [None], "untested_reason": ["phenotype_absent"]}).to_csv(
+        S / "EUR_intron_retention_GA.gxe_tier2_untested.tsv", sep="\t", index=False)
+    out = tmp_path / "EUR"
+    out.mkdir()
+
+    class A:
+        format, round_digits, cohort = "parquet", None, "C"
+    export.interactions(A, str(S), "EUR", str(out), str(out / "C_EUR"))
+    t1 = pd.read_parquet(out / "C_EUR_H_gxe_tier1.parquet")
+    assert list(t1.columns[:3]) == ["ancestry", "modality", "exposure"]
+    assert t1[["modality", "exposure"]].iloc[0].tolist() == ["intron_retention", "GA"]
+    t2 = pd.read_parquet(out / "H_gxe_tier2" / "C_EUR_H_gxe_tier2_intron_retention_GA.parquet")
+    assert t2["b_gi"].dtype == np.float32 and t2["pval_nominal"].dtype == np.float64
+    st = pd.read_csv(out / "C_EUR_H_status.tsv", sep="\t")
+    assert sorted(st.component) == ["tier1", "tier2"]
+    un = pd.read_csv(out / "C_EUR_H_gxe_tier2_untested.tsv.gz", sep="\t")
+    assert un[["modality", "exposure", "untested_reason"]].iloc[0].tolist() == ["intron_retention", "GA", "phenotype_absent"]
+    assert (out / "C_EUR_H_exposures.tsv").exists() and not (out / "C_EUR_G_gxc.parquet").exists()
+    assert export.file_class("C_EUR_H_gxe_tier2_intron_retention_GA.parquet") == "H"
+
+
 # ---------------- covariates ----------------
 def test_prune_correlated_keeps_higher_priority():
     rng = np.random.default_rng(1)

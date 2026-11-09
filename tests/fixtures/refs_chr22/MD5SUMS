@@ -1,5 +1,7 @@
-125d372a8448c6c4504b21b127675a69  ./README.txt
+a7982bcb6a1da6f6ec6167bfdf259c54  ./README.txt
 dc901a5fe0a3a4100cf0f9587a9d8ed0  ./annotation/gencode.v45.chr22.PANTRY.gtf.gz
+1587a30d1ad28c752019b8a87265342d  ./editing/rediportal_hg38.bed.gz
+52c2055963ea26f52e44bd26d077c15d  ./music/placenta_music_reference.rds
 9d81d3988c4f3a99901837889f266f08  ./txrevise/txrevise.grp_1.contained.gff3.gz
 b373536c13b4c1f718f56cbb84a5590c  ./txrevise/txrevise.grp_1.downstream.gff3.gz
 e605da84bcd0912d5d685885380a0dea  ./txrevise/txrevise.grp_1.upstream.gff3.gz

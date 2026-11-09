@@ -338,8 +338,10 @@ Approximate requirements for one cohort of about 350 samples with about 50 M rea
 | Aggregation, normalization, MuSiC | `process_medium`/`process_high` | ~40 | 50–100 | 50 GB |
 | HCP grid (per modality × ancestry) | `process_medium` | ~60 | ~60 | small |
 | tensorQTL (per modality × ancestry) | `process_gpu_capable` | ~50 | 100–300 (CPU) | 100 GB |
-| GxE tier 1 (per modality × exposure) | `process_gpu_capable` + `process_long` | ~20 | 100–300 (CPU) | small |
-| G×C, GxE tier 2, LD, export | `process_medium` | ~100 | 20–50 | 100–150 GB export |
+| GxE scans, tiers 1 and 2 (per ancestry × modality × exposure × tier × chromosome) | `process_gpu_capable` | ~800 per exposure | 100–300 (CPU) | tier 2: see below |
+| G×C, GxE merge and sensitivity, LD, export | `process_medium`/`process_low` | ~150 | 20–50 | 100–150 GB export |
+
+GxE tier 2 stores every cis variant of the test-set phenotypes, so for those phenotypes its size grows like file A. If a site cannot hold or share it, `gxe.tier2: pairs` keeps only the lead variants ([Interaction analyses](INTERACTIONS.md#tier-2-all-cis-variants-of-the-test-set-phenotypes)).
 
 To shorten runs, raise `--queue_size` (if allowed), use GPUs for tensorQTL, and place the work directory on the fastest shared filesystem.
 
