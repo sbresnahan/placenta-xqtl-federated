@@ -59,6 +59,7 @@ All notable changes to this pipeline are recorded here. Versions follow [semanti
 - Image build: `containers/install_r_extra.R` now runs with the environment's `bin` on `PATH` so Rhcpp and colocboost find the conda C++ compiler; it also stops early if the bioconda `GenomeInfoDbData` post-link download failed.
 - CI: base image pinned by digest directly in the `FROM` lines (hadolint DL3006); `actions/checkout` and `actions/setup-java` v5.
 - Export file C: the `file` column of `*_C_ld.windows.tsv` now names the exported LD files (`<cohort>_<ANC>_C_ld_...`); central ingest also matches older exports by window coordinates.
+- `fetch_references.sh`: the unpinned-reference error now gives the correct `pin_reference_record.py --files <record dir>/files.tsv` command (it named a `--checksums` option that does not exist).
 - Colocalization: when one trait had no credible set, the `coloc.abf` fallback wrote empty (NaN) posteriors because the `.abf` suffix of the summary names was not stripped; `PP.H0`–`PP.H4` are now filled.
 - Leak scan: text columns were skipped under pandas >= 3 (new `str` dtype), so sample IDs in string columns of parquet/TSV exports could pass; the scanner now checks every non-numeric, non-boolean, non-datetime column.
 - CI unit tests: dependencies pinned to the image versions (`tests/requirements-ci.txt`), plus a second run with the latest pandas/pyarrow/numpy.

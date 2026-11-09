@@ -89,7 +89,7 @@ do_download() {
       die "required references are not pinned yet: ${unpinned[*]}.
   These come from the public MDACC Zenodo reference record. Build it with
   scripts/make_public_reference_record.sh, upload it to Zenodo, then run
-  scripts/pin_reference_record.py --record <id> --checksums <record>/SHA256SUMS
+  scripts/pin_reference_record.py --record <id> --files <record dir>/files.tsv
   (or pass --allow-unpinned for a development image without them)."
     fi
   fi
