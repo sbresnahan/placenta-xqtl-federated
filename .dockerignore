@@ -18,3 +18,4 @@ xqtl_smoke
 *.sif
 xqtl-restricted-*.tar.gz
 !tests/fixtures/xqtl-restricted-test.tar.gz
+!tests/fixtures/phenotyping/xqtl-restricted-phenotyping-test.tar.gz

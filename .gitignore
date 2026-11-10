@@ -16,6 +16,7 @@ __pycache__/
 # never commit restricted or individual-level data
 xqtl-restricted-*.tar.gz
 !tests/fixtures/xqtl-restricted-test.tar.gz
+!tests/fixtures/phenotyping/xqtl-restricted-phenotyping-test.tar.gz
 *.sif
 refs_cache/
 refs/

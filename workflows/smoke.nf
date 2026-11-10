@@ -64,15 +64,20 @@ process SMOKE_RESTRICTED {
     errorStrategy 'ignore'
 
     input:
-    val archive
+    path archive     // staged into the task, so relative paths and any container engine work
+    val requested    // --restricted as given ('' when not set)
 
     output:
     path 'result.tsv'
 
     script:
-    if (!archive)
+    if (!requested)
         """
         printf "S04_restricted_file\\tWARN\\tnot set (--restricted); request xqtl-restricted-<version>.tar.gz by email before site runs (docs/SETUP.md)\\n" > result.tsv
+        """
+    else if (!archive)
+        """
+        printf "S04_restricted_file\\tFAIL\\t--restricted ${requested} does not exist (resolved from the launch directory)\\n" > result.tsv
         """
     else
         """
@@ -289,7 +294,9 @@ workflow SMOKE {
     SMOKE_R()
     SMOKE_TOOLS()
     SMOKE_REFS()
-    SMOKE_RESTRICTED(channel.value(params.restricted ?: ''))
+    def restricted = params.restricted ? file(params.restricted) : null
+    SMOKE_RESTRICTED(restricted?.exists() ? channel.value(restricted) : channel.value([]),
+                     channel.value(params.restricted ?: ''))
     SMOKE_PLINK2()
     SMOKE_RESOURCES()
     SMOKE_FANOUT(channel.of(1..5))

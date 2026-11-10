@@ -123,8 +123,14 @@ RUN PATH="/opt/conda/envs/xqtl/bin:${PATH}" bash /build/refs/fetch_references.sh
 FROM envs AS final
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Intron retention (IRFinder-S v2.0.1)
+# Intron retention (IRFinder-S v2.0.1). Its Perl scripts run under /usr/bin/perl and use modules
+# that perl-base lacks (File::Copy, FindBin, Data::Dumper), so install the full perl package and
+# compile-check every script.
 COPY --from=irfinder /opt/xqtl/IRFinder /opt/xqtl/IRFinder
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends perl \
+ && rm -rf /var/lib/apt/lists/* \
+ && grep -rl '^#!/usr/bin/perl' /opt/xqtl/IRFinder/bin | xargs -r -n1 /usr/bin/perl -c
 
 # Java runtime + Nextflow launcher. These are exported to the host by `bootstrap`, so the
 # Nextflow head job needs nothing but this image.
