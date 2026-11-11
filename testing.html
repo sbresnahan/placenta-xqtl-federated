@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Testing and validation | placenta-xqtl-federated</title>
+  <meta name="description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  <meta name="generator" content="bookdown 0.48 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Testing and validation | placenta-xqtl-federated" />
+  <meta property="og:type" content="book" />
+  <meta property="og:image" content="https://seantbresnahan.com/placenta-xqtl-federated/social-preview.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="placenta-xqtl-federated: federated multi-ancestry placental xQTL pipeline documentation" />
+  <meta property="og:description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Testing and validation | placenta-xqtl-federated" />
+  
+  <meta name="twitter:description" content="Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis." />
+  <meta name="twitter:image" content="https://seantbresnahan.com/placenta-xqtl-federated/social-preview.png" />
+
+<meta name="author" content="Sean T. Bresnahan, MD Anderson Cancer Center (Bhattacharya Lab)" />
+
+
+<meta name="date" content="2026-11-11" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="references.html"/>
+<link rel="next" href="changelog.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">placenta-xqtl-federated</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Home</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#where-to-start"><i class="fa fa-check"></i>Where to start</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#quick-start"><i class="fa fa-check"></i>Quick start</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#the-restricted-file"><i class="fa fa-check"></i>The restricted file</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#licence"><i class="fa fa-check"></i>Licence</a></li>
+</ul></li>
+<li class="part"><span><b>Part I: For cohort investigators</b></span></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html"><i class="fa fa-check"></i>Collaboration brief</a>
+<ul>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--1-purpose-of-the-collaboration"><i class="fa fa-check"></i>1. Purpose of the collaboration</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--2-research-questions-and-planned-analyses"><i class="fa fa-check"></i>2. Research questions and planned analyses</a>
+<ul>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--21-identify-genetic-effects-on-different-rna-measurements"><i class="fa fa-check"></i>2.1 Identify genetic effects on different RNA measurements</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--22-compare-placental-findings-with-birth-and-childhood-health-studies"><i class="fa fa-check"></i>2.2 Compare placental findings with birth and childhood health studies</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--23-test-whether-pregnancy-conditions-modify-genetic-effects"><i class="fa fa-check"></i>2.3 Test whether pregnancy conditions modify genetic effects</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--24-interpret-the-findings"><i class="fa fa-check"></i>2.4 Interpret the findings</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--3-analyses-performed-by-participating-sites"><i class="fa fa-check"></i>3. Analyses performed by participating sites</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--4-analyses-performed-by-md-anderson"><i class="fa fa-check"></i>4. Analyses performed by MD Anderson</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--5-data-and-computing-needed-at-each-cohort"><i class="fa fa-check"></i>5. Data and computing needed at each cohort</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--6-files-requested-from-each-cohort"><i class="fa fa-check"></i>6. Files requested from each cohort</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--7-data-sharing-and-safeguards"><i class="fa fa-check"></i>7. Data sharing and safeguards</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--8-planned-extensions-beyond-the-first-release"><i class="fa fa-check"></i>8. Planned extensions beyond the first release</a></li>
+<li class="chapter" data-level="" data-path="collaboration-brief.html"><a href="collaboration-brief.html#collaboration-brief--references"><i class="fa fa-check"></i>References</a></li>
+</ul></li>
+<li class="part"><span><b>Part II: Running the pipeline</b></span></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html"><i class="fa fa-check"></i>Setup</a>
+<ul>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--what-you-need"><i class="fa fa-check"></i>What you need</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--1-get-the-image"><i class="fa fa-check"></i>1. Get the image</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--2-check-the-image"><i class="fa fa-check"></i>2. Check the image</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--3-export-the-launcher-bootstrap"><i class="fa fa-check"></i>3. Export the launcher (<code>bootstrap</code>)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--4-what-run_xqtlsh-does"><i class="fa fa-check"></i>4. What <code>run_xqtl.sh</code> does</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--5-check-that-your-cluster-works-smoke-test"><i class="fa fa-check"></i>5. Check that your cluster works (smoke test)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--6-build-the-alignment-indices-once-per-site"><i class="fa fa-check"></i>6. Build the alignment indices (once per site)</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--upgrading-to-a-new-pipeline-version"><i class="fa fa-check"></i>Upgrading to a new pipeline version</a></li>
+<li class="chapter" data-level="" data-path="setup.html"><a href="setup.html#setup--offline-documentation"><i class="fa fa-check"></i>Offline documentation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html"><i class="fa fa-check"></i>HPC configuration guide</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--configuration-layers"><i class="fa fa-check"></i>Configuration layers</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--resource-classes"><i class="fa fa-check"></i>Resource classes</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--caps---max_cpus---max_memory---max_time"><i class="fa fa-check"></i>Caps (<code>--max_cpus</code>, <code>--max_memory</code>, <code>--max_time</code>)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--executors"><i class="fa fa-check"></i>Executors</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--single-node--profile-local"><i class="fa fa-check"></i>Single node (<code>-profile local</code>)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--queues-and-partitions"><i class="fa fa-check"></i>Queues and partitions</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--memory"><i class="fa fa-check"></i>Memory</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--lsf"><i class="fa fa-check"></i>LSF</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--slurm"><i class="fa fa-check"></i>SLURM</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--pbs-and-sge"><i class="fa fa-check"></i>PBS and SGE</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--retries-after-memory-or-time-kills"><i class="fa fa-check"></i>Retries after memory or time kills</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--cpus-and-threads"><i class="fa fa-check"></i>CPUs and threads</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--job-arrays-queue-size-and-submission-rate"><i class="fa fa-check"></i>Job arrays, queue size and submission rate</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--gpus"><i class="fa fa-check"></i>GPUs</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--container-runtime"><i class="fa fa-check"></i>Container runtime</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--apptainer-or-singularity"><i class="fa fa-check"></i>Apptainer or Singularity</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--bind-paths"><i class="fa fa-check"></i>Bind paths</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--work-directory-temporary-space-and-cleanup"><i class="fa fa-check"></i>Work directory, temporary space and cleanup</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--running-offline"><i class="fa fa-check"></i>Running offline</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--running-the-head-inside-a-batch-job"><i class="fa fa-check"></i>Running the head inside a batch job</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--site-specific-settings"><i class="fa fa-check"></i>Site-specific settings</a>
+<ul>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--account-project-and-qos-codes"><i class="fa fa-check"></i>Account, project and QOS codes</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--module-systems"><i class="fa fa-check"></i>Module systems</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--validating-a-new-site"><i class="fa fa-check"></i>Validating a new site</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--worked-example-seadragon-md-anderson"><i class="fa fa-check"></i>Worked example: seadragon (MD Anderson)</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--tuning-table"><i class="fa fa-check"></i>Tuning table</a></li>
+<li class="chapter" data-level="" data-path="hpc.html"><a href="hpc.html#hpc--hpc-troubleshooting"><i class="fa fa-check"></i>HPC troubleshooting</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html"><i class="fa fa-check"></i>Configuration</a>
+<ul>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--a-minimal-cohortyml"><i class="fa fa-check"></i>A minimal <code>cohort.yml</code></a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--input-tables"><i class="fa fa-check"></i>Input tables</a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--settings-reference"><i class="fa fa-check"></i>Settings reference</a>
+<ul>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--run-and-inputs"><i class="fa fa-check"></i>Run and inputs</a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--genotypes"><i class="fa fa-check"></i><code>genotypes</code></a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--imputation_prep"><i class="fa fa-check"></i><code>imputation_prep</code></a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--rnaseq"><i class="fa fa-check"></i><code>rnaseq</code></a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--qc-post-imputation-genotype-qc"><i class="fa fa-check"></i><code>qc</code> (post-imputation genotype QC)</a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--ancestry"><i class="fa fa-check"></i><code>ancestry</code></a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--mapping"><i class="fa fa-check"></i><code>mapping</code></a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--ld-file-c"><i class="fa fa-check"></i><code>ld</code> (file C)</a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--gxc-cell-type-interaction"><i class="fa fa-check"></i><code>gxc</code> (cell-type interaction)</a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--gxe-exposure-interaction"><i class="fa fa-check"></i><code>gxe</code> (exposure interaction)</a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--export"><i class="fa fa-check"></i><code>export</code></a></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--central-mdacc-only"><i class="fa fa-check"></i><code>central</code> (MDACC only)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="configuration.html"><a href="configuration.html#configuration--command-line-parameters"><i class="fa fa-check"></i>Command-line parameters</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="walkthrough.html"><a href="walkthrough.html"><i class="fa fa-check"></i>Walkthrough</a>
+<ul>
+<li class="chapter" data-level="" data-path="walkthrough.html"><a href="walkthrough.html#walkthrough--1-setup-and-smoke-test"><i class="fa fa-check"></i>1. Setup and smoke test</a></li>
+<li class="chapter" data-level="" data-path="walkthrough.html"><a href="walkthrough.html#walkthrough--2-input-tables-and-cohortyml"><i class="fa fa-check"></i>2. Input tables and <code>cohort.yml</code></a></li>
+<li class="chapter" data-level="" data-path="walkthrough.html"><a href="walkthrough.html#walkthrough--3-genotypes-for-imputation"><i class="fa fa-check"></i>3. Genotypes for imputation</a></li>
+<li class="chapter" data-level="" data-path="walkthrough.html"><a href="walkthrough.html#walkthrough--4-topmed-imputation"><i class="fa fa-check"></i>4. TOPMed imputation</a></li>
+<li class="chapter" data-level="" data-path="walkthrough.html"><a href="walkthrough.html#walkthrough--5-site-indices-once-per-site"><i class="fa fa-check"></i>5. Site indices (once per site)</a></li>
+<li class="chapter" data-level="" data-path="walkthrough.html"><a href="walkthrough.html#walkthrough--6-site-analysis"><i class="fa fa-check"></i>6. Site analysis</a></li>
+<li class="chapter" data-level="" data-path="walkthrough.html"><a href="walkthrough.html#walkthrough--7-review-the-export"><i class="fa fa-check"></i>7. Review the export</a></li>
+<li class="chapter" data-level="" data-path="walkthrough.html"><a href="walkthrough.html#walkthrough--8-transfer"><i class="fa fa-check"></i>8. Transfer</a></li>
+<li class="chapter" data-level="" data-path="walkthrough.html"><a href="walkthrough.html#walkthrough--9-central-analysis-mdacc"><i class="fa fa-check"></i>9. Central analysis (MDACC)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="phenotyping.html"><a href="phenotyping.html"><i class="fa fa-check"></i>Phenotyping</a>
+<ul>
+<li class="chapter" data-level="" data-path="phenotyping.html"><a href="phenotyping.html#phenotyping--before-the-first-run-site-indices"><i class="fa fa-check"></i>Before the first run: site indices</a></li>
+<li class="chapter" data-level="" data-path="phenotyping.html"><a href="phenotyping.html#phenotyping--inputs"><i class="fa fa-check"></i>Inputs</a></li>
+<li class="chapter" data-level="" data-path="phenotyping.html"><a href="phenotyping.html#phenotyping--per-sample-steps"><i class="fa fa-check"></i>Per-sample steps</a></li>
+<li class="chapter" data-level="" data-path="phenotyping.html"><a href="phenotyping.html#phenotyping--cohort-level-phenotypes"><i class="fa fa-check"></i>Cohort-level phenotypes</a>
+<ul>
+<li class="chapter" data-level="" data-path="phenotyping.html"><a href="phenotyping.html#phenotyping--splicing-frozen-and-novel-clusters"><i class="fa fa-check"></i>Splicing: frozen and novel clusters</a></li>
+<li class="chapter" data-level="" data-path="phenotyping.html"><a href="phenotyping.html#phenotyping--cell-type-proportions"><i class="fa fa-check"></i>Cell-type proportions</a></li>
+<li class="chapter" data-level="" data-path="phenotyping.html"><a href="phenotyping.html#phenotyping--library-types"><i class="fa fa-check"></i>Library types</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="phenotyping.html"><a href="phenotyping.html#phenotyping--outputs"><i class="fa fa-check"></i>Outputs</a></li>
+<li class="chapter" data-level="" data-path="phenotyping.html"><a href="phenotyping.html#phenotyping--implementation-notes"><i class="fa fa-check"></i>Implementation notes</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html"><i class="fa fa-check"></i>Troubleshooting</a>
+<ul>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#troubleshooting--input-validation-messages"><i class="fa fa-check"></i>Input validation messages</a></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#troubleshooting--imputation-preparation"><i class="fa fa-check"></i>Imputation preparation</a></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#troubleshooting--site-analysis"><i class="fa fa-check"></i>Site analysis</a></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#troubleshooting--export"><i class="fa fa-check"></i>Export</a></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#troubleshooting--central-analysis"><i class="fa fa-check"></i>Central analysis</a></li>
+</ul></li>
+<li class="part"><span><b>Part III: Outputs and analysis</b></span></li>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html"><i class="fa fa-check"></i>Interaction analyses (G×C and GxE)</a>
+<ul>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--test-sets"><i class="fa fa-check"></i>Test sets</a></li>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--gc-cell-type-interaction"><i class="fa fa-check"></i>G×C: cell-type interaction</a></li>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--gxe-exposure-interaction"><i class="fa fa-check"></i>GxE: exposure interaction</a>
+<ul>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--exposures"><i class="fa fa-check"></i>Exposures</a></li>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--model"><i class="fa fa-check"></i>Model</a></li>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--tier-1-permutation-scan-of-every-phenotype"><i class="fa fa-check"></i>Tier 1: permutation scan of every phenotype</a></li>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--tier-2-all-cis-variants-of-the-test-set-phenotypes"><i class="fa fa-check"></i>Tier 2: all cis variants of the test-set phenotypes</a></li>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--sensitivity-snp--covariate-refits"><i class="fa fa-check"></i>Sensitivity: SNP × covariate refits</a></li>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--run-status"><i class="fa fa-check"></i>Run status</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--analyses-not-run-at-the-sites"><i class="fa fa-check"></i>Analyses not run at the sites</a></li>
+<li class="chapter" data-level="" data-path="interactions.html"><a href="interactions.html#interactions--caveats"><i class="fa fa-check"></i>Caveats</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html"><i class="fa fa-check"></i>Export specification</a>
+<ul>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--layout"><i class="fa fa-check"></i>Layout</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--file-classes"><i class="fa fa-check"></i>File classes</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--what-is-never-exported"><i class="fa fa-check"></i>What is never exported</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--leak-scan"><i class="fa fa-check"></i>Leak scan</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--rebuilding-the-export"><i class="fa fa-check"></i>Rebuilding the export</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--phenotype-inputs-phenotypes_dir"><i class="fa fa-check"></i>Phenotype inputs (<code>phenotypes_dir</code>)</a></li>
+<li class="chapter" data-level="" data-path="export-spec.html"><a href="export-spec.html#export-spec--site-side-processing-behind-the-export"><i class="fa fa-check"></i>Site-side processing behind the export</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html"><i class="fa fa-check"></i>Central analysis (MDACC)</a>
+<ul>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--running-it"><i class="fa fa-check"></i>Running it</a>
+<ul>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--receiving-exports"><i class="fa fa-check"></i>Receiving exports</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--ingest-and-harmonization"><i class="fa fa-check"></i>Ingest and harmonization</a></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--nominal-meta-analysis"><i class="fa fa-check"></i>Nominal meta-analysis</a></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--feature-level-significance"><i class="fa fa-check"></i>Feature-level significance</a></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--fine-mapping"><i class="fa fa-check"></i>Fine-mapping</a></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--colocalization"><i class="fa fa-check"></i>Colocalization</a></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--interactions"><i class="fa fa-check"></i>Interactions</a></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--twas-inputs"><i class="fa fa-check"></i>TWAS inputs</a></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--summary-and-enrichment"><i class="fa fa-check"></i>Summary and enrichment</a></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--caveats"><i class="fa fa-check"></i>Caveats</a></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--what-the-shared-files-cannot-support"><i class="fa fa-check"></i>What the shared files cannot support</a></li>
+<li class="chapter" data-level="" data-path="central-analysis.html"><a href="central-analysis.html#central-analysis--references"><i class="fa fa-check"></i>References</a></li>
+</ul></li>
+<li class="appendix"><span><b>Appendices</b></span></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>Reference data and software provenance</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--embedded-reference-data"><i class="fa fa-check"></i>Embedded reference data</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--genome"><i class="fa fa-check"></i>Genome</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--ancestry-pca-panel"><i class="fa fa-check"></i>Ancestry PCA panel</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--rna-editing-sites-rediportal"><i class="fa fa-check"></i>RNA-editing sites (REDIportal)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--built-at-each-site"><i class="fa fa-check"></i>Built at each site</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--not-public-the-restricted-file"><i class="fa fa-check"></i>Not public: the restricted file</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--software"><i class="fa fa-check"></i>Software</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--mdacc-maintainer-procedures"><i class="fa fa-check"></i>MDACC maintainer procedures</a>
+<ul>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-the-public-reference-record-once-per-reference-release"><i class="fa fa-check"></i>Building the public reference record (once per reference release)</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html#references--building-the-restricted-file"><i class="fa fa-check"></i>Building the restricted file</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html"><i class="fa fa-check"></i>Testing and validation</a>
+<ul>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--development-environment"><i class="fa fa-check"></i>Development environment</a></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--unit-tests"><i class="fa fa-check"></i>Unit tests</a></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--end-to-end-tests"><i class="fa fa-check"></i>End-to-end tests</a>
+<ul>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--site-run-test_sitesh"><i class="fa fa-check"></i>Site run: <code>test_site.sh</code></a></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--central-analysis-test_centralsh"><i class="fa fa-check"></i>Central analysis: <code>test_central.sh</code></a></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--phenotyping-test_phenotypingsh"><i class="fa fa-check"></i>Phenotyping: <code>test_phenotyping.sh</code></a></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--imputation-preparation-test_imputation_prepsh"><i class="fa fa-check"></i>Imputation preparation: <code>test_imputation_prep.sh</code></a></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--smoke-test-and-bootstrap"><i class="fa fa-check"></i>Smoke test and bootstrap</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--continuous-integration"><i class="fa fa-check"></i>Continuous integration</a></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--cluster-checks-on-seadragon"><i class="fa fa-check"></i>Cluster checks on seadragon</a></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--building-and-releasing"><i class="fa fa-check"></i>Building and releasing</a>
+<ul>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--building-an-image"><i class="fa fa-check"></i>Building an image</a></li>
+<li class="chapter" data-level="" data-path="testing.html"><a href="testing.html#testing--releasing-a-version"><i class="fa fa-check"></i>Releasing a version</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html"><i class="fa fa-check"></i>Changelog</a>
+<ul>
+<li class="chapter" data-level="" data-path="changelog.html"><a href="changelog.html#changelog--100-unreleased"><i class="fa fa-check"></i>1.0.0 (unreleased)</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/sbresnahan/placenta-xqtl-federated" target="_blank">Source on GitHub</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">placenta-xqtl-federated</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="testing" class="section level1 hasAnchor">
+<h1>Testing and validation<a href="testing.html#testing" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>This page is for maintainers and developers. It describes the automated tests and their test data, the checks run on MD Anderson’s seadragon cluster, and how the image is built and released. Sites do not need any of it: they validate their own cluster with the smoke test (<a href="hpc.html#hpc--validating-a-new-site">Validating a new site</a>).</p>
+<p>All test data are either public or synthetic. The test cohorts use real 1000 Genomes genotypes (chr22) with <strong>synthetic phenotypes carrying planted effects</strong>: they check that the software recovers known signals, not anything about placental biology. The only real placental RNA-seq in the tests is 8 public runs of BioProject PRJNA820329, cut to chr22.</p>
+<div id="testing--development-environment" class="section level2 hasAnchor">
+<h2>Development environment<a href="testing.html#testing--development-environment" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb44"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb44-1"><a href="testing.html#cb44-1" tabindex="-1"></a><span class="ex">scripts/dev_env.sh</span> /path/to/env        <span class="co"># conda/micromamba environment matching the image</span></span>
+<span id="cb44-2"><a href="testing.html#cb44-2" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span>/path/to/env/bin:/path/to/env/align/bin:/path/to/env/xqtl/bin:/path/to/env/irfinder/bin:<span class="va">$PWD</span>/bin:<span class="va">$PATH</span></span>
+<span id="cb44-3"><a href="testing.html#cb44-3" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> pytest tests/unit            <span class="co"># unit tests</span></span>
+<span id="cb44-4"><a href="testing.html#cb44-4" tabindex="-1"></a><span class="ex">scripts/check_configs.sh</span>               <span class="co"># every profile resolves</span></span>
+<span id="cb44-5"><a href="testing.html#cb44-5" tabindex="-1"></a><span class="ex">nextflow</span> run main.nf <span class="at">-profile</span> local,dev,smoke <span class="at">--refs_dir</span> tests/fixtures/refs_mini <span class="dt">\</span></span>
+<span id="cb44-6"><a href="testing.html#cb44-6" tabindex="-1"></a>    <span class="at">--restricted</span> tests/fixtures/xqtl-restricted-test.tar.gz</span>
+<span id="cb44-7"><a href="testing.html#cb44-7" tabindex="-1"></a><span class="ex">Rscript</span> book/render_book.R             <span class="co"># documentation site into book/_book</span></span>
+<span id="cb44-8"><a href="testing.html#cb44-8" tabindex="-1"></a><span class="ex">tests/scripts/test_bootstrap.sh</span>        <span class="co"># bootstrap + run_xqtl.sh against a mock image tree</span></span></code></pre></div>
+<p><code>-profile dev</code> (<code>conf/containers/none.config</code>) runs every tool from <code>PATH</code> without a container. It is for development only, not for production runs. <code>-profile test</code> (<code>conf/test.config</code>) points every input at the test data below and caps resources at 2 CPUs and 6 GB; combine it with an engine, e.g. <code>-profile test,docker</code> or <code>-profile test,dev</code>.</p>
+</div>
+<div id="testing--unit-tests" class="section level2 hasAnchor">
+<h2>Unit tests<a href="testing.html#testing--unit-tests" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>tests/unit/</code> (pytest) covers input validation, the restricted file, reference download and checks, the MDACC packaging scripts, splicing clusters, mapping and export helpers (including the leak scan), G×C and GxE statistics, imputation preparation and the central analysis. The central tests compare the IVW meta-analysis with a hand calculation and cover ACAT, allele harmonization and exposure rescaling. <code>test_docs.py</code> checks that every <code>cohort.yml</code> setting in the schema is documented in <a href="configuration.html#configuration">Configuration</a>.</p>
+</div>
+<div id="testing--end-to-end-tests" class="section level2 hasAnchor">
+<h2>End-to-end tests<a href="testing.html#testing--end-to-end-tests" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Each script runs the pipeline on test data and then checks the outputs. Usage: <code>tests/scripts/&lt;test&gt;.sh [WORKDIR] [ENGINE]</code>, with <code>ENGINE</code> = <code>dev</code> (tools on <code>PATH</code>) or <code>docker</code>.</p>
+<div id="testing--site-run-test_sitesh" class="section level3 hasAnchor">
+<h3>Site run: <code>test_site.sh</code><a href="testing.html#testing--site-run-test_sitesh" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Test cohort <code>tests/fixtures/site/</code> (built by <code>make_site_fixture.sh</code> and <code>make_site_fixture.py</code>): 130 1000 Genomes samples on chr22 with synthetic phenotypes and planted cis effects (<code>TRUTH.tsv</code>). The test runs <code>--mode site</code> with <code>-profile test</code> and checks that:</p>
+<ul>
+<li>the planted cis effects are recovered in EUR and EAS (q ≤ 0.05 in file B; correct sign and p ≤ 10⁻³ at the planted variant in file A; <code>check_site_truth.py</code>);</li>
+<li>AFR (n = 10, below <code>ancestry.min_n</code>) is listed in <code>I_strata</code> but not mapped or exported;</li>
+<li>a sample ID planted in a site output makes <code>--mode export</code> fail and leaves no export behind, and <code>--mode export</code> rebuilds the same export once it is removed.</li>
+</ul>
+<p><strong>Interactions.</strong> The site cohort also carries planted interactions:</p>
+<ul>
+<li>a G × Cytotrophoblast interaction on <code>ENSGFIX0000011</code>;</li>
+<li>a G × GA interaction on <code>ENSGFIX0000021</code> (planted variant chr22:20290948:A:G);</li>
+<li>a G × GA splicing plant on clu_31.</li>
+</ul>
+<p>The restricted test file (<code>tests/fixtures/xqtl-restricted-test.tar.gz</code>, built by <code>make_restricted_test.sh</code>) adds MDACC pairs that exercise every test-set flag: a phenotype absent from the site, a variant absent from the site, a different MDACC lead for a site eGene, shared pairs, and an MDACC-only pair. With GA and the maternal-age sensitivity enabled, <code>check_site_interactions.py</code> checks, in EUR and EAS:</p>
+<ul>
+<li>the primary cell type of <code>ENSGFIX0000011</code>;</li>
+<li>the tier-1 q-value and sign for <code>ENSGFIX0000021</code>;</li>
+<li>the tier-2 top variant for <code>ENSGFIX0000021</code>;</li>
+<li>the test-set sources and untested reasons;</li>
+<li>H_status;</li>
+<li>the sensitivity refit.</li>
+</ul>
+<p>It asserts only the planted pairs: with 60 samples per stratum, another pair can reach q ≤ 0.05 by chance. GxE recovery is checked on the expression plant only; normalization of splicing ratios attenuates the splicing plant too much to detect at n = 60, so that plant is checked only for its main effect and test-set flags.</p>
+</div>
+<div id="testing--central-analysis-test_centralsh" class="section level3 hasAnchor">
+<h3>Central analysis: <code>test_central.sh</code><a href="testing.html#testing--central-analysis-test_centralsh" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><code>test_central.sh</code> runs <code>--mode site</code> for two independent test cohorts, then <code>--mode central</code>.</p>
+<ul>
+<li><strong>Cohort 1</strong> is the site cohort above (parquet export).</li>
+<li><strong>Cohort 2</strong> (<code>tests/fixtures/site2/</code>, built by <code>make_central_fixture.sh</code>) has 120 other 1000 Genomes samples (60 EUR, 60 EAS), the same planted effects with other random seeds, and is exported as <code>tsv.gz</code>. The cohorts do not share samples, and each stratum has at least <code>ancestry.min_n</code> = 50 samples.</li>
+<li><strong>GWAS.</strong> <code>tests/fixtures/central/make_gwas.py</code> writes a synthetic GWAS from one export’s LD window: one causal variant shared with a planted cis effect (colocalizing) and one nearby independent causal variant (a distinct signal, H3).</li>
+<li>The test adds a BED of the planted variants (±1 kb) as an enrichment annotation and gives study 2 as a path relative to <code>studies.tsv</code>.</li>
+</ul>
+<p><code>check_central.py</code> checks ingest, the planted signals at meta, feature, fine-mapping, colocalization, G×C and GxE level, the tier-1 scope labels, the TWAS input files and the summary. <code>check_central_ivw.R</code> recomputes the fixed- and random-effects IVW (Q, I², τ²) in R from the raw file A rows of both exports and loads every FUSION weight file.</p>
+</div>
+<div id="testing--phenotyping-test_phenotypingsh" class="section level3 hasAnchor">
+<h3>Phenotyping: <code>test_phenotyping.sh</code><a href="testing.html#testing--phenotyping-test_phenotypingsh" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><code>test_phenotyping.sh</code> runs <code>--mode prepare_references</code> and <code>--mode phenotyping_only</code> (<code>-profile test_phenotyping</code>) and checks the phenotype BEDs (<code>check_phenotypes.py</code>).</p>
+<ul>
+<li><strong>Reads.</strong> 8 public placenta RNA-seq runs of BioProject PRJNA820329 (Seoul National University Hospital), as read pairs with both mates on chr22 (<code>tests/fixtures/fastq/</code>, <code>tests/fixtures/phenotyping/</code>). <code>extract_snuh_chr22.sh</code> cuts them from STAR alignments and <code>make_fastq_fixture.sh</code> writes the fixture. Base qualities are set to a constant (Phred 30), as in SRA Lite, so base-quality filters act differently from real data.</li>
+<li><strong>Annotation.</strong> GENCODE v45 chr22 (<code>gencode.v45.annotation.gtf.gz</code>, sha256-pinned in <code>make_refs_fixture.sh</code>), written in the HPLRv2 PANTRY GTF form and processed with Pantry’s txrevise scripts, is a public stand-in for HPLRv2 (<code>tests/fixtures/refs_chr22/</code>). Real runs use the HPLRv2 annotation in the image.</li>
+<li><strong>Editing sites and cell types.</strong> <code>refs_chr22/editing/</code> and <code>music/</code> are chr22 cuts of the public reference record (<code>extract_refs_chr22.sh</code>): 413,357 REDIportal sites on chr22, and a mini single-cell reference of 254 chr22 genes and 3,857 cells (at most 30 cells per cell type and donor; 29 cell types, 5 donors). With so few genes, the test’s cell proportions only check that the step runs; they are not realistic estimates.</li>
+<li><strong>Splicing.</strong> The test’s restricted file freezes every other leafCutter cluster of these samples (<code>make_phenotyping_restricted.sh</code>), so both frozen and novel clusters are exercised.</li>
+<li>The chr22 genome is cut from the image’s GRCh38 FASTA. On it, IRFinder-S writes an empty <code>intergenic.ROI.bed</code>, because it keeps intergenic regions only on chromosome names of up to two characters. This does not affect IR ratios.</li>
+</ul>
+</div>
+<div id="testing--imputation-preparation-test_imputation_prepsh" class="section level3 hasAnchor">
+<h3>Imputation preparation: <code>test_imputation_prep.sh</code><a href="testing.html#testing--imputation-preparation-test_imputation_prepsh" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Test data <code>tests/fixtures/imputation_prep/</code> (rebuilt by <code>make_fixture.sh</code>): a 1000 Genomes phase 3 GRCh37 chr22 slice of 40 site-cohort samples, chr22 hg19 → hg38 chains, and a GRCh38 PLINK set with REF = major allele. The test checks:</p>
+<ol style="list-style-type: decimal">
+<li>GRCh37 VCF → liftover → <code>chr22.vcf.gz</code> at the GRCh38 positions and alleles of the same samples’ GRCh38 genotypes, plus the report, liftover summary and TOPMed checklist;</li>
+<li>GRCh38 PLINK input → REF/ALT swapped to GRCh38 with genotypes intact;</li>
+<li>the GRCh37 VCF declared as GRCh38 stops with “Wrong build?” and publishes no VCF;</li>
+<li>duplicate sample IDs stop the run.</li>
+</ol>
+</div>
+<div id="testing--smoke-test-and-bootstrap" class="section level3 hasAnchor">
+<h3>Smoke test and bootstrap<a href="testing.html#testing--smoke-test-and-bootstrap" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><code>tests/fixtures/refs_mini/</code> is a small stand-in reference set (labelled “TEST FIXTURE: not real reference data”) for running <code>--mode smoke</code> outside the image. <code>test_bootstrap.sh</code> runs <code>containers/bootstrap.sh</code> and the generated <code>run_xqtl.sh</code> against a directory mock of the image, with the pinned Java runtime and Nextflow downloaded and verified as in the image build.</p>
+</div>
+</div>
+<div id="testing--continuous-integration" class="section level2 hasAnchor">
+<h2>Continuous integration<a href="testing.html#testing--continuous-integration" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>.github/workflows/ci.yml</code> runs on every push and pull request:</p>
+<ul>
+<li><strong>unit tests</strong>, with dependencies at the image versions (<code>tests/requirements-ci.txt</code>) and again with the latest pandas, pyarrow and numpy;</li>
+<li><strong>configs and linters:</strong> every profile resolves (<code>scripts/check_configs.sh</code>), <code>nextflow lint</code>, executable bits, shellcheck, hadolint and actionlint;</li>
+<li><strong>image checks</strong> in the development image <code>ghcr.io/sbresnahan/placenta-xqtl-federated:dev</code>: <code>versions</code>, <code>refs-check</code>, the smoke test, and the site, central, phenotyping and imputation-preparation tests above. These steps are skipped, with a notice, while no development image is published.</li>
+</ul>
+<p><code>.github/workflows/image.yml</code> builds the development image on pushes to <code>main</code> that change the image inputs, and the release images on version tags (see below). <code>.github/workflows/docs.yml</code> renders the documentation site.</p>
+</div>
+<div id="testing--cluster-checks-on-seadragon" class="section level2 hasAnchor">
+<h2>Cluster checks on seadragon<a href="testing.html#testing--cluster-checks-on-seadragon" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The scheduler and container behaviour the pipeline relies on was checked on seadragon on 2026-10-29, with a stand-alone set of checks equivalent to <code>--mode smoke</code>, in both supported head modes. Both runs gave <strong>GO</strong>. Smoke-test identifiers are in brackets.</p>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Scheduler</td>
+<td>IBM Spectrum LSF</td>
+</tr>
+<tr class="even">
+<td>Container engine</td>
+<td>Apptainer 1.5.1, invoked as <code>singularity</code></td>
+</tr>
+<tr class="odd">
+<td>Nextflow</td>
+<td>26.10.4</td>
+</tr>
+<tr class="even">
+<td>Head, run 1</td>
+<td>Login node; tasks as LSF jobs (job array 79979021)</td>
+</tr>
+<tr class="odd">
+<td>Head, run 2</td>
+<td>Inside LSF job 79979246 (queue <code>medium</code>, 1 core, 4 GB, host cdragon233)</td>
+</tr>
+<tr class="even">
+<td>Software</td>
+<td>R 4.3.1 (+ Bioconductor <code>qvalue</code>), tensorQTL 1.0.10 / torch 2.15.0 (CPU), plink2</td>
+</tr>
+</tbody>
+</table>
+<p>Results of run 2 (head inside an LSF job); run 1 gave the same results:</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Check [smoke test]</th>
+<th>Status</th>
+<th>Observation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Container start, R [S01]</td>
+<td>PASS</td>
+<td>R 4.3.1 ran inside the container on compute node cdragon208</td>
+</tr>
+<tr class="even">
+<td>plink2 [S05]</td>
+<td>PASS</td>
+<td><code>--freq</code>, <code>--hardy</code> and <code>--r2-unphased</code> on a dummy dataset</td>
+</tr>
+<tr class="odd">
+<td>Resources [S06]</td>
+<td>PASS</td>
+<td>4 CPUs and 8 GB granted (<code>rusage[mem=8192MB]</code>, memlimit 8 G); <code>nproc=4</code>: CPUs confined to the request</td>
+</tr>
+<tr class="even">
+<td>Fan-out [S07]</td>
+<td>PASS</td>
+<td>5 independent jobs on 4 different nodes</td>
+</tr>
+<tr class="odd">
+<td>Job array [S08]</td>
+<td>PASS</td>
+<td>One LSF array job (79979266[1–5]) with <code>LSB_JOBINDEX</code> 1–5</td>
+</tr>
+<tr class="even">
+<td>Bind read [S09]</td>
+<td>PASS</td>
+<td>A file on <code>/rsrch5</code> was readable inside the container</td>
+</tr>
+<tr class="odd">
+<td>Memory enforcement and retry [S10]</td>
+<td>PASS</td>
+<td>Attempt 1 (2 GB request, 3 GB used) killed with exit 130; attempt 2 with 4 GB succeeded</td>
+</tr>
+<tr class="even">
+<td>tensorQTL CPU [S11]</td>
+<td>PASS</td>
+<td>tensorQTL 1.0.10, 4 threads; planted feature <code>pval_beta</code> = 1.97 × 10⁻¹⁴</td>
+</tr>
+<tr class="odd">
+<td>tensorQTL GPU [S11]</td>
+<td>SKIP</td>
+<td>Not requested</td>
+</tr>
+<tr class="even">
+<td>Storey q-value [S12]</td>
+<td>PASS</td>
+<td><code>compute_qvalues.R</code> bridge, qvalue 2.34.0 on R 4.3.1; planted feature q = 7.87 × 10⁻¹³</td>
+</tr>
+<tr class="odd">
+<td>Resume</td>
+<td>PASS</td>
+<td>18 of 18 tasks reported as cached on <code>-resume</code></td>
+</tr>
+<tr class="even">
+<td>Run exit</td>
+<td>PASS</td>
+<td>Nextflow exit status 0</td>
+</tr>
+</tbody>
+</table>
+<p>How these results shape the <code>seadragon</code> profile and the image:</p>
+<ul>
+<li><strong>Queues.</strong> The site’s submission filter enforces walltime ranges (<code>short</code> ≤ 3 h; <code>medium</code> more than 3 h and under 24 h; <code>long</code> 24–120 h), so the profile picks the queue from each task’s walltime (<code>queue_rules</code>).</li>
+<li><strong>Memory.</strong> <code>LSF_UNIT_FOR_LIMITS=GB</code> and <code>LSB_MEMLIMIT_ENFORCE=y</code>: memory is requested per job and enforced, and over-limit jobs exit with status 130, which is in the pipeline’s retry list.</li>
+<li><strong>CPU confinement.</strong> <code>LSB_RESOURCE_ENFORCE="cpu gpu"</code>.</li>
+<li><strong>No internet on compute nodes.</strong> Without <code>NXF_OFFLINE</code>, Nextflow waits about 130 s per launch for <code>www.nextflow.io</code>; <code>run_xqtl.sh</code> sets <code>NXF_OFFLINE=true</code>, and the image contains everything needed at run time.</li>
+<li><strong>Registries.</strong> From login nodes <code>ghcr.io</code> and <code>quay.io</code> worked at about 0.6 MB/s; Docker Hub, <code>gcr.io</code> and Amazon ECR were blocked or unreliable. The image is published on <code>ghcr.io</code> and Zenodo.</li>
+<li><strong>No image builds on seadragon.</strong> <code>apptainer build --fakeroot</code> with apt fails (exit 100); images are built by GitHub Actions.</li>
+<li><strong><code>ps</code> inside the image.</strong> Nextflow’s task wrapper needs <code>ps</code>; the image includes <code>procps</code>.</li>
+<li><strong>q-values without rpy2.</strong> Storey q-values are computed in R through <code>compute_qvalues.R</code>.</li>
+</ul>
+</div>
+<div id="testing--building-and-releasing" class="section level2 hasAnchor">
+<h2>Building and releasing<a href="testing.html#testing--building-and-releasing" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="testing--building-an-image" class="section level3 hasAnchor">
+<h3>Building an image<a href="testing.html#testing--building-an-image" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><code>containers/build_image.sh</code> downloads and verifies the references, renders this documentation if needed, and runs <code>docker buildx build</code> with the right build contexts and arguments:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb45-1"><a href="testing.html#cb45-1" tabindex="-1"></a><span class="ex">containers/build_image.sh</span>                       <span class="co"># development build (unpinned rows allowed)</span></span>
+<span id="cb45-2"><a href="testing.html#cb45-2" tabindex="-1"></a><span class="ex">containers/build_image.sh</span> <span class="at">--variant</span> cuda        <span class="co"># GPU variant</span></span>
+<span id="cb45-3"><a href="testing.html#cb45-3" tabindex="-1"></a><span class="ex">containers/build_image.sh</span> <span class="at">--release</span>             <span class="co"># every row pinned; references must equal assets/refs_manifest.tsv</span></span></code></pre></div>
+</div>
+<div id="testing--releasing-a-version" class="section level3 hasAnchor">
+<h3>Releasing a version<a href="testing.html#testing--releasing-a-version" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ol style="list-style-type: decimal">
+<li>Pin the public reference record (<a href="references.html#references--building-the-public-reference-record-once-per-reference-release">Reference data</a>) and push to <code>main</code>. The <code>image</code> workflow builds <code>ghcr.io/sbresnahan/placenta-xqtl-federated:dev</code> and uploads <code>refs_MANIFEST.tsv</code> as an artifact.</li>
+<li>Commit that file as <code>assets/refs_manifest.tsv</code> whenever a reference changes.</li>
+<li>Set <code>manifest.version</code> in <code>nextflow.config</code>, update the changelog, and push the tag <code>v&lt;version&gt;</code>. The workflow then builds the CPU and <code>-cuda</code> images in strict mode, pushes them, builds the <code>.sif</code>, pushes it to <code>ghcr.io/sbresnahan/xqtl-federated-sif:&lt;version&gt;</code> (pulled with <code>apptainer pull oras://...</code>), archives it on Zenodo, and attaches the <code>.sif</code> checksum, reference manifest and version list to the GitHub release.</li>
+</ol>
+<p>Release checklist (in order):</p>
+<ol style="list-style-type: decimal">
+<li>All CI checks pass on <code>main</code>.</li>
+<li>The public reference record is pinned in <code>assets/refs_sources.tsv</code> (no unpinned rows) and <code>assets/refs_manifest.tsv</code> matches the <code>refs_MANIFEST.tsv</code> artifact of the last <code>:dev</code> build.</li>
+<li>The restricted file for this version is built, its version equals <code>expected_restricted_version</code> in <code>nextflow.config</code>, and its sha256 is recorded with the MDACC records.</li>
+<li>The <code>:dev</code> image passes the smoke test on seadragon (<code>-profile seadragon,smoke</code>, <code>VERDICT GO</code>) and a full <code>--mode site</code> run on a real cohort subset.</li>
+<li><code>manifest.version</code> in <code>nextflow.config</code> and <code>params.image</code> carry the new version; the changelog section is dated; the export-format or restricted-file version change, if any, is a major version change.</li>
+<li>The documentation book renders with no broken links (<code>Rscript book/render_book.R</code>).</li>
+<li>Push the tag <code>v&lt;version&gt;</code>; after the workflow finishes, check the GitHub release assets, the GHCR packages, the Zenodo deposition (publish it if <code>ZENODO_PUBLISH</code> is not set) and <code>apptainer pull oras://ghcr.io/sbresnahan/xqtl-federated-sif:&lt;version&gt;</code> from a site-like machine.</li>
+<li>Email the restricted file to approved sites and announce the release with the SIF checksum.</li>
+</ol>
+<p>One-time repository settings:</p>
+<ul>
+<li><strong>Workflow permissions</strong>: Settings → Actions → General → Workflow permissions → Read and write.</li>
+<li><strong>Secret <code>ZENODO_TOKEN</code></strong>: a Zenodo personal access token with <code>deposit:write</code> and <code>deposit:actions</code>. Optional repository variables: <code>ZENODO_CONCEPT_ID</code> (an earlier deposition of the image record, so every release becomes a new version under one concept DOI) and <code>ZENODO_PUBLISH=true</code> (publish automatically; otherwise the deposition is left as a draft to review on zenodo.org).</li>
+<li><strong>Package visibility</strong>: after the first push, set both GHCR packages (<code>placenta-xqtl-federated</code> and <code>xqtl-federated-sif</code>) to public under the repository’s Packages settings, so sites can pull without logging in.</li>
+<li><strong>Documentation site</strong>: Settings → Pages → Deploy from a branch → <code>bookdown</code> / (root). The <code>docs</code> workflow renders the book and pushes it to that branch.</li>
+</ul>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="references.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="changelog.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": null,
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "section",
+    "scroll_highlight": true
+  },
+  "info": false
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
