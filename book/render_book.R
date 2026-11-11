@@ -21,6 +21,28 @@ bookdown::render_book("index.Rmd", output_format = "bookdown::gitbook", envir = 
 setwd(owd)
 file.create(file.path(out, ".nojekyll"))
 
+# ---- link-preview image ----------------------------------------------------------------
+# gitbook writes og:image / twitter:image from `url` + `cover-image` in index.Rmd but does not copy
+# the file, and always uses the small "summary" X card. Copy the image, use the large card, and add
+# its size and alt text so previews render on the first share.
+img <- "social-preview.png"
+if (!file.copy(file.path(here, img), file.path(out, img), overwrite = TRUE))
+  stop("could not copy book/", img, " into the rendered book", call. = FALSE)
+for (f in list.files(out, pattern = "\\.html$", full.names = TRUE)) {
+  x <- readLines(f, warn = FALSE)
+  x <- sub('<meta name="twitter:card" content="summary" />',
+           '<meta name="twitter:card" content="summary_large_image" />', x, fixed = TRUE)
+  i <- grep('<meta property="og:image"', x, fixed = TRUE)
+  if (length(i) == 1)
+    x <- append(x, c('  <meta property="og:image:width" content="1200" />',
+                     '  <meta property="og:image:height" content="630" />',
+                     '  <meta property="og:image:alt" content="placenta-xqtl-federated: federated multi-ancestry placental xQTL pipeline documentation" />'),
+                after = i)
+  writeLines(x, f)
+}
+if (length(grep("og:image:width", readLines(file.path(out, "index.html")))) != 1)
+  stop("og:image meta tags missing from index.html (check url and cover-image in index.Rmd)", call. = FALSE)
+
 # ---- link check on the rendered HTML ------------------------------------------------
 html <- list.files(out, pattern = "\\.html$", full.names = TRUE)
 ids <- lapply(html, function(f) {

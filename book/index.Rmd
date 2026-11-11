@@ -4,6 +4,10 @@ subtitle: "Federated multi-ancestry placental xQTL pipeline: documentation"
 author: "Sean T. Bresnahan, MD Anderson Cancer Center (Bhattacharya Lab)"
 date: "`r format(Sys.Date(), '%Y-%m-%d')`"
 site: bookdown::bookdown_site
+# Link previews (Open Graph / X cards): gitbook writes og:image and twitter:image as url + cover-image,
+# so url must be the published address with a trailing slash. render_book.R copies the image into _book.
+url: 'https://seantbresnahan.com/placenta-xqtl-federated/'
+cover-image: social-preview.png
 description: "Documentation for the placenta-xqtl-federated pipeline: collaboration brief, setup, HPC configuration, outputs and central analysis."
 ---
 

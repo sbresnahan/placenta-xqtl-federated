@@ -158,7 +158,7 @@ prepare_book <- function(repo = normalizePath(file.path(dirname(sys_script()), "
   if (length(problems)) {
     stop("broken documentation links:\n  ", paste(unique(problems), collapse = "\n  "), call. = FALSE)
   }
-  for (f in c("index.Rmd", "_output.yml", "style.css"))
+  for (f in c("index.Rmd", "_output.yml", "style.css", "social-preview.png"))
     file.copy(file.path(repo, "book", f), file.path(build, f), overwrite = TRUE)
   yml <- readLines(file.path(repo, "book", "_bookdown.yml"))
   yml <- c(yml, "rmd_files:", paste0("  - \"", rmd_files, "\""))
